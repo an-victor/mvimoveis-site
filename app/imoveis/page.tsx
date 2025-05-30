@@ -133,9 +133,10 @@ export default async function PropertiesPage({ searchParams }: { searchParams?: 
             {properties && properties.length > 0 ? (
               <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
                 {properties.map((property) => {
-                  const imageUrl = property.mainImage
-                    ? urlForImage(property.mainImage)?.width(400).height(225).fit("crop").url()
-                    : "/placeholder.svg?width=400&height=225";
+                  const imageUrl =
+  property.mainImage && property.mainImage.asset
+    ? urlForImage(property.mainImage).width(400).height(225).fit("crop").url()
+    : "/placeholder.svg?width=400&height=225";
                   return (
                     <Card
                       key={property._id}
