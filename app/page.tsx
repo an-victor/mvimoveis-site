@@ -1,5 +1,11 @@
-'use client';
-import React from 'react';
+"use client";
+
+import React from "react"; // ✅ ESSENCIAL para usar <React.Fragment>
+import { type JSX } from "react";
+import Link from "next/link";
+import { siteConfig } from "@/config/site";
+import { buttonVariants } from "@/components/ui/button";
+import { Icons } from "@/components/icons";
 
 export default function Home(): JSX.Element {
   return (
