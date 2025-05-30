@@ -2,7 +2,7 @@
 import { createClient } from "next-sanity";
 
 // IMPORTANT: Replace these values with your actual Sanity project details
-export const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || "YOUR_PROJECT_ID";
+export const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || "98pdr6kx";
 export const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET || "production";
 export const apiVersion = process.env.NEXT_PUBLIC_SANITY_API_VERSION || "2024-05-30"; // Use a recent date
 
