@@ -1,3 +1,6 @@
+'use client'
+
+import React from 'react'
 import Link from "next/link"
 import { ChevronRight, MapPin, Star } from "lucide-react"
 
