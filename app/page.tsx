@@ -29,10 +29,12 @@ export default async function Home() {
   ]);
 
   // Se não houver bannerImages, array vazio
-  const banners = settings?.bannerImages ?? [];
+  const banners = (settings?.bannerImages ?? []).filter((img: any) => !!img?.asset);
 
   // Logo do site
-  const logoUrl = settings?.logo ? urlForImage(settings.logo).width(200).url() : "/placeholder.svg";
+  const logoUrl = settings?.logo && settings.logo.asset
+  ? urlForImage(settings.logo).width(200).url()
+  : "/placeholder.svg";
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -57,39 +59,37 @@ export default async function Home() {
         <section className="relative h-[80vh] w-full overflow-hidden" id="inicio">
           <Carousel className="absolute inset-0 h-full w-full">
             <CarouselContent>
-              {banners && banners.filter((img: any) => !!img?.asset).length > 0 ? (
-                banners
-                .filter((img: any) => !!img?.asset)
-                  .map((img: any, index: number) => (
-                    <CarouselItem key={img._key || index} className="h-full w-full">
-                      <div className="relative h-full w-full">
-                        <Image
-                          src={urlForImage(img).width(1920).height(1080).fit("crop").url()}
-                          alt={`Banner ${index + 1}`}
-                          fill
-                          className="object-cover"
-                          sizes="100vw"
-                          priority={index === 0}
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-r from-slate-900/70 to-slate-900/30" />
-                      </div>
-                    </CarouselItem>
-                  ))
-              ) : (
-                <CarouselItem className="h-full w-full">
-                  <div className="relative h-full w-full">
-                    <Image
-                      src="/placeholder.svg?height=1080&width=1920"
-                      alt="Banner"
-                      fill
-                      className="object-cover"
-                      sizes="100vw"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-r from-slate-900/70 to-slate-900/30" />
-                  </div>
-                </CarouselItem>
-              )}
-            </CarouselContent>
+  {banners.length > 0 ? (
+    banners.map((img: any, index: number) => (
+      <CarouselItem key={img._key || index} className="h-full w-full">
+        <div className="relative h-full w-full">
+          <Image
+            src={urlForImage(img).width(1920).height(1080).fit("crop").url()}
+            alt={`Banner ${index + 1}`}
+            fill
+            className="object-cover"
+            sizes="100vw"
+            priority={index === 0}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-900/70 to-slate-900/30" />
+        </div>
+      </CarouselItem>
+    ))
+  ) : (
+    <CarouselItem className="h-full w-full">
+      <div className="relative h-full w-full">
+        <Image
+          src="/placeholder.svg?height=1080&width=1920"
+          alt="Banner"
+          fill
+          className="object-cover"
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-900/70 to-slate-900/30" />
+      </div>
+    </CarouselItem>
+  )}
+</CarouselContent>
             <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2 z-10">
               <CarouselPrevious />
               <CarouselNext />
