@@ -124,12 +124,16 @@ export default async function Home() {
                   <Card key={property._id || index} className="overflow-hidden transition-all hover:shadow-lg">
                     <div className="aspect-video w-full overflow-hidden">
                       <Image
-                        src={property.mainImage ? urlForImage(property.mainImage).width(800).height(600).fit("crop").url() : "/placeholder.svg"}
-                        alt={property.title}
-                        width={800}
-                        height={600}
-                        className="h-full w-full object-cover transition-transform hover:scale-105"
-                      />
+  src={
+    property.mainImage && property.mainImage.asset
+      ? urlForImage(property.mainImage).width(800).height(600).fit("crop").url()
+      : "/placeholder.svg"
+  }
+  alt={property.title}
+  width={800}
+  height={600}
+  className="h-full w-full object-cover transition-transform hover:scale-105"
+/>
                     </div>
                     <CardContent className="p-6">
                       <h3 className="text-xl font-bold text-slate-900">{property.title}</h3>
