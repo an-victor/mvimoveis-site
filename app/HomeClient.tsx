@@ -90,9 +90,9 @@ export default function HomeClient({ settings, properties }) {
                       <div className="mt-4 flex items-center justify-between">
                         <span className="text-lg font-bold text-blue-900">{formatCurrency(property.price)}</span>
                         <div className="flex items-center gap-1 text-sm">
-                          <span>{property.details.area}</span>
+                          <span>{property.details?.area ?? 'Área não informada'}</span>
                           <span className="text-slate-300">|</span>
-                          <span>{property.details.bedrooms} quartos</span>
+                          <span>{property.details?.bedrooms ?? '?'} quartos</span>
                         </div>
                       </div>
                     </CardContent>
