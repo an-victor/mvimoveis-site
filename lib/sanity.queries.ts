@@ -7,12 +7,13 @@ export const settingsQuery = groq`
     ...,
     "logoUrl": logo.asset->url,
     "aboutImageUrl": aboutImage.asset->url,
+    "bannerUrls": banners[].asset->url,
     testimonials[]{
       ...,
       "clientImageUrl": clientImage.asset->url
     }
   }
-`;
+`
 
 // ================= Properties =================
 // Query to get all property slugs
