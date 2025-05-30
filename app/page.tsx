@@ -3,10 +3,9 @@ import React from 'react';
 
 export default function Home(): JSX.Element {
   return (
-    <>
+    <React.Fragment>
 
     <div className="flex min-h-screen flex-col">
-      {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-2">
@@ -54,7 +53,6 @@ export default function Home(): JSX.Element {
       </header>
 
       <main className="flex-1">
-        {/* Hero Section */}
         <section className="relative h-[80vh] w-full overflow-hidden">
           <div
             className="absolute inset-0 bg-cover bg-center"
@@ -74,7 +72,6 @@ export default function Home(): JSX.Element {
           </div>
         </section>
 
-        {/* Imóveis em Destaque */}
         <section id="imoveis" className="py-16 bg-slate-50">
           <div className="container">
             <div className="mb-12 text-center">
@@ -125,7 +122,6 @@ export default function Home(): JSX.Element {
           </div>
         </section>
 
-        {/* Sobre o Corretor */}
         <section id="sobre" className="py-16">
           <div className="container">
             <div className="grid gap-12 md:grid-cols-2 md:items-center">
@@ -174,7 +170,6 @@ export default function Home(): JSX.Element {
           </div>
         </section>
 
-        {/* Depoimentos */}
         <section id="depoimentos" className="py-16 bg-slate-50">
           <div className="container">
             <div className="mb-12 text-center">
@@ -221,7 +216,6 @@ export default function Home(): JSX.Element {
           </div>
         </section>
 
-        {/* Formulário de Contato */}
         <section id="contato" className="py-16">
           <div className="container">
             <div className="mx-auto max-w-3xl">
@@ -292,6 +286,6 @@ export default function Home(): JSX.Element {
                         >
                           <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                           <circle cx="12" cy="10" r="3" />
-    </>
+    </React.Fragment>
   );
 }
