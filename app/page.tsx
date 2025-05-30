@@ -1,3 +1,6 @@
+"use client"
+import React from "react";
+
 import React from 'react'
 
 import Link from "next/link"
@@ -7,8 +10,11 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 
-export default function Home() {
+
+
+export default function Home(): JSX.Element {
   return (
+
     <div className="flex min-h-screen flex-col">
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
