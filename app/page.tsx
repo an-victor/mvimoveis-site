@@ -57,22 +57,24 @@ export default async function Home() {
         <section className="relative h-[80vh] w-full overflow-hidden" id="inicio">
           <Carousel className="absolute inset-0 h-full w-full">
             <CarouselContent>
-              {banners.length > 0 ? (
-                banners.map((img: any, index: number) => (
-                  <CarouselItem key={img._key || index} className="h-full w-full">
-                    <div className="relative h-full w-full">
-                      <Image
-                        src={urlForImage(img).width(1920).height(1080).fit("crop").url()}
-                        alt={`Banner ${index + 1}`}
-                        fill
-                        className="object-cover"
-                        sizes="100vw"
-                        priority={index === 0}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-r from-slate-900/70 to-slate-900/30" />
-                    </div>
-                  </CarouselItem>
-                ))
+              {banners && banners.filter((img: any) => !!img?.asset).length > 0 ? (
+                banners
+                .filter((img: any) => !!img?.asset)
+                  .map((img: any, index: number) => (
+                    <CarouselItem key={img._key || index} className="h-full w-full">
+                      <div className="relative h-full w-full">
+                        <Image
+                          src={urlForImage(img).width(1920).height(1080).fit("crop").url()}
+                          alt={`Banner ${index + 1}`}
+                          fill
+                          className="object-cover"
+                          sizes="100vw"
+                          priority={index === 0}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-r from-slate-900/70 to-slate-900/30" />
+                      </div>
+                    </CarouselItem>
+                  ))
               ) : (
                 <CarouselItem className="h-full w-full">
                   <div className="relative h-full w-full">
