@@ -7,7 +7,7 @@ export const settingsQuery = groq`
     ...,
     "logoUrl": logo.asset->url,
     "aboutImageUrl": aboutImage.asset->url,
-    "bannerUrls": banners[].asset->url,
+    bannerImages[]{ ..., asset-> },
     testimonials[]{
       ...,
       "clientImageUrl": clientImage.asset->url
@@ -70,4 +70,3 @@ export const paginatedPropertiesQuery = groq`
 // export const propertiesCountQuery = groq`
 //   count(*[_type == "property"])
 // `;
-

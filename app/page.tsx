@@ -1,7 +1,7 @@
 // /home/ubuntu/corretor_site/app/page.tsx
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronRight, MapPin } from "lucide-react";
+import { ChevronRight, MapPin, Star } from "lucide-react";
 import { SanityDocument } from "next-sanity";
 import Autoplay from "embla-carousel-autoplay";
 
@@ -10,7 +10,9 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import {
   Carousel,
   CarouselContent,
-  CarouselItem
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
 } from "@/components/ui/carousel";
 import { client } from "@/lib/sanity.client";
 import { urlForImage } from "@/lib/sanity.image";
@@ -18,7 +20,7 @@ import { settingsQuery, featuredPropertiesQuery } from "@/lib/sanity.queries";
 
 interface SettingsData extends SanityDocument {
   title?: string;
-  bannerUrls?: any[];
+  bannerImages?: any[];
   aboutImage?: any;
   aboutText?: string;
   testimonials?: {
@@ -58,9 +60,13 @@ const formatCurrency = (value: number | undefined) => {
 export default async function Home() {
   const { settings, featuredProperties } = await getHomepageData();
 
-  const bannerImageUrls = (settings?.bannerUrls || [])
+  const bannerImageUrls = (settings?.bannerImages || [])
     .map((img) => urlForImage(img)?.width(1920).height(1080).fit("crop").url())
     .filter((url): url is string => typeof url === "string");
+
+  const aboutImageUrl = settings?.aboutImage
+    ? urlForImage(settings.aboutImage)?.width(600).height(600).fit("cover").url()
+    : "/placeholder.svg?height=600&width=600";
 
   return (
     <div className="flex min-h-screen flex-col">
