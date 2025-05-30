@@ -66,9 +66,9 @@ export default async function Home() {
   const { settings, featuredProperties } = await getHomepageData();
 
   // Prepare banner images
-  const bannerImageUrls = settings?.bannerUrls || [];
-    ?.map((img) => urlForImage(img)?.width(1920).height(1080).fit("crop").url())
-    .filter(Boolean) as string[];
+  const bannerImageUrls = (settings?.bannerUrls || [])
+  .map((img) => urlForImage(img)?.width(1920).height(1080).fit("crop").url())
+  .filter(Boolean) as string[];
 
   const aboutImageUrl = settings?.aboutImage
     ? urlForImage(settings.aboutImage)?.width(600).height(600).fit("cover").url()
