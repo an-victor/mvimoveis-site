@@ -1,7 +1,7 @@
 // /home/ubuntu/corretor_site/app/page.tsx
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronRight, MapPin, Star } from "lucide-react";
+import { ChevronRight, MapPin } from "lucide-react";
 import { SanityDocument } from "next-sanity";
 import Autoplay from "embla-carousel-autoplay";
 
@@ -10,15 +10,12 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import {
   Carousel,
   CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
+  CarouselItem
 } from "@/components/ui/carousel";
 import { client } from "@/lib/sanity.client";
 import { urlForImage } from "@/lib/sanity.image";
 import { settingsQuery, featuredPropertiesQuery } from "@/lib/sanity.queries";
 
-// Interfaces
 interface SettingsData extends SanityDocument {
   title?: string;
   bannerUrls?: any[];
@@ -44,14 +41,12 @@ interface Property extends SanityDocument {
   mainImage?: any;
 }
 
-// Fetch data
 async function getHomepageData() {
   const settings = await client.fetch<SettingsData>(settingsQuery);
   const featuredProperties = await client.fetch<Property[]>(featuredPropertiesQuery);
   return { settings, featuredProperties };
 }
 
-// Format currency
 const formatCurrency = (value: number | undefined) => {
   if (value === undefined || value === null) return "Valor não informado";
   return new Intl.NumberFormat("pt-BR", {
@@ -67,10 +62,6 @@ export default async function Home() {
     .map((img) => urlForImage(img)?.width(1920).height(1080).fit("crop").url())
     .filter((url): url is string => typeof url === "string");
 
-  const aboutImageUrl = settings?.aboutImage
-    ? urlForImage(settings.aboutImage)?.width(600).height(600).fit("cover").url()
-    : "/placeholder.svg?height=600&width=600";
-
   return (
     <div className="flex min-h-screen flex-col">
       <main className="flex-1">
@@ -84,12 +75,14 @@ export default async function Home() {
             >
               <CarouselContent className="h-full">
                 {bannerImageUrls.map((url, index) => (
-                  <CarouselItem key={index} className="h-full">
-                    <div
-                      className="absolute inset-0 bg-cover bg-center"
-                      style={{ backgroundImage: `url(${url})` }}
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-r from-slate-900/70 to-slate-900/30" />
+                  <CarouselItem key={index} className="h-full w-full">
+                    <div className="relative w-full h-full">
+                      <div
+                        className="w-full h-full bg-cover bg-center"
+                        style={{ backgroundImage: `url(${url})` }}
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-slate-900/70 to-slate-900/30" />
+                      </div>
                     </div>
                   </CarouselItem>
                 ))}
@@ -190,8 +183,6 @@ export default async function Home() {
             </div>
           </div>
         </section>
-
-        {/* Demais seções como "Sobre", "Depoimentos", etc. — permanecem como estão */}
       </main>
     </div>
   );
