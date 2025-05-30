@@ -1,7 +1,7 @@
-// /home/ubuntu/corretor_site/app/page.tsx
+// app/page.tsx
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronRight, MapPin, Star } from "lucide-react";
+import { ChevronRight, MapPin } from "lucide-react";
 import { SanityDocument } from "next-sanity";
 import Autoplay from "embla-carousel-autoplay";
 
@@ -11,8 +11,6 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
 } from "@/components/ui/carousel";
 import { client } from "@/lib/sanity.client";
 import { urlForImage } from "@/lib/sanity.image";
@@ -20,7 +18,7 @@ import { settingsQuery, featuredPropertiesQuery } from "@/lib/sanity.queries";
 
 interface SettingsData extends SanityDocument {
   title?: string;
-  bannerImages?: any[];
+  bannerUrls?: any[];
   aboutImage?: any;
   aboutText?: string;
   testimonials?: {
@@ -60,17 +58,14 @@ const formatCurrency = (value: number | undefined) => {
 export default async function Home() {
   const { settings, featuredProperties } = await getHomepageData();
 
-  const bannerImageUrls = (settings?.bannerImages || [])
+  const bannerImageUrls = (settings?.bannerUrls || [])
     .map((img) => urlForImage(img)?.width(1920).height(1080).fit("crop").url())
     .filter((url): url is string => typeof url === "string");
-
-  const aboutImageUrl = settings?.aboutImage
-    ? urlForImage(settings.aboutImage)?.width(600).height(600).fit("cover").url()
-    : "/placeholder.svg?height=600&width=600";
 
   return (
     <div className="flex min-h-screen flex-col">
       <main className="flex-1">
+
         {/* HERO */}
         <section className="relative h-[70vh] md:h-[80vh] w-full overflow-hidden">
           {bannerImageUrls.length > 0 ? (
@@ -82,50 +77,83 @@ export default async function Home() {
               <CarouselContent className="h-full">
                 {bannerImageUrls.map((url, index) => (
                   <CarouselItem key={index} className="h-full w-full">
-                    <div className="relative w-full h-full">
-                      <div
-                        className="w-full h-full bg-cover bg-center"
-                        style={{ backgroundImage: `url(${url})` }}
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-r from-slate-900/70 to-slate-900/30" />
-                      </div>
+                    <div
+                      className="w-full h-full bg-cover bg-center relative"
+                      style={{ backgroundImage: `url(${url})` }}
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-slate-900/70 to-slate-900/30" />
                     </div>
                   </CarouselItem>
                 ))}
               </CarouselContent>
             </Carousel>
           ) : (
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{ backgroundImage: "url('/placeholder.svg?height=1080&width=1920')" }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-slate-900/70 to-slate-900/30" />
-            </div>
+            <div className="absolute inset-0 bg-cover bg-center bg-slate-300" />
           )}
 
           <div className="container relative flex h-full flex-col items-start justify-center gap-4 text-white z-10">
-            <h1 className="max-w-2xl text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
-              Carlos Rodrigues
-            </h1>
-            <p className="max-w-xl text-xl font-light text-slate-100 md:text-2xl">
-              Seu novo lar começa aqui
-            </p>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold">Carlos Rodrigues</h1>
+            <p className="text-xl sm:text-2xl max-w-lg">Seu novo lar começa aqui</p>
             <Link href="/imoveis">
               <Button className="mt-4 bg-primary hover:opacity-90" size="lg">
-                Ver Imóveis
-                <ChevronRight className="ml-2 h-4 w-4" />
+                Ver Imóveis <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
           </div>
         </section>
 
+        {/* SOBRE O CORRETOR */}
+        {settings.aboutText && (
+          <section className="py-16 bg-white dark:bg-slate-950">
+            <div className="container grid md:grid-cols-2 gap-8 items-center">
+              {settings.aboutImage && (
+                <Image
+                  src={urlForImage(settings.aboutImage).width(800).height(600).fit("crop").url()}
+                  alt="Imagem do corretor"
+                  width={800}
+                  height={600}
+                  className="rounded-2xl object-cover w-full"
+                />
+              )}
+              <div>
+                <h2 className="text-3xl font-bold mb-4 text-foreground">Sobre o corretor</h2>
+                <p className="text-lg text-foreground/80 leading-relaxed">{settings.aboutText}</p>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* DEPOIMENTOS */}
+        {settings.testimonials && settings.testimonials.length > 0 && (
+          <section className="py-16 bg-slate-100 dark:bg-slate-900">
+            <div className="container text-center">
+              <h2 className="text-3xl font-bold mb-10 text-foreground">Depoimentos</h2>
+              <div className="grid gap-8 md:grid-cols-3">
+                {settings.testimonials.map((testimonial) => (
+                  <div key={testimonial._key} className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md">
+                    {testimonial.clientImage && (
+                      <Image
+                        src={urlForImage(testimonial.clientImage).width(80).height(80).fit("crop").url()}
+                        alt={testimonial.name || "Cliente"}
+                        width={80}
+                        height={80}
+                        className="mx-auto mb-4 rounded-full"
+                      />
+                    )}
+                    <p className="text-foreground/80 italic">"{testimonial.quote}"</p>
+                    <p className="mt-2 font-bold text-primary">{testimonial.name}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* IMÓVEIS EM DESTAQUE */}
         <section className="py-16 bg-slate-50 dark:bg-slate-900">
           <div className="container">
             <div className="mb-12 text-center">
-              <h2 className="text-3xl font-bold text-foreground sm:text-4xl">
-                Imóveis em Destaque
-              </h2>
+              <h2 className="text-3xl font-bold text-foreground sm:text-4xl">Imóveis em Destaque</h2>
               <p className="mt-4 text-lg text-foreground/70">
                 Conheça as melhores oportunidades disponíveis no mercado
               </p>
@@ -133,7 +161,7 @@ export default async function Home() {
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {featuredProperties.map((property) => {
                 const imageUrl = property.mainImage
-                  ? urlForImage(property.mainImage)?.width(400).height(225).fit("crop").url()
+                  ? urlForImage(property.mainImage).width(400).height(225).fit("crop").url()
                   : "/placeholder.svg?width=400&height=225";
 
                 return (
@@ -182,13 +210,26 @@ export default async function Home() {
             <div className="mt-12 text-center">
               <Link href="/imoveis">
                 <Button variant="outline" className="border-primary text-primary hover:bg-primary/10">
-                  Ver todos os imóveis
-                  <ChevronRight className="ml-2 h-4 w-4" />
+                  Ver todos os imóveis <ChevronRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
             </div>
           </div>
         </section>
+
+        {/* CONTATO */}
+        <section className="py-16 bg-white dark:bg-slate-950">
+          <div className="container text-center max-w-xl mx-auto">
+            <h2 className="text-3xl font-bold mb-4 text-foreground">Fale com o corretor</h2>
+            <p className="text-lg text-foreground/70 mb-6">Entre em contato agora mesmo pelo WhatsApp e tire todas as suas dúvidas.</p>
+            <Link href="https://wa.me/seu-numero-aqui" target="_blank">
+              <Button className="bg-green-600 hover:bg-green-700 text-white" size="lg">
+                Conversar pelo WhatsApp
+              </Button>
+            </Link>
+          </div>
+        </section>
+
       </main>
     </div>
   );
