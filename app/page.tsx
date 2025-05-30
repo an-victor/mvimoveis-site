@@ -1,19 +1,9 @@
-"use client"
-import React from "react";
-
-import React from 'react'
-
-import Link from "next/link"
-import { ChevronRight, MapPin, Star } from "lucide-react"
-
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
-
-
+'use client';
+import React from 'react';
 
 export default function Home(): JSX.Element {
   return (
+    <>
 
     <div className="flex min-h-screen flex-col">
       {/* Header */}
@@ -302,4 +292,6 @@ export default function Home(): JSX.Element {
                         >
                           <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                           <circle cx="12" cy="10" r="3" />
-                       
+    </>
+  );
+}
