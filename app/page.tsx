@@ -1,4 +1,3 @@
-// app/page.tsx
 import Link from "next/link";
 import Image from "next/image";
 import { ChevronRight, MapPin } from "lucide-react";
@@ -18,7 +17,7 @@ import { settingsQuery, featuredPropertiesQuery } from "@/lib/sanity.queries";
 
 interface SettingsData extends SanityDocument {
   title?: string;
-  bannerUrls?: any[];
+  bannerUrls?: string[];
   aboutImage?: any;
   aboutText?: string;
   testimonials?: {
@@ -52,15 +51,13 @@ const formatCurrency = (value: number | undefined) => {
   return new Intl.NumberFormat("pt-BR", {
     style: "currency",
     currency: "BRL"
-  }).format(value)
-}
+  }).format(value);
+};
 
 export default async function Home() {
   const { settings, featuredProperties } = await getHomepageData();
 
-  const bannerImageUrls = settings?.bannerUrls?.filter((url): url is string => typeof url === "string") || [];
-    .map((img) => urlForImage(img)?.width(1920).height(1080).fit("crop").url())
-    .filter((url): url is string => typeof url === "string");
+  const bannerImageUrls = settings?.bannerUrls || [];
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -156,7 +153,7 @@ export default async function Home() {
                       </Link>
                     </CardFooter>
                   </Card>
-                )
+                );
               })}
             </div>
             <div className="mt-12 text-center">
@@ -183,5 +180,5 @@ export default async function Home() {
         </section>
       </main>
     </div>
-  )
+  );
 }
