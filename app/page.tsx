@@ -58,7 +58,7 @@ const formatCurrency = (value: number | undefined) => {
 export default async function Home() {
   const { settings, featuredProperties } = await getHomepageData();
 
-  const bannerImageUrls = (settings?.bannerUrls || [])
+  const bannerImageUrls = settings?.bannerUrls?.filter((url): url is string => typeof url === "string") || [];
     .map((img) => urlForImage(img)?.width(1920).height(1080).fit("crop").url())
     .filter((url): url is string => typeof url === "string");
 
