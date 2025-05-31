@@ -27,6 +27,12 @@ interface SettingsData extends SanityDocument {
     quote?: string;
     clientImage?: any;
   }[];
+  // Add other fields from your settings query if needed
+  primaryColor?: string;
+  textColor?: string;
+  contactPhone?: string;
+  contactWhatsApp?: string;
+  // ... etc
 }
 
 interface Property extends SanityDocument {
@@ -58,15 +64,34 @@ const formatCurrency = (value: number | undefined) => {
 export default async function Home() {
   const { settings, featuredProperties } = await getHomepageData();
 
-  const bannerImageUrls = (settings?.bannerImages || []).map((img) => { // Use bannerImages instead of bannerUrls
-  try {
-    // The image object itself is passed to urlForImage
-    return urlForImage(img)?.width(1920).height(1080).fit("crop").url();
-  } catch (error) {
-    console.error("Error processing banner image:", error, img);
-    return null;
-  }
-}).filter((url): url is string => !!url);
+  // Corrected logic to safely generate banner image URLs
+  const bannerImageUrls = (settings?.bannerImages || [])
+    .map((img) => {
+      try {
+        // First, get the URL builder or undefined
+        const builder = urlForImage(img);
+        
+        // Only if the builder is valid (valid image in Sanity),
+        // proceed to generate the URL with desired dimensions.
+        if (builder) {
+          return builder.width(1920).height(1080).fit("crop").url();
+        }
+        
+        // If the image is invalid (builder is undefined), log a warning and return null.
+        console.warn("Skipping invalid banner image object:", img);
+        return null;
+      } catch (error) {
+        // Catch any other unexpected errors during processing
+        console.error("Error processing banner image:", error, img);
+        return null;
+      }
+    })
+    .filter((url): url is string => !!url); // Filter out all nulls/undefineds to get only valid URLs
+
+  // Fallback WhatsApp link if not defined in settings
+  const whatsappLink = settings?.contactWhatsApp
+    ? `https://wa.me/${settings.contactWhatsApp.replace(/\D/g, '')}` // Clean non-digits
+    : "https://wa.me/seu-numero-aqui"; // Default placeholder
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -93,13 +118,17 @@ export default async function Home() {
               </CarouselContent>
             </Carousel>
           ) : (
-            <div className="absolute inset-0 bg-cover bg-center bg-slate-300" />
+            // Placeholder if no valid banner images are found
+            <div className="absolute inset-0 bg-cover bg-center bg-slate-300 flex items-center justify-center">
+              <p className="text-slate-600">Banner indisponível</p>
+            </div>
           )}
 
           <div className="container relative flex h-full flex-col items-start justify-center gap-4 text-white z-10">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold">Carlos Rodrigues</h1>
             <p className="text-xl sm:text-2xl max-w-lg">Seu novo lar começa aqui</p>
             <Link href="/imoveis">
+              {/* Consider using settings.primaryColor here if implemented */}
               <Button className="mt-4 bg-primary hover:opacity-90" size="lg">
                 Ver Imóveis <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
@@ -117,22 +146,25 @@ export default async function Home() {
               </p>
             </div>
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-              {featuredProperties.map((property) => {
+              {(featuredProperties || []).map((property) => {
                 const imageUrl = property.mainImage
-                  ? urlForImage(property.mainImage).width(400).height(225).fit("crop").url()
-                  : "/placeholder.svg?width=400&height=225";
+                  ? urlForImage(property.mainImage)?.width(400).height(225).fit("crop").url()
+                  : "/placeholder.svg?width=400&height=225"; // Ensure placeholder exists
 
                 return (
                   <Card key={property._id} className="overflow-hidden hover:shadow-lg dark:bg-slate-800">
                     <Link href={`/imoveis/${property.slug?.current || property._id}`} className="block">
                       <div className="aspect-video w-full overflow-hidden">
-                        <Image
-                          src={imageUrl}
-                          alt={property.title || "Imagem do Imóvel"}
-                          width={400}
-                          height={225}
-                          className="h-full w-full object-cover transition-transform hover:scale-105"
-                        />
+                        {imageUrl && (
+                          <Image
+                            src={imageUrl}
+                            alt={property.title || "Imagem do Imóvel"}
+                            width={400}
+                            height={225}
+                            className="h-full w-full object-cover transition-transform hover:scale-105"
+                            unoptimized={imageUrl.startsWith("/placeholder")}
+                          />
+                        )}
                       </div>
                     </Link>
                     <CardContent className="p-6">
@@ -141,7 +173,7 @@ export default async function Home() {
                       </h3>
                       <div className="mt-2 flex items-center text-foreground/70">
                         <MapPin className="mr-1 h-4 w-4" />
-                        <span className="text-sm">{property.location}</span>
+                        <span className="text-sm">{property.location || "Localização não informada"}</span>
                       </div>
                       <div className="mt-4 flex justify-between">
                         <span className="text-lg font-bold text-primary">
@@ -150,7 +182,7 @@ export default async function Home() {
                         <div className="flex gap-1 text-sm text-foreground/70">
                           {property.area && <span>{property.area} m²</span>}
                           {property.area && property.bedrooms && <span className="text-slate-300">|</span>}
-                          {property.bedrooms && <span>{property.bedrooms} quartos</span>}
+                          {property.bedrooms && <span>{property.bedrooms} quarto{property.bedrooms > 1 ? 's' : ''}</span>}
                         </div>
                       </div>
                     </CardContent>
@@ -180,7 +212,7 @@ export default async function Home() {
           <div className="container text-center max-w-xl mx-auto">
             <h2 className="text-3xl font-bold mb-4 text-foreground">Fale com o corretor</h2>
             <p className="text-lg text-foreground/70 mb-6">Entre em contato agora mesmo pelo WhatsApp e tire todas as suas dúvidas.</p>
-            <Link href="https://wa.me/seu-numero-aqui" target="_blank">
+            <Link href={whatsappLink} target="_blank">
               <Button className="bg-green-600 hover:bg-green-700 text-white" size="lg">
                 Conversar pelo WhatsApp
               </Button>
@@ -191,3 +223,4 @@ export default async function Home() {
     </div>
   );
 }
+
