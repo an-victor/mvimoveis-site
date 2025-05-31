@@ -57,7 +57,14 @@ const formatCurrency = (value: number | undefined) => {
 export default async function Home() {
   const { settings, featuredProperties } = await getHomepageData();
 
-  const bannerImageUrls = settings?.bannerUrls || [];
+  const bannerImageUrls = (settings?.bannerUrls || []).map((img) => {
+  try {
+    if (typeof img === "string") return img;
+    return urlForImage(img)?.width(1920).height(1080).fit("crop").url();
+  } catch {
+    return null;
+  }
+}).filter((url): url is string => !!url);
 
   return (
     <div className="flex min-h-screen flex-col">
