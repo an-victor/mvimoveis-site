@@ -17,7 +17,8 @@ import { settingsQuery, featuredPropertiesQuery } from "@/lib/sanity.queries";
 
 interface SettingsData extends SanityDocument {
   title?: string;
-  bannerUrls?: string[];
+  // bannerUrls?: string[]; // Incorrect field name
+  bannerImages?: any[]; // Correct field name based on query
   aboutImage?: any;
   aboutText?: string;
   testimonials?: {
@@ -57,11 +58,12 @@ const formatCurrency = (value: number | undefined) => {
 export default async function Home() {
   const { settings, featuredProperties } = await getHomepageData();
 
-  const bannerImageUrls = (settings?.bannerUrls || []).map((img) => {
+  const bannerImageUrls = (settings?.bannerImages || []).map((img) => { // Use bannerImages instead of bannerUrls
   try {
-    if (typeof img === "string") return img;
+    // The image object itself is passed to urlForImage
     return urlForImage(img)?.width(1920).height(1080).fit("crop").url();
-  } catch {
+  } catch (error) {
+    console.error("Error processing banner image:", error, img);
     return null;
   }
 }).filter((url): url is string => !!url);
