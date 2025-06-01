@@ -211,7 +211,7 @@ export default async function PropertiesPage() {
                 <img
                   src={getImageUrl(siteSettings.logo, 150, 50) || "/placeholder.svg"}
                   alt={siteSettings.title || "Logo Rodapé"} // Alt text ajustado
-                  className="h-12 w-auto mb-4" // Tamanho e margem para a logo no rodapé
+                  className="h-18 w-auto mb-4" // Tamanho e margem para a logo no rodapé
                 />
               )}
               {/* FIM DA LOGO ADICIONADA AO RODAPÉ */}

@@ -330,7 +330,7 @@ export default async function Home() {
                 <img
                   src={getImageUrl(siteSettings.logo, 150, 50) || "/placeholder.svg"} // Ajuste os tamanhos (150, 50) se necessário para a URL da imagem
                   alt={siteSettings.title || "Marcelo Victor Imóveis - Logo Rodapé"}
-                  className="h-12 w-auto mb-4" // Tamanho da logo no rodapé e margem inferior
+                  className="h-18 w-auto mb-4" // Tamanho da logo no rodapé e margem inferior
                 />
               )}
               {/* FIM DA LOGO ADICIONADA AO RODAPÉ */}
@@ -396,8 +396,8 @@ export default async function Home() {
           </div>
           <div className="mt-12 border-t pt-6 text-center text-sm text-slate-500">
             <p>
-              © {new Date().getFullYear()} {siteSettings?.title || "Marcelo Victor Imóveis"}. Todos os direitos
-              reservados.
+              © {new Date().getFullYear()} {siteSettings?.heroSubtitle || "Marcelo Victor Imóveis"}. Todos os direitos
+              reservados. Feito pela ALX Mídias
             </p>
           </div>
         </div>
