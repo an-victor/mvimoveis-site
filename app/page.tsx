@@ -2,23 +2,24 @@ import Link from "next/link";
 import Image from "next/image";
 import { ChevronRight, MapPin } from "lucide-react";
 import { SanityDocument } from "next-sanity";
-import Autoplay from "embla-carousel-autoplay";
+// Removed Autoplay and Carousel imports as they are now in HeroCarousel
+// import Autoplay from "embla-carousel-autoplay";
+// import {
+//   Carousel,
+//   CarouselContent,
+//   CarouselItem,
+// } from "@/components/ui/carousel";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-} from "@/components/ui/carousel";
 import { client } from "@/lib/sanity.client";
 import { urlForImage } from "@/lib/sanity.image";
 import { settingsQuery, featuredPropertiesQuery } from "@/lib/sanity.queries";
+import { HeroCarousel } from "@/components/hero-carousel"; // Import the new Client Component
 
 interface SettingsData extends SanityDocument {
   title?: string;
-  // bannerUrls?: string[]; // Incorrect field name
-  bannerImages?: any[]; // Correct field name based on query
+  bannerImages?: any[];
   aboutImage?: any;
   aboutText?: string;
   testimonials?: {
@@ -27,12 +28,10 @@ interface SettingsData extends SanityDocument {
     quote?: string;
     clientImage?: any;
   }[];
-  // Add other fields from your settings query if needed
   primaryColor?: string;
   textColor?: string;
   contactPhone?: string;
   contactWhatsApp?: string;
-  // ... etc
 }
 
 interface Property extends SanityDocument {
@@ -64,71 +63,39 @@ const formatCurrency = (value: number | undefined) => {
 export default async function Home() {
   const { settings, featuredProperties } = await getHomepageData();
 
-  // Corrected logic to safely generate banner image URLs
   const bannerImageUrls = (settings?.bannerImages || [])
     .map((img) => {
       try {
-        // First, get the URL builder or undefined
         const builder = urlForImage(img);
-        
-        // Only if the builder is valid (valid image in Sanity),
-        // proceed to generate the URL with desired dimensions.
         if (builder) {
           return builder.width(1920).height(1080).fit("crop").url();
         }
-        
-        // If the image is invalid (builder is undefined), log a warning and return null.
         console.warn("Skipping invalid banner image object:", img);
         return null;
       } catch (error) {
-        // Catch any other unexpected errors during processing
         console.error("Error processing banner image:", error, img);
         return null;
       }
     })
-    .filter((url): url is string => !!url); // Filter out all nulls/undefineds to get only valid URLs
+    .filter((url): url is string => !!url);
 
-  // Fallback WhatsApp link if not defined in settings
   const whatsappLink = settings?.contactWhatsApp
-    ? `https://wa.me/${settings.contactWhatsApp.replace(/\D/g, '')}` // Clean non-digits
-    : "https://wa.me/seu-numero-aqui"; // Default placeholder
+    ? `https://wa.me/${settings.contactWhatsApp.replace(/\D/g, '')}`
+    : "https://wa.me/seu-numero-aqui";
 
   return (
     <div className="flex min-h-screen flex-col">
       <main className="flex-1">
         {/* HERO */}
         <section className="relative h-[70vh] md:h-[80vh] w-full overflow-hidden">
-          {bannerImageUrls.length > 0 ? (
-            <Carousel
-              opts={{ loop: true }}
-              plugins={[Autoplay({ delay: 5000 })]}
-              className="h-full w-full"
-            >
-              <CarouselContent className="h-full">
-                {bannerImageUrls.map((url, index) => (
-                  <CarouselItem key={index} className="h-full w-full">
-                    <div
-                      className="w-full h-full bg-cover bg-center relative"
-                      style={{ backgroundImage: `url(${url})` }}
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-r from-slate-900/70 to-slate-900/30" />
-                    </div>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-            </Carousel>
-          ) : (
-            // Placeholder if no valid banner images are found
-            <div className="absolute inset-0 bg-cover bg-center bg-slate-300 flex items-center justify-center">
-              <p className="text-slate-600">Banner indisponível</p>
-            </div>
-          )}
+          {/* Use the new HeroCarousel Client Component */}
+          <HeroCarousel imageUrls={bannerImageUrls} />
 
+          {/* Overlay content remains in the Server Component */}
           <div className="container relative flex h-full flex-col items-start justify-center gap-4 text-white z-10">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold">Carlos Rodrigues</h1>
             <p className="text-xl sm:text-2xl max-w-lg">Seu novo lar começa aqui</p>
             <Link href="/imoveis">
-              {/* Consider using settings.primaryColor here if implemented */}
               <Button className="mt-4 bg-primary hover:opacity-90" size="lg">
                 Ver Imóveis <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
@@ -149,7 +116,7 @@ export default async function Home() {
               {(featuredProperties || []).map((property) => {
                 const imageUrl = property.mainImage
                   ? urlForImage(property.mainImage)?.width(400).height(225).fit("crop").url()
-                  : "/placeholder.svg?width=400&height=225"; // Ensure placeholder exists
+                  : "/placeholder.svg?width=400&height=225";
 
                 return (
                   <Card key={property._id} className="overflow-hidden hover:shadow-lg dark:bg-slate-800">
