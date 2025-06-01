@@ -35,13 +35,13 @@ export default async function PropertiesPage() {
     <div className="flex min-h-screen flex-col">
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-white">
-        <div className="container flex h-34 items-center justify-between"> {/* Altura do cabeçalho ajustada */}
+        <div className="container flex h-36 items-center justify-between"> {/* Altura do cabeçalho ajustada */}
           <div className="flex items-center gap-2">
             {siteSettings?.logo ? (
               <img
                 src={getImageUrl(siteSettings.logo, 150, 50) || "/placeholder.svg"}
                 alt={siteSettings.title || "Logo Principal"} // Alt text ajustado para clareza
-                className="h-22 w-auto" // Altura da logo do cabeçalho ajustada
+                className="h-24 w-auto" // Altura da logo do cabeçalho ajustada
               />
             ) : (
               <span className="text-xl font-bold text-slate-900">
