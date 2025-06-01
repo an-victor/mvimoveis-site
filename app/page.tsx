@@ -1,15 +1,15 @@
 import Link from "next/link";
-import Image from "next/image"; // Adicionado se você for usar o componente Image do Next.js para a logo, mas o código atual usa <img>
+import Image from "next/image"; // Importado para o caso de você querer usar o componente Image do Next.js no futuro, mas o código atual usa <img>
 import { ChevronRight, MapPin, Star } from "lucide-react";
-import { client } from "@/sanity/lib/client"; // Verifique se o caminho está correto
-import { getImageUrl } from "@/sanity/lib/image"; // Verifique se o caminho está correto
-import { FEATURED_PROPERTIES_QUERY, TESTIMONIALS_QUERY, SITE_SETTINGS_QUERY } from "@/sanity/lib/queries"; // Verifique se o caminho está correto
-import type { Property, Testimonial, SiteSettings } from "@/types/sanity"; // Verifique se o caminho está correto
+import { client } from "@/sanity/lib/client"; // Verifique o caminho
+import { getImageUrl } from "@/sanity/lib/image"; // Verifique o caminho. Assumimos que esta é sua função urlForImage.
+import { FEATURED_PROPERTIES_QUERY, TESTIMONIALS_QUERY, SITE_SETTINGS_QUERY } from "@/sanity/lib/queries"; // Verifique o caminho
+import type { Property, Testimonial, SiteSettings } from "@/types/sanity"; // Verifique o caminho
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"; // Mantido para o carrossel de depoimentos
-import { BannerCarousel } from "@/components/banner-carousel"; // Para o banner principal
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { BannerCarousel } from "@/components/banner-carousel"; // Seu componente de Banner Carrossel
 
 async function getHomeData() {
   try {
@@ -34,7 +34,6 @@ async function getHomeData() {
   }
 }
 
-// Função para formatar moeda, se for usar nos imóveis em destaque
 const formatCurrency = (value?: number) => {
   if (value === undefined || value === null) return "Valor não informado";
   return new Intl.NumberFormat("pt-BR", {
@@ -43,39 +42,25 @@ const formatCurrency = (value?: number) => {
   }).format(value);
 };
 
-
 export default async function Home() {
   const { featuredProperties, testimonials, siteSettings } = await getHomeData()
 
-  // Lógica para URLs do banner (similar à que você tinha, ajustada para getImageUrl)
-  const bannerImageUrls = (siteSettings?.bannerImages || [])
-    .map((img) => {
-      try {
-        const imageUrl = getImageUrl(img, 1920, 1080, true); // true para crop
-        if (imageUrl) {
-          return imageUrl;
-        }
-        console.warn("Skipping invalid banner image object:", img);
-        return null;
-      } catch (error) {
-        console.error("Error processing banner image:", error, img);
-        return null;
-      }
-    })
-    .filter((url): url is string => !!url);
-
+  // A URL do WhatsApp será construída aqui para ser usada no header e na seção de contato
+  const whatsappLink = siteSettings?.whatsapp
+    ? `https://wa.me/${siteSettings.whatsapp.replace(/\D/g, '')}`
+    : "#"; // Link padrão ou de fallback se não houver número
 
   return (
     <div className="flex min-h-screen flex-col">
       {/* Header */}
-      <header className="absolute top-0 z-50 w-full"> {/* Nota: 'absolute' pode precisar de ajustes se o fundo do banner não cobrir */}
+      <header className="absolute top-0 z-50 w-full">
         <div className="container flex h-32 items-center justify-between"> {/* Altura do cabeçalho ajustada */}
           <div className="flex items-center gap-2">
             {siteSettings?.logo ? (
               <img
-                src={getImageUrl(siteSettings.logo, 150, 50) || "/placeholder.svg"}
-                alt={siteSettings.title || "Logo Principal"} // Alt text ajustado
-                className="h-20 w-auto" // Altura da logo do cabeçalho ajustada
+                src={getImageUrl(siteSettings.logo, 150, 50) || "/placeholder.svg"} // getImageUrl deve retornar a URL diretamente ou o builder + .url()
+                alt={siteSettings.title || "Marcelo Victor Imóveis - Logo Principal"}
+                className="h-20 w-auto" // Altura da logo do cabeçalho
               />
             ) : (
               <span className="text-2xl font-bold text-orange-500">{siteSettings?.title || "Marcelo Victor"}</span>
@@ -97,47 +82,19 @@ export default async function Home() {
           </nav>
           {siteSettings?.whatsapp && (
             <Link
-              href={`https://wa.me/${siteSettings.whatsapp.replace(/\D/g, "")}`}
-              target="_blank" // Adicionado para abrir em nova aba
-              rel="noopener noreferrer" // Adicionado por segurança
+              href={whatsappLink}
+              target="_blank"
+              rel="noopener noreferrer"
               className="hidden md:inline-flex items-center rounded-md bg-orange-500 px-4 py-2 text-sm font-medium text-white hover:bg-orange-600"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="mr-2 h-4 w-4"
-              >
-                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 h-4 w-4" > <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" /> </svg>
               WhatsApp
             </Link>
           )}
           <div className="md:hidden">
-            <Button variant="ghost" size="icon" className="text-white"> {/* Supondo que o menu mobile deva ter ícone branco no banner */}
+            <Button variant="ghost" size="icon" className="text-white">
               <span className="sr-only">Abrir menu</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-6 w-6"
-              >
-                <line x1="4" x2="20" y1="12" y2="12" />
-                <line x1="4" x2="20" y1="6" y2="6" />
-                <line x1="4" x2="20" y1="18" y2="18" />
-              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6" > <line x1="4" x2="20" y1="12" y2="12" /> <line x1="4" x2="20" y1="6" y2="6" /> <line x1="4" x2="20" y1="18" y2="18" /> </svg>
             </Button>
           </div>
         </div>
@@ -145,7 +102,8 @@ export default async function Home() {
 
       <main className="flex-1">
         {/* Hero Section */}
-        <BannerCarousel images={bannerImageUrls}> {/* Usando bannerImageUrls processadas */}
+        {/* Mantendo a forma como você passou as imagens do banner, assumindo que BannerCarousel lida com o objeto de imagem do Sanity */}
+        <BannerCarousel images={siteSettings?.bannerImages || []}>
           <div className="container relative flex h-full flex-col items-center justify-center text-center text-white">
             <p className="mb-2 text-xl font-light">
               {siteSettings?.heroSubtitle || "Marcelo Victor - Corretor de Imóveis"}
@@ -170,50 +128,23 @@ export default async function Home() {
               {siteSettings?.heroDescription ||
                 "Mais de 15 anos de experiência ajudando famílias a encontrar o lar perfeito. Venda, compra e locação com total segurança e transparência."}
             </p>
-            <div className="mt-10 flex flex-wrap justify-center gap-4"> {/* Adicionado flex-wrap e justify-center */}
+            <div className="mt-10 flex flex-wrap justify-center gap-4">
               {siteSettings?.whatsapp && (
-                <Link href={`https://wa.me/${siteSettings.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer">
-                  <Button className="bg-orange-500 hover:bg-orange-600" size="lg"> {/* Removido mt-4, pois o gap-4 do pai já cuida do espaçamento */}
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="mr-2 h-5 w-5"
-                    >
-                      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-                    </svg>
+                <Link href={whatsappLink} target="_blank" rel="noopener noreferrer">
+                  <Button className="bg-orange-500 hover:bg-orange-600" size="lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 h-5 w-5" > <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" /> </svg>
                     Falar no WhatsApp
                   </Button>
                 </Link>
               )}
               <Link href="/imoveis">
-                <Button className="bg-white text-slate-900 hover:bg-slate-100" size="lg"> {/* Removido mt-4 */}
+                <Button className="bg-white text-slate-900 hover:bg-slate-100" size="lg">
                   Ver Imóveis
                 </Button>
               </Link>
             </div>
             <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-8 w-8"
-              >
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <polyline points="19 12 12 19 5 12"></polyline>
-              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-8 w-8" > <line x1="12" y1="5" x2="12" y2="19"></line> <polyline points="19 12 12 19 5 12"></polyline> </svg>
               <span className="sr-only">Role para baixo</span>
             </div>
           </div>
@@ -231,8 +162,8 @@ export default async function Home() {
                 <Card key={property._id} className="overflow-hidden transition-all hover:shadow-lg">
                   <div className="aspect-video w-full overflow-hidden">
                     <img
-                      src={getImageUrl(property.images?.[0], 800, 600) || "/placeholder.svg"} // Assumindo que images é um array e pegamos a primeira
-                      alt={property.title || "Imagem do Imóvel"} // Alt text
+                      src={getImageUrl(property.images?.[0], 800, 600) || "/placeholder.svg"}
+                      alt={property.title || "Imagem do Imóvel"}
                       className="h-full w-full object-cover transition-transform hover:scale-105"
                     />
                   </div>
@@ -286,35 +217,14 @@ export default async function Home() {
                   {siteSettings?.aboutTitle || "Sobre Marcelo Victor"}
                 </h2>
                 <p className="text-lg text-slate-600">
-                  {siteSettings?.aboutDescription || // Supondo que aboutDescription seja o campo no Sanity
+                  {siteSettings?.aboutDescription || // Assumindo que 'aboutDescription' é o campo no Sanity
                     "Com mais de 15 anos de experiência no mercado imobiliário, me dedico a encontrar o imóvel perfeito para cada cliente, entendendo suas necessidades e oferecendo um atendimento personalizado do início ao fim."}
                 </p>
                 <div className="grid gap-6 sm:grid-cols-2">
-                  {/* Cards de características - idealmente viriam do Sanity também */}
-                  <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-                    <h3 className="mb-2 text-lg font-bold text-slate-900">Atendimento Personalizado</h3>
-                    <p className="text-slate-600">
-                      Cada cliente recebe atenção exclusiva e dedicada às suas necessidades específicas.
-                    </p>
-                  </div>
-                  <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-                    <h3 className="mb-2 text-lg font-bold text-slate-900">Especialista em Alto Padrão</h3>
-                    <p className="text-slate-600">
-                      Conhecimento profundo do mercado de imóveis de luxo e suas particularidades.
-                    </p>
-                  </div>
-                  <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-                    <h3 className="mb-2 text-lg font-bold text-slate-900">Negociação Transparente</h3>
-                    <p className="text-slate-600">
-                      Processos claros e objetivos para garantir a melhor experiência na compra ou venda.
-                    </p>
-                  </div>
-                  <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-                    <h3 className="mb-2 text-lg font-bold text-slate-900">Suporte Contínuo</h3>
-                    <p className="text-slate-600">
-                      Acompanhamento em todas as etapas, desde a visita até a finalização do contrato.
-                    </p>
-                  </div>
+                  <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm"> <h3 className="mb-2 text-lg font-bold text-slate-900">Atendimento Personalizado</h3> <p className="text-slate-600"> Cada cliente recebe atenção exclusiva e dedicada às suas necessidades específicas. </p> </div>
+                  <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm"> <h3 className="mb-2 text-lg font-bold text-slate-900">Especialista em Alto Padrão</h3> <p className="text-slate-600"> Conhecimento profundo do mercado de imóveis de luxo e suas particularidades. </p> </div>
+                  <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm"> <h3 className="mb-2 text-lg font-bold text-slate-900">Negociação Transparente</h3> <p className="text-slate-600"> Processos claros e objetivos para garantir a melhor experiência na compra ou venda. </p> </div>
+                  <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm"> <h3 className="mb-2 text-lg font-bold text-slate-900">Suporte Contínuo</h3> <p className="text-slate-600"> Acompanhamento em todas as etapas, desde a visita até a finalização do contrato. </p> </div>
                 </div>
               </div>
             </div>
@@ -326,36 +236,31 @@ export default async function Home() {
           <section id="depoimentos" className="py-16 bg-slate-50">
             <div className="container">
               <div className="mb-12 text-center">
-                <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-                  O que dizem nossos clientes
-                </h2>
-                <p className="mt-4 text-lg text-slate-600">
-                  A satisfação de quem já realizou o sonho da casa própria com nossa ajuda
-                </p>
+                <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl"> O que dizem nossos clientes </h2>
+                <p className="mt-4 text-lg text-slate-600"> A satisfação de quem já realizou o sonho da casa própria com nossa ajuda </p>
               </div>
               <Carousel className="mx-auto max-w-4xl">
                 <CarouselContent>
                   {testimonials.map((testimonial) => (
-                    <CarouselItem key={testimonial._id || testimonial._key}> {/* Adicionado _key como fallback */}
+                    <CarouselItem key={testimonial._id || testimonial._key}>
                       <div className="rounded-lg border bg-white p-8 shadow-sm">
                         <div className="mb-4 flex">
-                          {/* Supondo que 'rating' seja um número no schema de testimonial */}
                           {testimonial.rating && [...Array(testimonial.rating)].map((_, i) => (
                             <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
                           ))}
                         </div>
-                        <blockquote className="mb-6 text-lg italic text-slate-600">"{testimonial.text}"</blockquote> {/* Supondo 'text' para o depoimento */}
+                        <blockquote className="mb-6 text-lg italic text-slate-600">"{testimonial.text}"</blockquote>
                         <div className="flex items-center gap-4">
                           <div className="h-12 w-12 overflow-hidden rounded-full">
                             <img
-                              src={getImageUrl(testimonial.avatar, 100, 100) || "/placeholder.svg"} // Supondo 'avatar' para a imagem do cliente
-                              alt={testimonial.name || "Cliente"} // Alt text
+                              src={getImageUrl(testimonial.avatar, 100, 100) || "/placeholder.svg"}
+                              alt={testimonial.name || "Cliente"}
                               className="h-full w-full object-cover"
                             />
                           </div>
                           <div>
                             <div className="font-medium text-slate-900">{testimonial.name}</div>
-                            <div className="text-sm text-slate-500">{testimonial.location}</div> {/* Supondo 'location' para a localização do cliente */}
+                            <div className="text-sm text-slate-500">{testimonial.location}</div>
                           </div>
                         </div>
                       </div>
@@ -377,84 +282,34 @@ export default async function Home() {
             <div className="mx-auto max-w-3xl">
               <div className="mb-12 text-center">
                 <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Entre em contato</h2>
-                <p className="mt-4 text-lg text-slate-600">
-                  Estou à disposição para ajudar você a encontrar o imóvel dos seus sonhos
-                </p>
+                <p className="mt-4 text-lg text-slate-600"> Estou à disposição para ajudar você a encontrar o imóvel dos seus sonhos </p>
               </div>
               <div className="overflow-hidden rounded-lg border bg-white shadow-sm">
                 <div className="grid md:grid-cols-2">
                   <div className="bg-orange-500 p-8 text-white">
                     <h3 className="mb-6 text-xl font-bold">Informações de Contato</h3>
                     <div className="space-y-4">
-                      {siteSettings?.phone && (
-                        <div className="flex items-start gap-3">
-                          <svg /* Ícone Telefone */ xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 shrink-0" > <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /> </svg>
-                          <div>
-                            <div className="text-sm font-medium text-white/70">Telefone</div>
-                            <div>{siteSettings.phone}</div>
-                          </div>
-                        </div>
-                      )}
-                      {siteSettings?.email && (
-                        <div className="flex items-start gap-3">
-                          <svg /* Ícone Email */ xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 shrink-0" > <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /> <polyline points="22,6 12,13 2,6" /> </svg>
-                          <div>
-                            <div className="text-sm font-medium text-white/70">Email</div>
-                            <div>{siteSettings.email}</div>
-                          </div>
-                        </div>
-                      )}
-                      {siteSettings?.address && (
-                        <div className="flex items-start gap-3">
-                          <svg /* Ícone Endereço */ xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 shrink-0" > <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /> <circle cx="12" cy="10" r="3" /> </svg>
-                          <div>
-                            <div className="text-sm font-medium text-white/70">Endereço</div>
-                            <div>{siteSettings.address}</div>
-                          </div>
-                        </div>
-                      )}
+                      {siteSettings?.phone && ( <div className="flex items-start gap-3"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 shrink-0" > <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /> </svg> <div> <div className="text-sm font-medium text-white/70">Telefone</div> <div>{siteSettings.phone}</div> </div> </div> )}
+                      {siteSettings?.email && ( <div className="flex items-start gap-3"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 shrink-0" > <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /> <polyline points="22,6 12,13 2,6" /> </svg> <div> <div className="text-sm font-medium text-white/70">Email</div> <div>{siteSettings.email}</div> </div> </div> )}
+                      {siteSettings?.address && ( <div className="flex items-start gap-3"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 shrink-0" > <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /> <circle cx="12" cy="10" r="3" /> </svg> <div> <div className="text-sm font-medium text-white/70">Endereço</div> <div>{siteSettings.address}</div> </div> </div> )}
                     </div>
                     <div className="mt-8">
                       <h4 className="mb-3 text-sm font-medium text-white/70">Redes Sociais</h4>
                       <div className="flex gap-4">
-                        {siteSettings?.facebook && (
-                          <a href={siteSettings.facebook} target="_blank" rel="noopener noreferrer" className="text-white hover:text-white/80"> {/* Adicionado target e rel */}
-                            <svg /* Ícone Facebook */ xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" > <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" /> </svg>
-                          </a>
-                        )}
-                        {siteSettings?.instagram && (
-                          <a href={siteSettings.instagram} target="_blank" rel="noopener noreferrer" className="text-white hover:text-white/80"> {/* Adicionado target e rel */}
-                            <svg /* Ícone Instagram */ xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" > <rect x="2" y="2" width="20" height="20" rx="5" ry="5" /> <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /> <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" /> </svg>
-                          </a>
-                        )}
-                        {siteSettings?.linkedin && (
-                          <a href={siteSettings.linkedin} target="_blank" rel="noopener noreferrer" className="text-white hover:text-white/80"> {/* Adicionado target e rel */}
-                            <svg /* Ícone LinkedIn */ xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" > <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" /> <rect x="2" y="9" width="4" height="12" /> <circle cx="4" cy="4" r="2" /> </svg>
-                          </a>
-                        )}
+                        {siteSettings?.facebook && ( <a href={siteSettings.facebook} target="_blank" rel="noopener noreferrer" className="text-white hover:text-white/80"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" > <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" /> </svg> </a> )}
+                        {siteSettings?.instagram && ( <a href={siteSettings.instagram} target="_blank" rel="noopener noreferrer" className="text-white hover:text-white/80"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" > <rect x="2" y="2" width="20" height="20" rx="5" ry="5" /> <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /> <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" /> </svg> </a> )}
+                        {siteSettings?.linkedin && ( <a href={siteSettings.linkedin} target="_blank" rel="noopener noreferrer" className="text-white hover:text-white/80"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" > <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" /> <rect x="2" y="9" width="4" height="12" /> <circle cx="4" cy="4" r="2" /> </svg> </a> )}
                       </div>
                     </div>
                   </div>
                   <div className="p-8">
                     <form className="space-y-4">
                       <div className="grid gap-4 sm:grid-cols-2">
-                        <div className="space-y-2">
-                          <label htmlFor="name" className="text-sm font-medium text-slate-700"> Nome </label>
-                          <input id="name" type="text" className="w-full rounded-md border border-slate-300 p-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500" placeholder="Seu nome completo" />
-                        </div>
-                        <div className="space-y-2">
-                          <label htmlFor="email" className="text-sm font-medium text-slate-700"> Email </label>
-                          <input id="email" type="email" className="w-full rounded-md border border-slate-300 p-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500" placeholder="seu@email.com" />
-                        </div>
+                        <div className="space-y-2"> <label htmlFor="name" className="text-sm font-medium text-slate-700"> Nome </label> <input id="name" type="text" className="w-full rounded-md border border-slate-300 p-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500" placeholder="Seu nome completo" /> </div>
+                        <div className="space-y-2"> <label htmlFor="email" className="text-sm font-medium text-slate-700"> Email </label> <input id="email" type="email" className="w-full rounded-md border border-slate-300 p-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500" placeholder="seu@email.com" /> </div>
                       </div>
-                      <div className="space-y-2">
-                        <label htmlFor="whatsapp" className="text-sm font-medium text-slate-700"> WhatsApp </label>
-                        <input id="whatsapp" type="tel" className="w-full rounded-md border border-slate-300 p-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500" placeholder="(00) 00000-0000" />
-                      </div>
-                      <div className="space-y-2">
-                        <label htmlFor="message" className="text-sm font-medium text-slate-700"> Mensagem </label>
-                        <textarea id="message" rows={4} className="w-full rounded-md border border-slate-300 p-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500" placeholder="Como posso ajudar você?" ></textarea>
-                      </div>
+                      <div className="space-y-2"> <label htmlFor="whatsapp" className="text-sm font-medium text-slate-700"> WhatsApp </label> <input id="whatsapp" type="tel" className="w-full rounded-md border border-slate-300 p-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500" placeholder="(00) 00000-0000" /> </div>
+                      <div className="space-y-2"> <label htmlFor="message" className="text-sm font-medium text-slate-700"> Mensagem </label> <textarea id="message" rows={4} className="w-full rounded-md border border-slate-300 p-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500" placeholder="Como posso ajudar você?" ></textarea> </div>
                       <Button className="w-full bg-orange-500 hover:bg-orange-600">Enviar mensagem</Button>
                     </form>
                   </div>
@@ -473,15 +328,15 @@ export default async function Home() {
               {/* LOGO ADICIONADA AO RODAPÉ ABAIXO */}
               {siteSettings?.logo && (
                 <img
-                  src={getImageUrl(siteSettings.logo, 150, 50) || "/placeholder.svg"}
-                  alt={siteSettings.title || "Logo Rodapé"} // Alt text ajustado
-                  className="h-12 w-auto mb-4" // Tamanho e margem para a logo no rodapé
+                  src={getImageUrl(siteSettings.logo, 150, 50) || "/placeholder.svg"} // Ajuste os tamanhos (150, 50) se necessário para a URL da imagem
+                  alt={siteSettings.title || "Marcelo Victor Imóveis - Logo Rodapé"}
+                  className="h-12 w-auto mb-4" // Tamanho da logo no rodapé e margem inferior
                 />
               )}
               {/* FIM DA LOGO ADICIONADA AO RODAPÉ */}
               <div className="text-xl font-bold text-slate-900">{siteSettings?.title || "Marcelo Victor Imóveis"}</div>
               <p className="mt-4 text-slate-600">
-                {siteSettings?.description ||
+                {siteSettings?.description || // Supondo que 'description' é o campo para a descrição geral no rodapé
                   "Especialista em imóveis de alto padrão, oferecendo um serviço personalizado e exclusivo para cada cliente."}
               </p>
             </div>
@@ -507,19 +362,19 @@ export default async function Home() {
               <div className="mt-4 space-y-2">
                 {siteSettings?.phone && (
                   <p className="flex items-center text-slate-600">
-                    <svg /* Ícone Telefone */ xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 h-5 w-5 text-orange-500" > <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /> </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 h-5 w-5 text-orange-500" > <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /> </svg>
                     {siteSettings.phone}
                   </p>
                 )}
                 {siteSettings?.email && (
                   <p className="flex items-center text-slate-600">
-                    <svg /* Ícone Email */ xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 h-5 w-5 text-orange-500" > <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /> <polyline points="22,6 12,13 2,6" /> </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 h-5 w-5 text-orange-500" > <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /> <polyline points="22,6 12,13 2,6" /> </svg>
                     {siteSettings.email}
                   </p>
                 )}
                 {siteSettings?.address && (
                   <p className="flex items-center text-slate-600">
-                    <svg /* Ícone Endereço */ xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 h-5 w-5 text-orange-500" > <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /> <circle cx="12" cy="10" r="3" /> </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 h-5 w-5 text-orange-500" > <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /> <circle cx="12" cy="10" r="3" /> </svg>
                     {siteSettings.address}
                   </p>
                 )}
@@ -527,12 +382,12 @@ export default async function Home() {
               {siteSettings?.whatsapp && (
                 <div className="mt-6">
                   <Link
-                    href={`https://wa.me/${siteSettings.whatsapp.replace(/\D/g, "")}`}
+                    href={whatsappLink}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center rounded-full bg-green-500 px-4 py-2 text-sm font-medium text-white hover:bg-green-600"
                   >
-                    <svg /* Ícone WhatsApp */ xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 h-4 w-4" > <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" /> </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 h-4 w-4" > <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" /> </svg>
                     Fale pelo WhatsApp
                   </Link>
                 </div>
