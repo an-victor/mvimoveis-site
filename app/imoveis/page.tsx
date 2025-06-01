@@ -41,7 +41,7 @@ export default async function PropertiesPage() {
               <img
                 src={getImageUrl(siteSettings.logo, 150, 50) || "/placeholder.svg"}
                 alt={siteSettings.title}
-                className="h-14 w-auto"
+                className="h-20 w-auto"
               />
             ) : (
               <span className="text-xl font-bold text-slate-900">
