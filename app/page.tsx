@@ -54,13 +54,13 @@ export default async function Home() {
     <div className="flex min-h-screen flex-col">
       {/* Header */}
       <header className="absolute top-0 z-50 w-full">
-        <div className="container flex h-32 items-center justify-between"> {/* Altura do cabeçalho ajustada */}
+        <div className="container flex h-34 items-center justify-between"> {/* Altura do cabeçalho ajustada */}
           <div className="flex items-center gap-2">
             {siteSettings?.logo ? (
               <img
                 src={getImageUrl(siteSettings.logo, 150, 50) || "/placeholder.svg"} // getImageUrl deve retornar a URL diretamente ou o builder + .url()
                 alt={siteSettings.title || "Marcelo Victor Imóveis - Logo Principal"}
-                className="h-20 w-auto" // Altura da logo do cabeçalho
+                className="h-22 w-auto" // Altura da logo do cabeçalho
               />
             ) : (
               <span className="text-2xl font-bold text-orange-500">{siteSettings?.title || "Marcelo Victor"}</span>
