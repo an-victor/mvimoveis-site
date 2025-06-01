@@ -46,7 +46,7 @@ export default async function Home() {
               <img
                 src={getImageUrl(siteSettings.logo, 150, 50) || "/placeholder.svg"}
                 alt={siteSettings.title}
-                className="h-8 w-auto"
+                className="h-14 w-auto"
               />
             ) : (
               <span className="text-2xl font-bold text-orange-500">{siteSettings?.title || "Marcelo Victor"}</span>
