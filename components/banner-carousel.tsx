@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
-import { urlForImage } from "@/sanity/lib/image"
+import { getImageUrl } from "@/sanity/lib/image"
 import type { SanityImage } from "@/types/sanity"
 
 interface BannerCarouselProps {
@@ -32,7 +32,7 @@ export function BannerCarousel({ images, children }: BannerCarouselProps) {
           className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000"
           style={{ backgroundImage: "url('/placeholder.svg?height=1080&width=1920')" }}
         >
-          <div className="absolute inset-0 bg-sky-900/70" />
+          <div className="absolute inset-0 bg-slate-900/70" />
         </div>
         {children}
       </section>
@@ -48,10 +48,10 @@ export function BannerCarousel({ images, children }: BannerCarouselProps) {
             index === currentIndex ? "opacity-100" : "opacity-0"
           }`}
           style={{
-            backgroundImage: `url(${urlForImage(image).width(1920).height(1080).fit("crop").crop("center").url()})`,
+            backgroundImage: `url(${getImageUrl(image, 1920, 1080)})`,
           }}
         >
-          <div className="absolute inset-0 bg-sky-900/70" />
+          <div className="absolute inset-0 bg-slate-900/70" />
         </div>
       ))}
       {children}

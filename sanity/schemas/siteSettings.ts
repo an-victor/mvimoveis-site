@@ -26,16 +26,8 @@ export default defineType({
       },
     }),
     defineField({
-      name: "heroImage",
-      title: "Imagem do Hero",
-      type: "image",
-      options: {
-        hotspot: true,
-      },
-    }),
-    defineField({
       name: "bannerImages",
-      title: "Imagens do Banner (6 imagens)",
+      title: "Imagens do Banner (até 6 imagens)",
       type: "array",
       of: [
         {
@@ -131,6 +123,22 @@ export default defineType({
       name: "linkedin",
       title: "LinkedIn",
       type: "url",
+    }),
+    defineField({
+      name: "primaryColor",
+      title: "Cor Primária",
+      type: "string",
+      description: "Cor principal do site (ex: #f97316 para laranja)",
+      validation: (Rule) => Rule.regex(/^#[0-9A-F]{6}$/i).error("Use formato hexadecimal (#RRGGBB)"),
+      initialValue: "#f97316",
+    }),
+    defineField({
+      name: "secondaryColor",
+      title: "Cor Secundária",
+      type: "string",
+      description: "Cor secundária do site (ex: #1e293b para azul escuro)",
+      validation: (Rule) => Rule.regex(/^#[0-9A-F]{6}$/i).error("Use formato hexadecimal (#RRGGBB)"),
+      initialValue: "#1e293b",
     }),
   ],
   preview: {

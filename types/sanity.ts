@@ -37,7 +37,6 @@ export interface SiteSettings {
   title: string
   description: string
   logo?: SanityImage
-  heroImage?: SanityImage
   bannerImages?: SanityImage[]
   heroTitle: string
   heroSubtitle: string
@@ -52,6 +51,8 @@ export interface SiteSettings {
   facebook?: string
   instagram?: string
   linkedin?: string
+  primaryColor?: string
+  secondaryColor?: string
 }
 
 export interface SanityImage {

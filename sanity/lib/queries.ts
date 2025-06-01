@@ -14,6 +14,8 @@ export const PROPERTIES_QUERY = groq`*[_type == "property" && status == "availab
   tax,
   images,
   youtubeVideo,
+  mapUrl,
+  virtualTour,
   description,
   features,
   featured,
@@ -47,6 +49,8 @@ export const PROPERTY_QUERY = groq`*[_type == "property" && slug.current == $slu
   tax,
   images,
   youtubeVideo,
+  mapUrl,
+  virtualTour,
   description,
   features,
   status
@@ -65,7 +69,7 @@ export const SITE_SETTINGS_QUERY = groq`*[_type == "siteSettings"][0] {
   title,
   description,
   logo,
-  heroImage,
+  bannerImages,
   heroTitle,
   heroSubtitle,
   heroDescription,
@@ -78,5 +82,7 @@ export const SITE_SETTINGS_QUERY = groq`*[_type == "siteSettings"][0] {
   whatsapp,
   facebook,
   instagram,
-  linkedin
+  linkedin,
+  primaryColor,
+  secondaryColor
 }`

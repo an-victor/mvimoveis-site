@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { ChevronRight, MapPin, Star } from "lucide-react"
 import { client } from "@/sanity/lib/client"
-import { urlForImage } from "@/sanity/lib/image"
+import { getImageUrl } from "@/sanity/lib/image"
 import { FEATURED_PROPERTIES_QUERY, TESTIMONIALS_QUERY, SITE_SETTINGS_QUERY } from "@/sanity/lib/queries"
 import type { Property, Testimonial, SiteSettings } from "@/types/sanity"
 
@@ -11,16 +11,25 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { BannerCarousel } from "@/components/banner-carousel"
 
 async function getHomeData() {
-  const [featuredProperties, testimonials, siteSettings] = await Promise.all([
-    client.fetch<Property[]>(FEATURED_PROPERTIES_QUERY),
-    client.fetch<Testimonial[]>(TESTIMONIALS_QUERY),
-    client.fetch<SiteSettings>(SITE_SETTINGS_QUERY),
-  ])
+  try {
+    const [featuredProperties, testimonials, siteSettings] = await Promise.all([
+      client.fetch<Property[]>(FEATURED_PROPERTIES_QUERY),
+      client.fetch<Testimonial[]>(TESTIMONIALS_QUERY),
+      client.fetch<SiteSettings>(SITE_SETTINGS_QUERY),
+    ])
 
-  return {
-    featuredProperties,
-    testimonials,
-    siteSettings,
+    return {
+      featuredProperties: featuredProperties || [],
+      testimonials: testimonials || [],
+      siteSettings: siteSettings || null,
+    }
+  } catch (error) {
+    console.error("Error fetching home data:", error)
+    return {
+      featuredProperties: [],
+      testimonials: [],
+      siteSettings: null,
+    }
   }
 }
 
@@ -35,12 +44,12 @@ export default async function Home() {
           <div className="flex items-center gap-2">
             {siteSettings?.logo ? (
               <img
-                src={urlForImage(siteSettings.logo).width(150).height(50).url() || "/placeholder.svg"}
+                src={getImageUrl(siteSettings.logo, 150, 50) || "/placeholder.svg"}
                 alt={siteSettings.title}
                 className="h-8 w-auto"
               />
             ) : (
-              <span className="text-2xl font-bold text-orange-500">Marcelo Victor</span>
+              <span className="text-2xl font-bold text-orange-500">{siteSettings?.title || "Marcelo Victor"}</span>
             )}
           </div>
           <nav className="hidden md:flex gap-8">
@@ -57,26 +66,28 @@ export default async function Home() {
               Contato
             </Link>
           </nav>
-          <Link
-            href={`https://wa.me/${siteSettings?.whatsapp?.replace(/\D/g, "")}`}
-            className="hidden md:inline-flex items-center rounded-md bg-orange-500 px-4 py-2 text-sm font-medium text-white hover:bg-orange-600"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="mr-2 h-4 w-4"
+          {siteSettings?.whatsapp && (
+            <Link
+              href={`https://wa.me/${siteSettings.whatsapp.replace(/\D/g, "")}`}
+              className="hidden md:inline-flex items-center rounded-md bg-orange-500 px-4 py-2 text-sm font-medium text-white hover:bg-orange-600"
             >
-              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-            </svg>
-            WhatsApp
-          </Link>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="mr-2 h-4 w-4"
+              >
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+              </svg>
+              WhatsApp
+            </Link>
+          )}
           <div className="md:hidden">
             <Button variant="ghost" size="icon" className="text-white">
               <span className="sr-only">Abrir menu</span>
@@ -129,25 +140,27 @@ export default async function Home() {
                 "Mais de 15 anos de experiência ajudando famílias a encontrar o lar perfeito. Venda, compra e locação com total segurança e transparência."}
             </p>
             <div className="mt-10 flex gap-4">
-              <Link href={`https://wa.me/${siteSettings?.whatsapp?.replace(/\D/g, "")}`}>
-                <Button className="mt-4 bg-orange-500 hover:bg-orange-600" size="lg">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="mr-2 h-5 w-5"
-                  >
-                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-                  </svg>
-                  Falar no WhatsApp
-                </Button>
-              </Link>
+              {siteSettings?.whatsapp && (
+                <Link href={`https://wa.me/${siteSettings.whatsapp.replace(/\D/g, "")}`}>
+                  <Button className="mt-4 bg-orange-500 hover:bg-orange-600" size="lg">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="mr-2 h-5 w-5"
+                    >
+                      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+                    </svg>
+                    Falar no WhatsApp
+                  </Button>
+                </Link>
+              )}
               <Link href="/imoveis">
                 <Button className="mt-4 bg-white text-slate-900 hover:bg-slate-100" size="lg">
                   Ver Imóveis
@@ -187,11 +200,7 @@ export default async function Home() {
                 <Card key={property._id} className="overflow-hidden transition-all hover:shadow-lg">
                   <div className="aspect-video w-full overflow-hidden">
                     <img
-                      src={
-                        property.images?.[0]
-                          ? urlForImage(property.images[0]).width(800).height(600).url()
-                          : "/placeholder.svg"
-                      }
+                      src={getImageUrl(property.images?.[0], 800, 600) || "/placeholder.svg"}
                       alt={property.title}
                       className="h-full w-full object-cover transition-transform hover:scale-105"
                     />
@@ -236,18 +245,14 @@ export default async function Home() {
             <div className="grid gap-12 md:grid-cols-2 md:items-center">
               <div className="relative aspect-square overflow-hidden rounded-lg md:aspect-auto md:h-[600px]">
                 <img
-                  src={
-                    siteSettings?.aboutImage
-                      ? urlForImage(siteSettings.aboutImage).width(600).height(600).url()
-                      : "/placeholder.svg?height=600&width=600"
-                  }
+                  src={getImageUrl(siteSettings?.aboutImage, 600, 600) || "/placeholder.svg"}
                   alt={siteSettings?.aboutTitle || "Sobre o corretor"}
                   className="h-full w-full object-cover"
                 />
               </div>
               <div className="space-y-6">
                 <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-                  {siteSettings?.aboutTitle || "Sobre Carlos Rodrigues"}
+                  {siteSettings?.aboutTitle || "Sobre Marcelo Victor"}
                 </h2>
                 <p className="text-lg text-slate-600">
                   {siteSettings?.aboutDescription ||
@@ -285,55 +290,53 @@ export default async function Home() {
         </section>
 
         {/* Depoimentos */}
-        <section id="depoimentos" className="py-16 bg-slate-50">
-          <div className="container">
-            <div className="mb-12 text-center">
-              <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-                O que dizem nossos clientes
-              </h2>
-              <p className="mt-4 text-lg text-slate-600">
-                A satisfação de quem já realizou o sonho da casa própria com nossa ajuda
-              </p>
-            </div>
-            <Carousel className="mx-auto max-w-4xl">
-              <CarouselContent>
-                {testimonials.map((testimonial) => (
-                  <CarouselItem key={testimonial._id}>
-                    <div className="rounded-lg border bg-white p-8 shadow-sm">
-                      <div className="mb-4 flex">
-                        {[...Array(testimonial.rating)].map((_, i) => (
-                          <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                        ))}
-                      </div>
-                      <blockquote className="mb-6 text-lg italic text-slate-600">"{testimonial.text}"</blockquote>
-                      <div className="flex items-center gap-4">
-                        <div className="h-12 w-12 overflow-hidden rounded-full">
-                          <img
-                            src={
-                              testimonial.avatar
-                                ? urlForImage(testimonial.avatar).width(100).height(100).url()
-                                : "/placeholder.svg"
-                            }
-                            alt={testimonial.name}
-                            className="h-full w-full object-cover"
-                          />
-                        </div>
-                        <div>
-                          <div className="font-medium text-slate-900">{testimonial.name}</div>
-                          <div className="text-sm text-slate-500">{testimonial.location}</div>
-                        </div>
-                      </div>
-                    </div>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              <div className="flex justify-center gap-2 mt-6">
-                <CarouselPrevious className="relative inset-0 translate-y-0" />
-                <CarouselNext className="relative inset-0 translate-y-0" />
+        {testimonials.length > 0 && (
+          <section id="depoimentos" className="py-16 bg-slate-50">
+            <div className="container">
+              <div className="mb-12 text-center">
+                <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+                  O que dizem nossos clientes
+                </h2>
+                <p className="mt-4 text-lg text-slate-600">
+                  A satisfação de quem já realizou o sonho da casa própria com nossa ajuda
+                </p>
               </div>
-            </Carousel>
-          </div>
-        </section>
+              <Carousel className="mx-auto max-w-4xl">
+                <CarouselContent>
+                  {testimonials.map((testimonial) => (
+                    <CarouselItem key={testimonial._id}>
+                      <div className="rounded-lg border bg-white p-8 shadow-sm">
+                        <div className="mb-4 flex">
+                          {[...Array(testimonial.rating)].map((_, i) => (
+                            <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                          ))}
+                        </div>
+                        <blockquote className="mb-6 text-lg italic text-slate-600">"{testimonial.text}"</blockquote>
+                        <div className="flex items-center gap-4">
+                          <div className="h-12 w-12 overflow-hidden rounded-full">
+                            <img
+                              src={getImageUrl(testimonial.avatar, 100, 100) || "/placeholder.svg"}
+                              alt={testimonial.name}
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                          <div>
+                            <div className="font-medium text-slate-900">{testimonial.name}</div>
+                            <div className="text-sm text-slate-500">{testimonial.location}</div>
+                          </div>
+                        </div>
+                      </div>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <div className="flex justify-center gap-2 mt-6">
+                  <CarouselPrevious className="relative inset-0 translate-y-0" />
+                  <CarouselNext className="relative inset-0 translate-y-0" />
+                </div>
+              </Carousel>
+            </div>
+          </section>
+        )}
 
         {/* Formulário de Contato */}
         <section id="contato" className="py-16">
@@ -350,68 +353,74 @@ export default async function Home() {
                   <div className="bg-orange-500 p-8 text-white">
                     <h3 className="mb-6 text-xl font-bold">Informações de Contato</h3>
                     <div className="space-y-4">
-                      <div className="flex items-start gap-3">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="24"
-                          height="24"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="h-5 w-5 shrink-0"
-                        >
-                          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                        </svg>
-                        <div>
-                          <div className="text-sm font-medium text-white/70">Telefone</div>
-                          <div>{siteSettings?.phone || "(11) 99999-9999"}</div>
+                      {siteSettings?.phone && (
+                        <div className="flex items-start gap-3">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="h-5 w-5 shrink-0"
+                          >
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                          </svg>
+                          <div>
+                            <div className="text-sm font-medium text-white/70">Telefone</div>
+                            <div>{siteSettings.phone}</div>
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="24"
-                          height="24"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="h-5 w-5 shrink-0"
-                        >
-                          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                          <polyline points="22,6 12,13 2,6" />
-                        </svg>
-                        <div>
-                          <div className="text-sm font-medium text-white/70">Email</div>
-                          <div>{siteSettings?.email || "contato@carlosimoveis.com"}</div>
+                      )}
+                      {siteSettings?.email && (
+                        <div className="flex items-start gap-3">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="h-5 w-5 shrink-0"
+                          >
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                            <polyline points="22,6 12,13 2,6" />
+                          </svg>
+                          <div>
+                            <div className="text-sm font-medium text-white/70">Email</div>
+                            <div>{siteSettings.email}</div>
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="24"
-                          height="24"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="h-5 w-5 shrink-0"
-                        >
-                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                          <circle cx="12" cy="10" r="3" />
-                        </svg>
-                        <div>
-                          <div className="text-sm font-medium text-white/70">Endereço</div>
-                          <div>{siteSettings?.address || "Av. Paulista, 1000 - Bela Vista, São Paulo - SP"}</div>
+                      )}
+                      {siteSettings?.address && (
+                        <div className="flex items-start gap-3">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="h-5 w-5 shrink-0"
+                          >
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                            <circle cx="12" cy="10" r="3" />
+                          </svg>
+                          <div>
+                            <div className="text-sm font-medium text-white/70">Endereço</div>
+                            <div>{siteSettings.address}</div>
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
                     <div className="mt-8">
                       <h4 className="mb-3 text-sm font-medium text-white/70">Redes Sociais</h4>
@@ -540,7 +549,7 @@ export default async function Home() {
         <div className="container">
           <div className="grid gap-8 md:grid-cols-3">
             <div>
-              <div className="text-xl font-bold text-slate-900">{siteSettings?.title || "Carlos Imóveis"}</div>
+              <div className="text-xl font-bold text-slate-900">{siteSettings?.title || "Marcelo Victor Imóveis"}</div>
               <p className="mt-4 text-slate-600">
                 {siteSettings?.description ||
                   "Especialista em imóveis de alto padrão, oferecendo um serviço personalizado e exclusivo para cada cliente."}
@@ -558,9 +567,6 @@ export default async function Home() {
                 <Link href="#sobre" className="text-slate-600 hover:text-orange-500">
                   Sobre
                 </Link>
-                <Link href="#depoimentos" className="text-slate-600 hover:text-orange-500">
-                  Depoimentos
-                </Link>
                 <Link href="#contato" className="text-slate-600 hover:text-orange-500">
                   Contato
                 </Link>
@@ -569,87 +575,96 @@ export default async function Home() {
             <div>
               <h3 className="text-lg font-bold text-slate-900">Fale Conosco</h3>
               <div className="mt-4 space-y-2">
-                <p className="flex items-center text-slate-600">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="mr-2 h-5 w-5 text-orange-500"
-                  >
-                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                  </svg>
-                  {siteSettings?.phone || "(11) 99999-9999"}
-                </p>
-                <p className="flex items-center text-slate-600">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="mr-2 h-5 w-5 text-orange-500"
-                  >
-                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                    <polyline points="22,6 12,13 2,6" />
-                  </svg>
-                  {siteSettings?.email || "contato@carlosimoveis.com"}
-                </p>
-                <p className="flex items-center text-slate-600">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="mr-2 h-5 w-5 text-orange-500"
-                  >
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                    <circle cx="12" cy="10" r="3" />
-                  </svg>
-                  {siteSettings?.address || "Av. Paulista, 1000 - Bela Vista, São Paulo - SP"}
-                </p>
+                {siteSettings?.phone && (
+                  <p className="flex items-center text-slate-600">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="mr-2 h-5 w-5 text-orange-500"
+                    >
+                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                    </svg>
+                    {siteSettings.phone}
+                  </p>
+                )}
+                {siteSettings?.email && (
+                  <p className="flex items-center text-slate-600">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="mr-2 h-5 w-5 text-orange-500"
+                    >
+                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                      <polyline points="22,6 12,13 2,6" />
+                    </svg>
+                    {siteSettings.email}
+                  </p>
+                )}
+                {siteSettings?.address && (
+                  <p className="flex items-center text-slate-600">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="mr-2 h-5 w-5 text-orange-500"
+                    >
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                      <circle cx="12" cy="10" r="3" />
+                    </svg>
+                    {siteSettings.address}
+                  </p>
+                )}
               </div>
-              <div className="mt-6">
-                <Link
-                  href={`https://wa.me/${siteSettings?.whatsapp?.replace(/\D/g, "")}`}
-                  className="inline-flex items-center rounded-full bg-green-500 px-4 py-2 text-sm font-medium text-white hover:bg-green-600"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="mr-2 h-4 w-4"
+              {siteSettings?.whatsapp && (
+                <div className="mt-6">
+                  <Link
+                    href={`https://wa.me/${siteSettings.whatsapp.replace(/\D/g, "")}`}
+                    className="inline-flex items-center rounded-full bg-green-500 px-4 py-2 text-sm font-medium text-white hover:bg-green-600"
                   >
-                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-                  </svg>
-                  Fale pelo WhatsApp
-                </Link>
-              </div>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="mr-2 h-4 w-4"
+                    >
+                      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+                    </svg>
+                    Fale pelo WhatsApp
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
           <div className="mt-12 border-t pt-6 text-center text-sm text-slate-500">
             <p>
-              © {new Date().getFullYear()} {siteSettings?.title || "Carlos Imóveis"}. Todos os direitos reservados.
+              © {new Date().getFullYear()} {siteSettings?.title || "Marcelo Victor Imóveis"}. Todos os direitos
+              reservados.
             </p>
           </div>
         </div>
