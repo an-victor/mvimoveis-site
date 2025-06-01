@@ -211,7 +211,7 @@ export default async function PropertiesPage() {
                 <img
                   src={getImageUrl(siteSettings.logo, 150, 50) || "/placeholder.svg"}
                   alt={siteSettings.title || "Logo Rodapé"} // Alt text ajustado
-                  className="h-13 w-auto mb-4" // Tamanho e margem para a logo no rodapé
+                  className="h-14 w-auto mb-4" // Tamanho e margem para a logo no rodapé
                 />
               )}
               {/* FIM DA LOGO ADICIONADA AO RODAPÉ */}
@@ -331,7 +331,7 @@ export default async function PropertiesPage() {
           </div>
           <div className="mt-12 border-t pt-6 text-center text-sm text-slate-500">
             <p>
-              © {new Date().getFullYear()} {siteSettings?.title || "Marcelo Victor Imóveis"}. Todos os direitos {/* Corrigido para siteSettings.title, se existir, senão o padrão */}
+              © {new Date().getFullYear()} {siteSettings?..heroSubtitle || "Marcelo Victor Imóveis"}. Todos os direitos {/* Corrigido para siteSettings.title, se existir, senão o padrão */}
               reservados. Feito pela ALX Mídias.
             </p>
           </div>

@@ -330,7 +330,7 @@ export default async function Home() {
                 <img
                   src={getImageUrl(siteSettings.logo, 150, 50) || "/placeholder.svg"} // Ajuste os tamanhos (150, 50) se necessário para a URL da imagem
                   alt={siteSettings.title || "Marcelo Victor Imóveis - Logo Rodapé"}
-                  className="h-13 w-auto mb-4" // Tamanho da logo no rodapé e margem inferior
+                  className="h-14 w-auto mb-4" // Tamanho da logo no rodapé e margem inferior
                 />
               )}
               {/* FIM DA LOGO ADICIONADA AO RODAPÉ */}
