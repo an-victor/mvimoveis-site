@@ -1,9 +1,9 @@
 import Link from "next/link"
 import { MapPin } from "lucide-react"
-import { client } from "@/sanity/lib/client"
-import { getImageUrl } from "@/sanity/lib/image"
-import { PROPERTIES_QUERY, SITE_SETTINGS_QUERY } from "@/sanity/lib/queries"
-import type { Property, SiteSettings } from "@/types/sanity"
+import { client } from "@/sanity/lib/client" // Verifique se o caminho está correto para seu projeto
+import { getImageUrl } from "@/sanity/lib/image" // Verifique se o caminho está correto para seu projeto
+import { PROPERTIES_QUERY, SITE_SETTINGS_QUERY } from "@/sanity/lib/queries" // Verifique se o caminho está correto
+import type { Property, SiteSettings } from "@/types/sanity" // Verifique se o caminho está correto
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
@@ -35,13 +35,13 @@ export default async function PropertiesPage() {
     <div className="flex min-h-screen flex-col">
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-white">
-        <div className="container flex h-32 items-center justify-between">
+        <div className="container flex h-32 items-center justify-between"> {/* Altura do cabeçalho ajustada */}
           <div className="flex items-center gap-2">
             {siteSettings?.logo ? (
               <img
                 src={getImageUrl(siteSettings.logo, 150, 50) || "/placeholder.svg"}
-                alt={siteSettings.title}
-                className="h-20 w-auto"
+                alt={siteSettings.title || "Logo Principal"} // Alt text ajustado para clareza
+                className="h-20 w-auto" // Altura da logo do cabeçalho ajustada
               />
             ) : (
               <span className="text-xl font-bold text-slate-900">
@@ -164,7 +164,7 @@ export default async function PropertiesPage() {
                   <div className="aspect-video w-full overflow-hidden">
                     <img
                       src={getImageUrl(property.images?.[0], 800, 600) || "/placeholder.svg"}
-                      alt={property.title}
+                      alt={property.title || "Imagem do Imóvel"} // Alt text ajustado
                       className="h-full w-full object-cover transition-transform hover:scale-105"
                     />
                   </div>
@@ -175,16 +175,16 @@ export default async function PropertiesPage() {
                       <span className="text-sm">{property.location}</span>
                     </div>
                     <div className="mt-4 flex items-center justify-between">
-                      <span className="text-lg font-bold text-orange-500">{property.price}</span>
+                      <span className="text-lg font-bold text-orange-500">{property.price}</span> {/* Considere formatar o preço como moeda */}
                       <div className="flex items-center gap-1 text-sm">
-                        <span>{property.area}</span>
+                        <span>{property.area} m²</span> {/* Adicionado m² para clareza */}
                         <span className="text-slate-300">|</span>
                         <span>{property.bedrooms} quartos</span>
                       </div>
                     </div>
                   </CardContent>
                   <CardFooter className="border-t bg-slate-50 p-4">
-                    <Link href={`/imoveis/${property.slug.current}`} className="w-full">
+                    <Link href={`/imoveis/${property.slug?.current}`} className="w-full"> {/* Corrigido para usar property.slug?.current */}
                       <Button className="w-full bg-orange-500 hover:bg-orange-600">Ver detalhes</Button>
                     </Link>
                   </CardFooter>
@@ -206,6 +206,15 @@ export default async function PropertiesPage() {
         <div className="container">
           <div className="grid gap-8 md:grid-cols-3">
             <div>
+              {/* LOGO ADICIONADA AO RODAPÉ ABAIXO */}
+              {siteSettings?.logo && (
+                <img
+                  src={getImageUrl(siteSettings.logo, 150, 50) || "/placeholder.svg"}
+                  alt={siteSettings.title || "Logo Rodapé"} // Alt text ajustado
+                  className="h-12 w-auto mb-4" // Tamanho e margem para a logo no rodapé
+                />
+              )}
+              {/* FIM DA LOGO ADICIONADA AO RODAPÉ */}
               <div className="text-xl font-bold text-slate-900">{siteSettings?.title || "Marcelo Victor Imóveis"}</div>
               <p className="mt-4 text-slate-600">
                 {siteSettings?.description ||
@@ -221,10 +230,10 @@ export default async function PropertiesPage() {
                 <Link href="/imoveis" className="text-slate-600 hover:text-orange-500">
                   Imóveis
                 </Link>
-                <Link href="#sobre" className="text-slate-600 hover:text-orange-500">
+                <Link href="#sobre" className="text-slate-600 hover:text-orange-500"> {/* Ajustar se #sobre não for na home */}
                   Sobre
                 </Link>
-                <Link href="#contato" className="text-slate-600 hover:text-orange-500">
+                <Link href="#contato" className="text-slate-600 hover:text-orange-500"> {/* Ajustar se #contato não for na home */}
                   Contato
                 </Link>
               </nav>
@@ -295,7 +304,9 @@ export default async function PropertiesPage() {
               {siteSettings?.whatsapp && (
                 <div className="mt-6">
                   <Link
-                    href={`https://wa.me/${siteSettings.whatsapp.replace(/\D/g, "")}`}
+                    href={`https://wa.me/${siteSettings.whatsapp.replace(/\D/g, "")}`} // Remove caracteres não numéricos do whatsapp
+                    target="_blank" // Adicionado para abrir em nova aba
+                    rel="noopener noreferrer" // Adicionado por segurança e boas práticas
                     className="inline-flex items-center rounded-full bg-green-500 px-4 py-2 text-sm font-medium text-white hover:bg-green-600"
                   >
                     <svg
@@ -320,8 +331,8 @@ export default async function PropertiesPage() {
           </div>
           <div className="mt-12 border-t pt-6 text-center text-sm text-slate-500">
             <p>
-              © {new Date().getFullYear()} {siteSettings?.title || "Marcelo Victor Imóveis"}. Todos os direitos
-              reservados.
+              © {new Date().getFullYear()} {siteSettings?.title || "Marcelo Victor Imóveis"}. Todos os direitos {/* Corrigido para siteSettings.title, se existir, senão o padrão */}
+              reservados. Feito pela ALX Mídias.
             </p>
           </div>
         </div>
