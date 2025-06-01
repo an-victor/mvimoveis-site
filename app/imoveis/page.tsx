@@ -35,7 +35,7 @@ export default async function PropertiesPage() {
     <div className="flex min-h-screen flex-col">
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-white">
-        <div className="container flex h-16 items-center justify-between">
+        <div className="container flex h-32 items-center justify-between">
           <div className="flex items-center gap-2">
             {siteSettings?.logo ? (
               <img
