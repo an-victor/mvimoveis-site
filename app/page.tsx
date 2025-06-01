@@ -64,11 +64,6 @@ const formatCurrency = (value: number | undefined) => {
 export default async function Home() {
   const { settings, featuredProperties } = await getHomepageData();
 
-  // Log the received settings data during build
-  console.log("--- Sanity Settings Data Received ---");
-  console.log(JSON.stringify(settings, null, 2));
-  console.log("-------------------------------------");
-
   // Corrected logic to safely generate banner image URLs
   const bannerImageUrls = (settings?.bannerImages || [])
     .map((img) => {
