@@ -1,34 +1,15 @@
 import Link from "next/link"
 import { ArrowLeft, Bath, Bed, Car, ChevronRight, Heart, MapPin, Maximize, Share2 } from "lucide-react"
-import { client } from "@/sanity/lib/client"
-import { urlForImage } from "@/sanity/lib/image"
-import { PROPERTY_QUERY, PROPERTIES_QUERY } from "@/sanity/lib/queries"
-import { portableTextToPlainText } from "@/sanity/lib/utils"
-import type { Property } from "@/types/sanity"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 
-async function getProperty(slug: string) {
-  const property = await client.fetch<Property>(PROPERTY_QUERY, { slug })
-  return property
-}
-
-async function getSimilarProperties() {
-  const properties = await client.fetch<Property[]>(PROPERTIES_QUERY)
-  return properties.slice(0, 6)
-}
-
-export default async function PropertyDetails({ params }: { params: { slug: string } }) {
-  const [property, similarProperties] = await Promise.all([getProperty(params.slug), getSimilarProperties()])
-
-  if (!property) {
-    return <div>Imóvel não encontrado</div>
-  }
-
-  const descriptionText = portableTextToPlainText(property.description)
+// Simulando busca de dados do imóvel pelo ID
+export default function PropertyDetails({ params }: { params: { id: string } }) {
+  // Em um cenário real, você buscaria os dados do imóvel pelo ID
+  const property = properties.find((p) => p.id === params.id) || properties[0]
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -88,7 +69,7 @@ export default async function PropertyDetails({ params }: { params: { slug: stri
                 Início
               </Link>
               <ChevronRight className="mx-2 h-4 w-4" />
-              <Link href="/imoveis" className="hover:text-orange-500">
+              <Link href="/#imoveis" className="hover:text-orange-500">
                 Imóveis
               </Link>
               <ChevronRight className="mx-2 h-4 w-4" />
@@ -97,11 +78,11 @@ export default async function PropertyDetails({ params }: { params: { slug: stri
           </div>
         </div>
 
-        {/* Galeria de Imagens e Vídeo */}
+        {/* Galeria de Imagens */}
         <section className="py-8">
           <div className="container">
             <div className="mb-6 flex items-center justify-between">
-              <Link href="/imoveis" className="flex items-center text-sm font-medium text-orange-500 hover:underline">
+              <Link href="/#imoveis" className="flex items-center text-sm font-medium text-orange-500 hover:underline">
                 <ArrowLeft className="mr-1 h-4 w-4" />
                 Voltar para imóveis
               </Link>
@@ -118,54 +99,32 @@ export default async function PropertyDetails({ params }: { params: { slug: stri
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              {/* Imagem principal */}
               <div className="relative aspect-video overflow-hidden rounded-lg">
                 <img
-                  src={
-                    property.images?.[0]
-                      ? urlForImage(property.images[0]).width(800).height(600).url()
-                      : "/placeholder.svg"
-                  }
+                  src={property.images[0] || "/placeholder.svg"}
                   alt={property.title}
                   className="h-full w-full object-cover"
                 />
               </div>
-
-              {/* Grid de imagens menores e vídeo */}
               <div className="grid grid-cols-2 gap-4">
-                {/* Vídeo do YouTube (se disponível) */}
-                {property.youtubeVideo && (
-                  <div className="relative aspect-[9/16] overflow-hidden rounded-lg col-span-1">
-                    <iframe
-                      src={`https://www.youtube.com/embed/${property.youtubeVideo}?rel=0&modestbranding=1`}
-                      title={`Vídeo do ${property.title}`}
-                      className="h-full w-full"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    />
-                  </div>
-                )}
-
-                {/* Imagens adicionais */}
-                {property.images?.slice(1, property.youtubeVideo ? 4 : 5).map((image, index) => (
+                {property.images.slice(1, 5).map((image, index) => (
                   <div key={index} className="relative aspect-square overflow-hidden rounded-lg">
                     <img
-                      src={urlForImage(image).width(400).height(400).url() || "/placeholder.svg"}
+                      src={image || "/placeholder.svg"}
                       alt={`${property.title} - Imagem ${index + 2}`}
                       className="h-full w-full object-cover"
                     />
-                    {index === (property.youtubeVideo ? 2 : 3) &&
-                      property.images.length > (property.youtubeVideo ? 4 : 5) && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                          <Button
-                            variant="outline"
-                            className="text-white border-white hover:text-white hover:bg-black/70"
-                          >
-                            <Maximize className="mr-2 h-4 w-4" />
-                            Ver todas as fotos
-                          </Button>
-                        </div>
-                      )}
+                    {index === 3 && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                        <Button
+                          variant="outline"
+                          className="text-white border-white hover:text-white hover:bg-black/70"
+                        >
+                          <Maximize className="mr-2 h-4 w-4" />
+                          Ver todas as fotos
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -190,22 +149,22 @@ export default async function PropertyDetails({ params }: { params: { slug: stri
                   <div className="rounded-lg border bg-white p-4 text-center">
                     <Maximize className="mx-auto mb-2 h-5 w-5 text-orange-500" />
                     <div className="text-sm text-slate-600">Área</div>
-                    <div className="font-bold text-slate-900">{property.area}</div>
+                    <div className="font-bold text-slate-900">{property.details.area}</div>
                   </div>
                   <div className="rounded-lg border bg-white p-4 text-center">
                     <Bed className="mx-auto mb-2 h-5 w-5 text-orange-500" />
                     <div className="text-sm text-slate-600">Quartos</div>
-                    <div className="font-bold text-slate-900">{property.bedrooms}</div>
+                    <div className="font-bold text-slate-900">{property.details.bedrooms}</div>
                   </div>
                   <div className="rounded-lg border bg-white p-4 text-center">
                     <Bath className="mx-auto mb-2 h-5 w-5 text-orange-500" />
                     <div className="text-sm text-slate-600">Banheiros</div>
-                    <div className="font-bold text-slate-900">{property.bathrooms}</div>
+                    <div className="font-bold text-slate-900">{property.details.bathrooms}</div>
                   </div>
                   <div className="rounded-lg border bg-white p-4 text-center">
                     <Car className="mx-auto mb-2 h-5 w-5 text-orange-500" />
                     <div className="text-sm text-slate-600">Vagas</div>
-                    <div className="font-bold text-slate-900">{property.parkingSpots}</div>
+                    <div className="font-bold text-slate-900">{property.details.parkingSpots}</div>
                   </div>
                 </div>
 
@@ -218,7 +177,9 @@ export default async function PropertyDetails({ params }: { params: { slug: stri
                   <TabsContent value="description" className="mt-4 rounded-lg border p-6">
                     <h3 className="mb-4 text-lg font-bold text-slate-900">Sobre este imóvel</h3>
                     <div className="space-y-4 text-slate-600">
-                      <p>{descriptionText}</p>
+                      {property.description.map((paragraph, index) => (
+                        <p key={index}>{paragraph}</p>
+                      ))}
                     </div>
                   </TabsContent>
                   <TabsContent value="features" className="mt-4 rounded-lg border p-6">
@@ -254,48 +215,12 @@ export default async function PropertyDetails({ params }: { params: { slug: stri
                         lazer.
                       </p>
                     </div>
-
-                    {property.mapUrl ? (
-                      <div className="space-y-4">
-                        <div className="aspect-video overflow-hidden rounded-lg">
-                          <iframe
-                            src={property.mapUrl.replace("/maps/", "/maps/embed?")}
-                            className="h-full w-full border-0"
-                            allowFullScreen
-                            loading="lazy"
-                            referrerPolicy="no-referrer-when-downgrade"
-                          />
-                        </div>
-                        <div className="flex gap-2">
-                          <a
-                            href={property.mapUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center rounded-md bg-orange-500 px-4 py-2 text-sm font-medium text-white hover:bg-orange-600"
-                          >
-                            <MapPin className="mr-2 h-4 w-4" />
-                            Ver no Google Maps
-                          </a>
-                          {property.virtualTour && (
-                            <a
-                              href={property.virtualTour}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center rounded-md border border-orange-500 px-4 py-2 text-sm font-medium text-orange-500 hover:bg-orange-50"
-                            >
-                              <Maximize className="mr-2 h-4 w-4" />
-                              Tour Virtual 360°
-                            </a>
-                          )}
-                        </div>
+                    <div className="aspect-video overflow-hidden rounded-lg bg-slate-200">
+                      {/* Aqui você poderia integrar um mapa real como Google Maps */}
+                      <div className="flex h-full items-center justify-center">
+                        <p className="text-slate-500">Mapa da localização</p>
                       </div>
-                    ) : (
-                      <div className="aspect-video overflow-hidden rounded-lg bg-slate-200">
-                        <div className="flex h-full items-center justify-center">
-                          <p className="text-slate-500">Mapa da localização</p>
-                        </div>
-                      </div>
-                    )}
+                    </div>
                   </TabsContent>
                 </Tabs>
 
@@ -304,18 +229,14 @@ export default async function PropertyDetails({ params }: { params: { slug: stri
                   <h3 className="mb-6 text-xl font-bold text-slate-900">Imóveis similares</h3>
                   <Carousel className="w-full">
                     <CarouselContent>
-                      {similarProperties
-                        .filter((p) => p._id !== property._id)
-                        .map((similarProperty) => (
-                          <CarouselItem key={similarProperty._id} className="md:basis-1/2 lg:basis-1/3">
+                      {properties
+                        .filter((p) => p.id !== property.id)
+                        .map((similarProperty, index) => (
+                          <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
                             <Card className="overflow-hidden">
                               <div className="aspect-video w-full overflow-hidden">
                                 <img
-                                  src={
-                                    similarProperty.images?.[0]
-                                      ? urlForImage(similarProperty.images[0]).width(400).height(300).url()
-                                      : "/placeholder.svg"
-                                  }
+                                  src={similarProperty.images[0] || "/placeholder.svg"}
                                   alt={similarProperty.title}
                                   className="h-full w-full object-cover transition-transform hover:scale-105"
                                 />
@@ -329,7 +250,7 @@ export default async function PropertyDetails({ params }: { params: { slug: stri
                                 <div className="mt-2 flex items-center justify-between">
                                   <span className="font-bold text-orange-500">{similarProperty.price}</span>
                                   <Link
-                                    href={`/imoveis/${similarProperty.slug.current}`}
+                                    href={`/imoveis/${similarProperty.id}`}
                                     className="text-xs text-orange-500 hover:underline"
                                   >
                                     Ver detalhes
@@ -356,24 +277,18 @@ export default async function PropertyDetails({ params }: { params: { slug: stri
                       <div className="text-sm text-slate-600">Valor</div>
                       <div className="text-3xl font-bold text-orange-500">{property.price}</div>
                     </div>
-                    {(property.condoFee || property.tax) && (
-                      <div className="mb-6 border-t border-b py-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          {property.condoFee && (
-                            <div className="text-center">
-                              <div className="text-sm text-slate-600">Condomínio</div>
-                              <div className="font-medium text-slate-900">{property.condoFee}</div>
-                            </div>
-                          )}
-                          {property.tax && (
-                            <div className="text-center">
-                              <div className="text-sm text-slate-600">IPTU</div>
-                              <div className="font-medium text-slate-900">{property.tax}</div>
-                            </div>
-                          )}
+                    <div className="mb-6 border-t border-b py-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="text-center">
+                          <div className="text-sm text-slate-600">Condomínio</div>
+                          <div className="font-medium text-slate-900">{property.details.condoFee}</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-sm text-slate-600">IPTU</div>
+                          <div className="font-medium text-slate-900">{property.details.tax}</div>
                         </div>
                       </div>
-                    )}
+                    </div>
                     <div className="space-y-4">
                       <Button className="w-full bg-orange-500 hover:bg-orange-600">Agendar visita</Button>
                       <Button variant="outline" className="w-full border-orange-500 text-orange-500 hover:bg-orange-50">
@@ -469,7 +384,7 @@ export default async function PropertyDetails({ params }: { params: { slug: stri
                 <Link href="/" className="text-slate-600 hover:text-orange-500">
                   Início
                 </Link>
-                <Link href="/imoveis" className="text-slate-600 hover:text-orange-500">
+                <Link href="/#imoveis" className="text-slate-600 hover:text-orange-500">
                   Imóveis
                 </Link>
                 <Link href="/#sobre" className="text-slate-600 hover:text-orange-500">
@@ -572,3 +487,130 @@ export default async function PropertyDetails({ params }: { params: { slug: stri
     </div>
   )
 }
+
+// Dados de exemplo para imóveis detalhados
+const properties = [
+  {
+    id: "1",
+    title: "Apartamento de Luxo",
+    location: "Jardins, São Paulo",
+    price: "R$ 1.200.000",
+    images: [
+      "/placeholder.svg?height=600&width=800",
+      "/placeholder.svg?height=400&width=400",
+      "/placeholder.svg?height=400&width=400",
+      "/placeholder.svg?height=400&width=400",
+      "/placeholder.svg?height=400&width=400",
+      "/placeholder.svg?height=400&width=400",
+    ],
+    details: {
+      area: "120m²",
+      bedrooms: 3,
+      bathrooms: 2,
+      parkingSpots: 2,
+      condoFee: "R$ 1.200/mês",
+      tax: "R$ 5.000/ano",
+    },
+    description: [
+      "Luxuoso apartamento localizado no coração dos Jardins, um dos bairros mais nobres de São Paulo. Com acabamento de alto padrão e vista privilegiada para a cidade.",
+      "O imóvel conta com 3 dormitórios, sendo 1 suíte master com closet, sala ampla com dois ambientes, varanda gourmet integrada, cozinha planejada e área de serviço completa.",
+      "O condomínio oferece infraestrutura completa com piscina, academia, salão de festas, playground e segurança 24 horas. Localização privilegiada, próximo a restaurantes, comércio e transporte público.",
+    ],
+    features: [
+      "Varanda gourmet",
+      "Piso em porcelanato",
+      "Ar-condicionado",
+      "Armários planejados",
+      "Churrasqueira",
+      "Piscina",
+      "Academia",
+      "Salão de festas",
+      "Playground",
+      "Segurança 24h",
+      "Portaria",
+      "Elevador",
+    ],
+  },
+  {
+    id: "2",
+    title: "Casa em Condomínio",
+    location: "Alphaville, Barueri",
+    price: "R$ 2.500.000",
+    images: [
+      "/placeholder.svg?height=600&width=800",
+      "/placeholder.svg?height=400&width=400",
+      "/placeholder.svg?height=400&width=400",
+      "/placeholder.svg?height=400&width=400",
+      "/placeholder.svg?height=400&width=400",
+      "/placeholder.svg?height=400&width=400",
+    ],
+    details: {
+      area: "350m²",
+      bedrooms: 4,
+      bathrooms: 3,
+      parkingSpots: 4,
+      condoFee: "R$ 1.800/mês",
+      tax: "R$ 8.000/ano",
+    },
+    description: [
+      "Magnífica casa em condomínio fechado em Alphaville, com arquitetura moderna e acabamento de alto padrão. Terreno de 500m² com área construída de 350m².",
+      "A casa possui 4 suítes espaçosas, sala ampla com pé direito duplo, cozinha gourmet integrada, escritório, área de lazer com piscina e espaço gourmet completo.",
+      "O condomínio oferece segurança 24 horas, área de lazer completa com quadras esportivas, piscina, academia e salão de festas. Localização privilegiada, próximo ao Alphaville Tennis Club e Shopping Tamboré.",
+    ],
+    features: [
+      "Piscina privativa",
+      "Espaço gourmet",
+      "Jardim",
+      "Pé direito duplo",
+      "Suítes",
+      "Closet",
+      "Home office",
+      "Ar-condicionado",
+      "Aquecimento solar",
+      "Segurança 24h",
+      "Quadra de tênis",
+      "Academia",
+    ],
+  },
+  {
+    id: "3",
+    title: "Cobertura Duplex",
+    location: "Vila Nova Conceição, São Paulo",
+    price: "R$ 3.800.000",
+    images: [
+      "/placeholder.svg?height=600&width=800",
+      "/placeholder.svg?height=400&width=400",
+      "/placeholder.svg?height=400&width=400",
+      "/placeholder.svg?height=400&width=400",
+      "/placeholder.svg?height=400&width=400",
+      "/placeholder.svg?height=400&width=400",
+    ],
+    details: {
+      area: "280m²",
+      bedrooms: 3,
+      bathrooms: 4,
+      parkingSpots: 3,
+      condoFee: "R$ 2.500/mês",
+      tax: "R$ 12.000/ano",
+    },
+    description: [
+      "Espetacular cobertura duplex na Vila Nova Conceição, um dos bairros mais exclusivos de São Paulo. Com vista panorâmica para o Parque Ibirapuera e acabamento de altíssimo padrão.",
+      "No primeiro pavimento, ampla sala de estar e jantar integradas, cozinha gourmet, lavabo e 3 suítes. No pavimento superior, área de lazer privativa com piscina, deck, churrasqueira e espaço gourmet.",
+      "O condomínio oferece serviço de concierge, segurança 24 horas, academia completa e salão de festas. Localização privilegiada, a poucos minutos do Parque Ibirapuera e do Shopping Ibirapuera.",
+    ],
+    features: [
+      "Cobertura duplex",
+      "Vista panorâmica",
+      "Piscina privativa",
+      "Terraço",
+      "Churrasqueira",
+      "Espaço gourmet",
+      "Suítes",
+      "Closet",
+      "Ar-condicionado",
+      "Automação residencial",
+      "Concierge",
+      "Segurança 24h",
+    ],
+  },
+]

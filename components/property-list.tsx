@@ -58,7 +58,7 @@ export function PropertyList({ properties }: PropertyListProps) {
               <span className="text-sm">{property.location}</span>
             </div>
             <div className="mt-4 flex items-center justify-between">
-              <span className="text-lg font-bold text-blue-900">{property.price}</span>
+              <span className="text-lg font-bold text-orange-500">{property.price}</span>
               <div className="flex items-center gap-1 text-sm">
                 <span>{property.details.area}</span>
                 <span className="text-slate-300">|</span>
@@ -68,7 +68,7 @@ export function PropertyList({ properties }: PropertyListProps) {
           </CardContent>
           <CardFooter className="border-t bg-slate-50 p-4">
             <Link href={`/imoveis/${property.id}`} className="w-full">
-              <Button className="w-full bg-blue-900 hover:bg-blue-800">Ver detalhes</Button>
+              <Button className="w-full bg-orange-500 hover:bg-orange-600">Ver detalhes</Button>
             </Link>
           </CardFooter>
         </Card>

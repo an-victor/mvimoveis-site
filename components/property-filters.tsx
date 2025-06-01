@@ -58,7 +58,7 @@ export function PropertyFilters() {
               </div>
               <div className="py-4">
                 <div className="h-2 w-full rounded-full bg-slate-200">
-                  <div className="h-2 w-[50%] rounded-full bg-blue-900"></div>
+                  <div className="h-2 w-[50%] rounded-full bg-orange-500"></div>
                 </div>
               </div>
             </div>
@@ -126,7 +126,7 @@ export function PropertyFilters() {
           </div>
           <div className="flex justify-between border-t pt-6">
             <Button variant="outline">Limpar filtros</Button>
-            <Button className="bg-blue-900 hover:bg-blue-800">Aplicar filtros</Button>
+            <Button className="bg-orange-500 hover:bg-orange-600">Aplicar filtros</Button>
           </div>
         </div>
       </SheetContent>
