@@ -1,8 +1,8 @@
 import Link from "next/link";
-import Image from "next/image"; // Importado para o caso de você querer usar o componente Image do Next.js no futuro, mas o código atual usa <img>
+import Image from "next/image"; // Importado, mas não usado ativamente pelas tags <img> abaixo. Útil se quiser converter para <Image> do Next.js
 import { ChevronRight, MapPin, Star } from "lucide-react";
-import { client } from "@/sanity/lib/client"; // Verifique o caminho
-import { getImageUrl } from "@/sanity/lib/image"; // Verifique o caminho. Assumimos que esta é sua função urlForImage.
+import { client } from "@/sanity/lib/client"; // Verifique se o caminho está correto para seu projeto
+import { getImageUrl } from "@/sanity/lib/image"; // Verifique se o caminho está correto. Assumimos que esta é sua função urlForImage.
 import { FEATURED_PROPERTIES_QUERY, TESTIMONIALS_QUERY, SITE_SETTINGS_QUERY } from "@/sanity/lib/queries"; // Verifique o caminho
 import type { Property, Testimonial, SiteSettings } from "@/types/sanity"; // Verifique o caminho
 
@@ -45,22 +45,21 @@ const formatCurrency = (value?: number) => {
 export default async function Home() {
   const { featuredProperties, testimonials, siteSettings } = await getHomeData()
 
-  // A URL do WhatsApp será construída aqui para ser usada no header e na seção de contato
   const whatsappLink = siteSettings?.whatsapp
     ? `https://wa.me/${siteSettings.whatsapp.replace(/\D/g, '')}`
-    : "#"; // Link padrão ou de fallback se não houver número
+    : "#";
 
   return (
     <div className="flex min-h-screen flex-col">
       {/* Header */}
       <header className="absolute top-0 z-50 w-full">
-        <div className="container flex h-36 items-center justify-between"> {/* Altura do cabeçalho ajustada */}
+        <div className="container flex h-36 items-center justify-between"> {/* Altura do cabeçalho como você ajustou */}
           <div className="flex items-center gap-2">
             {siteSettings?.logo ? (
               <img
-                src={getImageUrl(siteSettings.logo, 150, 50) || "/placeholder.svg"} // getImageUrl deve retornar a URL diretamente ou o builder + .url()
+                src={getImageUrl(siteSettings.logo, 150, 50) || "/placeholder.svg"}
                 alt={siteSettings.title || "Marcelo Victor Imóveis - Logo Principal"}
-                className="h-24 w-auto" // Altura da logo do cabeçalho
+                className="h-24 w-auto" // Altura da logo do cabeçalho como você ajustou
               />
             ) : (
               <span className="text-2xl font-bold text-orange-500">{siteSettings?.title || "Marcelo Victor"}</span>
@@ -102,7 +101,6 @@ export default async function Home() {
 
       <main className="flex-1">
         {/* Hero Section */}
-        {/* Mantendo a forma como você passou as imagens do banner, assumindo que BannerCarousel lida com o objeto de imagem do Sanity */}
         <BannerCarousel images={siteSettings?.bannerImages || []}>
           <div className="container relative flex h-full flex-col items-center justify-center text-center text-white">
             <p className="mb-2 text-xl font-light">
@@ -217,7 +215,7 @@ export default async function Home() {
                   {siteSettings?.aboutTitle || "Sobre Marcelo Victor"}
                 </h2>
                 <p className="text-lg text-slate-600">
-                  {siteSettings?.aboutDescription || // Assumindo que 'aboutDescription' é o campo no Sanity
+                  {siteSettings?.aboutDescription ||
                     "Com mais de 15 anos de experiência no mercado imobiliário, me dedico a encontrar o imóvel perfeito para cada cliente, entendendo suas necessidades e oferecendo um atendimento personalizado do início ao fim."}
                 </p>
                 <div className="grid gap-6 sm:grid-cols-2">
@@ -328,15 +326,15 @@ export default async function Home() {
               {/* LOGO ADICIONADA AO RODAPÉ ABAIXO */}
               {siteSettings?.logo && (
                 <img
-                  src={getImageUrl(siteSettings.logo, 150, 50) || "/placeholder.svg"} // Ajuste os tamanhos (150, 50) se necessário para a URL da imagem
+                  src={getImageUrl(siteSettings.logo, 150, 50) || "/placeholder.svg"} 
                   alt={siteSettings.title || "Marcelo Victor Imóveis - Logo Rodapé"}
-                  className="h-14 w-auto mb-4" // Tamanho da logo no rodapé e margem inferior
+                  className="h-14 w-auto mb-4" // Tamanho da logo no rodapé ajustado
                 />
               )}
               {/* FIM DA LOGO ADICIONADA AO RODAPÉ */}
               <div className="text-xl font-bold text-slate-900">{siteSettings?.title || "Marcelo Victor Imóveis"}</div>
               <p className="mt-4 text-slate-600">
-                {siteSettings?.description || // Supondo que 'description' é o campo para a descrição geral no rodapé
+                {siteSettings?.description || 
                   "Especialista em imóveis de alto padrão, oferecendo um serviço personalizado e exclusivo para cada cliente."}
               </p>
             </div>
@@ -396,7 +394,7 @@ export default async function Home() {
           </div>
           <div className="mt-12 border-t pt-6 text-center text-sm text-slate-500">
             <p>
-              © {new Date().getFullYear()} {siteSettings?.heroSubtitle || "Marcelo Victor Imóveis"}. Todos os direitos
+              © {new Date().getFullYear()} {siteSettings?.title || "Marcelo Victor Imóveis"}. Todos os direitos {/* Copyright usa title */}
               reservados. Feito pela ALX Mídias
             </p>
           </div>
