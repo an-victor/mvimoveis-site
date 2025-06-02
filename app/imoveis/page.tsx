@@ -37,13 +37,13 @@ export default async function PropertiesPage() {
     <div className="flex min-h-screen flex-col">
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-white">
-        <div className="container flex h-40 items-center justify-between">
+        <div className="container flex h-32 items-center justify-between">
           <div className="flex items-center gap-2">
             {siteSettings?.logo ? (
               <img
                 src={getImageUrl(siteSettings.logo, 150, 80) || "/placeholder.svg"}
                 alt={siteSettings.title}
-                className="h-20 w-auto"
+                className="h-14 w-auto"
               />
             ) : (
               <span className="text-xl font-bold text-slate-900">
