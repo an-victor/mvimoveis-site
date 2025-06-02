@@ -28,6 +28,19 @@ async function getPropertiesData() {
   }
 }
 
+// ADICIONANDO A FUNÇÃO formatCurrency AQUI
+const formatCurrency = (value?: number) => {
+  if (value === undefined || value === null) {
+    // Se o problema de "R$ NaN" ocorrer aqui, adicione um log para investigar 'value'
+    // console.log("Valor recebido para formatCurrency (página /imoveis):", value);
+    return "Valor não informado";
+  }
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL"
+  }).format(value);
+};
+
 export default async function PropertiesPage() {
   const { properties, siteSettings } = await getPropertiesData()
 
@@ -35,13 +48,13 @@ export default async function PropertiesPage() {
     <div className="flex min-h-screen flex-col">
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-white">
-        <div className="container flex h-20 items-center justify-between"> {/* Altura do cabeçalho ajustada */}
+        <div className="container flex h-20 items-center justify-between"> {/* Altura do cabeçalho ajustada por você anteriormente */}
           <div className="flex items-center gap-2">
             {siteSettings?.logo ? (
               <img
                 src={getImageUrl(siteSettings.logo, 150, 50) || "/placeholder.svg"}
-                alt={siteSettings.title || "Logo Principal"} // Alt text ajustado para clareza
-                className="h-14 w-auto" // Altura da logo do cabeçalho ajustada
+                alt={siteSettings.title || "Logo Principal"}
+                className="h-14 w-auto" // Altura da logo do cabeçalho ajustada por você anteriormente
               />
             ) : (
               <span className="text-xl font-bold text-slate-900">
@@ -164,7 +177,7 @@ export default async function PropertiesPage() {
                   <div className="aspect-video w-full overflow-hidden">
                     <img
                       src={getImageUrl(property.images?.[0], 800, 600) || "/placeholder.svg"}
-                      alt={property.title || "Imagem do Imóvel"} // Alt text ajustado
+                      alt={property.title || "Imagem do Imóvel"}
                       className="h-full w-full object-cover transition-transform hover:scale-105"
                     />
                   </div>
@@ -175,16 +188,17 @@ export default async function PropertiesPage() {
                       <span className="text-sm">{property.location}</span>
                     </div>
                     <div className="mt-4 flex items-center justify-between">
-                      <span className="text-lg font-bold text-orange-500">{property.price}</span> {/* Considere formatar o preço como moeda */}
+                      {/* APLICANDO A FUNÇÃO formatCurrency AO PREÇO AQUI */}
+                      <span className="text-lg font-bold text-orange-500">{formatCurrency(property.price)}</span>
                       <div className="flex items-center gap-1 text-sm">
-                        <span>{property.area} m²</span> {/* Adicionado m² para clareza */}
+                        <span>{property.area} m²</span>
                         <span className="text-slate-300">|</span>
                         <span>{property.bedrooms} quartos</span>
                       </div>
                     </div>
                   </CardContent>
                   <CardFooter className="border-t bg-slate-50 p-4">
-                    <Link href={`/imoveis/${property.slug?.current}`} className="w-full"> {/* Corrigido para usar property.slug?.current */}
+                    <Link href={`/imoveis/${property.slug?.current}`} className="w-full">
                       <Button className="w-full bg-orange-500 hover:bg-orange-600">Ver detalhes</Button>
                     </Link>
                   </CardFooter>
@@ -210,7 +224,7 @@ export default async function PropertiesPage() {
               {siteSettings?.logo && (
                 <img
                   src={getImageUrl(siteSettings.logo, 150, 50) || "/placeholder.svg"}
-                  alt={siteSettings.title || "Logo Rodapé"} // Alt text ajustado
+                  alt={siteSettings.title || "Logo Rodapé"}
                   className="h-14 w-auto mb-4" // Tamanho e margem para a logo no rodapé
                 />
               )}
@@ -230,10 +244,10 @@ export default async function PropertiesPage() {
                 <Link href="/imoveis" className="text-slate-600 hover:text-orange-500">
                   Imóveis
                 </Link>
-                <Link href="#sobre" className="text-slate-600 hover:text-orange-500"> {/* Ajustar se #sobre não for na home */}
+                <Link href="/#sobre" className="text-slate-600 hover:text-orange-500">
                   Sobre
                 </Link>
-                <Link href="#contato" className="text-slate-600 hover:text-orange-500"> {/* Ajustar se #contato não for na home */}
+                <Link href="/#contato" className="text-slate-600 hover:text-orange-500">
                   Contato
                 </Link>
               </nav>
@@ -255,7 +269,7 @@ export default async function PropertiesPage() {
                       strokeLinejoin="round"
                       className="mr-2 h-5 w-5 text-orange-500"
                     >
-                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81 .7A2 2 0 0 1 22 16.92z" />
                     </svg>
                     {siteSettings.phone}
                   </p>
@@ -305,8 +319,8 @@ export default async function PropertiesPage() {
                 <div className="mt-6">
                   <Link
                     href={`https://wa.me/${siteSettings.whatsapp.replace(/\D/g, "")}`} // Remove caracteres não numéricos do whatsapp
-                    target="_blank" // Adicionado para abrir em nova aba
-                    rel="noopener noreferrer" // Adicionado por segurança e boas práticas
+                    target="_blank" 
+                    rel="noopener noreferrer" 
                     className="inline-flex items-center rounded-full bg-green-500 px-4 py-2 text-sm font-medium text-white hover:bg-green-600"
                   >
                     <svg
@@ -331,7 +345,7 @@ export default async function PropertiesPage() {
           </div>
           <div className="mt-12 border-t pt-6 text-center text-sm text-slate-500">
             <p>
-              © {new Date().getFullYear()} {siteSettings?.heroSubtitle || "Marcelo Victor Imóveis"}. Todos os direitos
+              © {new Date().getFullYear()} {siteSettings?.title || "Marcelo Victor Imóveis"}. Todos os direitos
               reservados. Feito pela ALX Mídias.
             </p>
           </div>
