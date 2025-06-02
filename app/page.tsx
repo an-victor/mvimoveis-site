@@ -49,7 +49,7 @@ export default async function Home() {
     <div className="flex min-h-screen flex-col">
       {/* Header */}
       <header className="absolute top-0 z-50 w-full">
-        <div className="container flex h-34 items-center justify-between">
+        <div className="container flex h-40 items-center justify-between">
           <div className="flex items-center gap-2">
             {siteSettings?.logo ? (
               <img
