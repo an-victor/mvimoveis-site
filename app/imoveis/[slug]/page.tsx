@@ -59,7 +59,7 @@ export default async function PropertyDetails({ params }: { params: { slug: stri
     <div className="flex min-h-screen flex-col">
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-        <div className="container flex h-32 items-center justify-between">
+        <div className="container flex h-24 items-center justify-between">
           <div className="flex items-center gap-2">
             {siteSettings?.logo ? (
               <img
