@@ -1,12 +1,14 @@
 import Link from "next/link"
 import { MapPin } from "lucide-react"
-import { client } from "@/sanity/lib/client" // Verifique se o caminho está correto para seu projeto
-import { getImageUrl } from "@/sanity/lib/image" // Verifique se o caminho está correto para seu projeto
-import { PROPERTIES_QUERY, SITE_SETTINGS_QUERY } from "@/sanity/lib/queries" // Verifique se o caminho está correto
-import type { Property, SiteSettings } from "@/types/sanity" // Verifique se o caminho está correto
+import { client } from "@/sanity/lib/client"
+import { getImageUrl } from "@/sanity/lib/image"
+import { formatCurrency } from "@/lib/format-currency"
+import { PROPERTIES_QUERY, SITE_SETTINGS_QUERY } from "@/sanity/lib/queries"
+import type { Property, SiteSettings } from "@/types/sanity"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import { NavigationLink } from "@/components/navigation-link"
 
 async function getPropertiesData() {
   try {
@@ -28,19 +30,6 @@ async function getPropertiesData() {
   }
 }
 
-// ADICIONANDO A FUNÇÃO formatCurrency AQUI
-const formatCurrency = (value?: number) => {
-  if (value === undefined || value === null) {
-    // Se o problema de "R$ NaN" ocorrer aqui, adicione um log para investigar 'value'
-    // console.log("Valor recebido para formatCurrency (página /imoveis):", value);
-    return "Valor não informado";
-  }
-  return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL"
-  }).format(value);
-};
-
 export default async function PropertiesPage() {
   const { properties, siteSettings } = await getPropertiesData()
 
@@ -48,13 +37,13 @@ export default async function PropertiesPage() {
     <div className="flex min-h-screen flex-col">
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-white">
-        <div className="container flex h-20 items-center justify-between"> {/* Altura do cabeçalho ajustada por você anteriormente */}
+        <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-2">
             {siteSettings?.logo ? (
               <img
-                src={getImageUrl(siteSettings.logo, 150, 50) || "/placeholder.svg"}
-                alt={siteSettings.title || "Logo Principal"}
-                className="h-14 w-auto" // Altura da logo do cabeçalho ajustada por você anteriormente
+                src={getImageUrl(siteSettings.logo, 150, 80) || "/placeholder.svg"}
+                alt={siteSettings.title}
+                className="h-20 w-auto"
               />
             ) : (
               <span className="text-xl font-bold text-slate-900">
@@ -69,12 +58,12 @@ export default async function PropertiesPage() {
             <Link href="/imoveis" className="text-sm font-medium text-slate-900 hover:text-orange-500">
               Imóveis
             </Link>
-            <Link href="/#sobre" className="text-sm font-medium text-slate-600 hover:text-orange-500">
+            <NavigationLink href="/#sobre" className="text-sm font-medium text-slate-600 hover:text-orange-500">
               Sobre
-            </Link>
-            <Link href="/#contato" className="text-sm font-medium text-slate-600 hover:text-orange-500">
+            </NavigationLink>
+            <NavigationLink href="/#contato" className="text-sm font-medium text-slate-600 hover:text-orange-500">
               Contato
-            </Link>
+            </NavigationLink>
           </nav>
           <div className="md:hidden">
             <Button variant="ghost" size="icon">
@@ -177,7 +166,7 @@ export default async function PropertiesPage() {
                   <div className="aspect-video w-full overflow-hidden">
                     <img
                       src={getImageUrl(property.images?.[0], 800, 600) || "/placeholder.svg"}
-                      alt={property.title || "Imagem do Imóvel"}
+                      alt={property.title}
                       className="h-full w-full object-cover transition-transform hover:scale-105"
                     />
                   </div>
@@ -188,17 +177,16 @@ export default async function PropertiesPage() {
                       <span className="text-sm">{property.location}</span>
                     </div>
                     <div className="mt-4 flex items-center justify-between">
-                      {/* APLICANDO A FUNÇÃO formatCurrency AO PREÇO AQUI */}
                       <span className="text-lg font-bold text-orange-500">{formatCurrency(property.price)}</span>
                       <div className="flex items-center gap-1 text-sm">
-                        <span>{property.area} m²</span>
+                        <span>{property.area}</span>
                         <span className="text-slate-300">|</span>
                         <span>{property.bedrooms} quartos</span>
                       </div>
                     </div>
                   </CardContent>
                   <CardFooter className="border-t bg-slate-50 p-4">
-                    <Link href={`/imoveis/${property.slug?.current}`} className="w-full">
+                    <Link href={`/imoveis/${property.slug.current}`} className="w-full">
                       <Button className="w-full bg-orange-500 hover:bg-orange-600">Ver detalhes</Button>
                     </Link>
                   </CardFooter>
@@ -220,20 +208,20 @@ export default async function PropertiesPage() {
         <div className="container">
           <div className="grid gap-8 md:grid-cols-3">
             <div>
-              {/* LOGO ADICIONADA AO RODAPÉ ABAIXO */}
-              {siteSettings?.logo && (
-                <img
-                  src={getImageUrl(siteSettings.logo, 150, 50) || "/placeholder.svg"}
-                  alt={siteSettings.title || "Logo Rodapé"}
-                  className="h-14 w-auto mb-4" // Tamanho e margem para a logo no rodapé
-                />
-              )}
-              {/* FIM DA LOGO ADICIONADA AO RODAPÉ */}
               <div className="text-xl font-bold text-slate-900">{siteSettings?.title || "Marcelo Victor Imóveis"}</div>
               <p className="mt-4 text-slate-600">
                 {siteSettings?.description ||
                   "Especialista em imóveis de alto padrão, oferecendo um serviço personalizado e exclusivo para cada cliente."}
               </p>
+              {siteSettings?.logo && (
+                <div className="mt-6">
+                  <img
+                    src={getImageUrl(siteSettings.logo, 120, 60) || "/placeholder.svg"}
+                    alt={siteSettings.title}
+                    className="h-12 w-auto"
+                  />
+                </div>
+              )}
             </div>
             <div>
               <h3 className="text-lg font-bold text-slate-900">Links Rápidos</h3>
@@ -244,12 +232,12 @@ export default async function PropertiesPage() {
                 <Link href="/imoveis" className="text-slate-600 hover:text-orange-500">
                   Imóveis
                 </Link>
-                <Link href="/#sobre" className="text-slate-600 hover:text-orange-500">
+                <NavigationLink href="/#sobre" className="text-slate-600 hover:text-orange-500">
                   Sobre
-                </Link>
-                <Link href="/#contato" className="text-slate-600 hover:text-orange-500">
+                </NavigationLink>
+                <NavigationLink href="/#contato" className="text-slate-600 hover:text-orange-500">
                   Contato
-                </Link>
+                </NavigationLink>
               </nav>
             </div>
             <div>
@@ -269,7 +257,7 @@ export default async function PropertiesPage() {
                       strokeLinejoin="round"
                       className="mr-2 h-5 w-5 text-orange-500"
                     >
-                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81 .7A2 2 0 0 1 22 16.92z" />
+                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
                     </svg>
                     {siteSettings.phone}
                   </p>
@@ -318,9 +306,7 @@ export default async function PropertiesPage() {
               {siteSettings?.whatsapp && (
                 <div className="mt-6">
                   <Link
-                    href={`https://wa.me/${siteSettings.whatsapp.replace(/\D/g, "")}`} // Remove caracteres não numéricos do whatsapp
-                    target="_blank" 
-                    rel="noopener noreferrer" 
+                    href={`https://wa.me/${siteSettings.whatsapp.replace(/\D/g, "")}`}
                     className="inline-flex items-center rounded-full bg-green-500 px-4 py-2 text-sm font-medium text-white hover:bg-green-600"
                   >
                     <svg
@@ -346,7 +332,7 @@ export default async function PropertiesPage() {
           <div className="mt-12 border-t pt-6 text-center text-sm text-slate-500">
             <p>
               © {new Date().getFullYear()} {siteSettings?.title || "Marcelo Victor Imóveis"}. Todos os direitos
-              reservados. Feito pela ALX Mídias.
+              reservados.
             </p>
           </div>
         </div>

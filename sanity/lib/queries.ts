@@ -56,13 +56,14 @@ export const PROPERTY_QUERY = groq`*[_type == "property" && slug.current == $slu
   status
 }`
 
-export const TESTIMONIALS_QUERY = groq`*[_type == "testimonial" && featured == true] | order(_createdAt desc) {
+export const TESTIMONIALS_QUERY = groq`*[_type == "testimonial"] | order(_createdAt desc) [0...6] {
   _id,
   name,
   location,
   text,
   avatar,
-  rating
+  rating,
+  featured
 }`
 
 export const SITE_SETTINGS_QUERY = groq`*[_type == "siteSettings"][0] {
