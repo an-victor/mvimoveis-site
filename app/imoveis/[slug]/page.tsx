@@ -76,13 +76,13 @@ export default async function PropertyDetails({ params }: { params: { slug: stri
     <div className="flex min-h-screen flex-col">
       {/* Header (mantendo a estrutura original deste arquivo) */}
       <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-        <div className="container flex h-16 items-center justify-between"> {/* Altura original do cabeçalho h-16 */}
+        <div className="container flex h-20 items-center justify-between"> {/* Altura original do cabeçalho h-16 */}
           <div className="flex items-center gap-2">
             {siteSettings?.logo ? (
               <img
                 src={getImageUrl(siteSettings.logo, 150, 50) || "/placeholder.svg"}
                 alt={siteSettings.title || "Marcelo Victor Imóveis - Logo"}
-                className="h-8 w-auto" // Altura original da logo h-8
+                className="h-14 w-auto" // Altura original da logo h-8
               />
             ) : (
               <span className="text-xl font-bold text-slate-900">
