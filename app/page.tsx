@@ -35,7 +35,11 @@ async function getHomeData() {
 }
 
 const formatCurrency = (value?: number) => {
-  if (value === undefined || value === null) return "Valor não informado";
+  if (value === undefined || value === null) {
+    // Se o problema de "R$ NaN" persistir apenas aqui, adicione um log para investigar 'value'
+    // console.log("Valor recebido para formatCurrency (featured):", value);
+    return "Valor não informado";
+  }
   return new Intl.NumberFormat("pt-BR", {
     style: "currency",
     currency: "BRL"
@@ -53,13 +57,13 @@ export default async function Home() {
     <div className="flex min-h-screen flex-col">
       {/* Header */}
       <header className="absolute top-0 z-50 w-full">
-        <div className="container flex h-36 items-center justify-between"> {/* Altura do cabeçalho como você ajustou */}
+        <div className="container flex h-36 items-center justify-between"> {/* Altura do cabeçalho mantida como h-36 */}
           <div className="flex items-center gap-2">
             {siteSettings?.logo ? (
               <img
                 src={getImageUrl(siteSettings.logo, 150, 50) || "/placeholder.svg"}
                 alt={siteSettings.title || "Marcelo Victor Imóveis - Logo Principal"}
-                className="h-24 w-auto" // Altura da logo do cabeçalho como você ajustou
+                className="h-24 w-auto" // Altura da logo do cabeçalho mantida como h-24
               />
             ) : (
               <span className="text-2xl font-bold text-orange-500">{siteSettings?.title || "Marcelo Victor"}</span>
@@ -156,37 +160,41 @@ export default async function Home() {
               <p className="mt-4 text-lg text-slate-600">Conheça as melhores oportunidades disponíveis no mercado</p>
             </div>
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-              {featuredProperties.map((property) => (
-                <Card key={property._id} className="overflow-hidden transition-all hover:shadow-lg">
-                  <div className="aspect-video w-full overflow-hidden">
-                    <img
-                      src={getImageUrl(property.images?.[0], 800, 600) || "/placeholder.svg"}
-                      alt={property.title || "Imagem do Imóvel"}
-                      className="h-full w-full object-cover transition-transform hover:scale-105"
-                    />
-                  </div>
-                  <CardContent className="p-6">
-                    <h3 className="text-xl font-bold text-slate-900">{property.title}</h3>
-                    <div className="mt-2 flex items-center text-slate-500">
-                      <MapPin className="mr-1 h-4 w-4" />
-                      <span className="text-sm">{property.location}</span>
+              {featuredProperties.map((property) => {
+                // Adicionando console.log para o preço do imóvel em destaque específico
+                // console.log(`Imóvel: ${property.title}, Preço Bruto: ${property.price}, Tipo: ${typeof property.price}`);
+                return (
+                  <Card key={property._id} className="overflow-hidden transition-all hover:shadow-lg">
+                    <div className="aspect-video w-full overflow-hidden">
+                      <img
+                        src={getImageUrl(property.images?.[0], 800, 600) || "/placeholder.svg"}
+                        alt={property.title || "Imagem do Imóvel"}
+                        className="h-full w-full object-cover transition-transform hover:scale-105"
+                      />
                     </div>
-                    <div className="mt-4 flex items-center justify-between">
-                      <span className="text-lg font-bold text-orange-500">{formatCurrency(property.price)}</span>
-                      <div className="flex items-center gap-1 text-sm">
-                        <span>{property.area} m²</span>
-                        <span className="text-slate-300">|</span>
-                        <span>{property.bedrooms} quartos</span>
+                    <CardContent className="p-6">
+                      <h3 className="text-xl font-bold text-slate-900">{property.title}</h3>
+                      <div className="mt-2 flex items-center text-slate-500">
+                        <MapPin className="mr-1 h-4 w-4" />
+                        <span className="text-sm">{property.location}</span>
                       </div>
-                    </div>
-                  </CardContent>
-                  <CardFooter className="border-t bg-slate-50 p-4">
-                    <Link href={`/imoveis/${property.slug?.current}`} className="w-full">
-                      <Button className="w-full bg-orange-500 hover:bg-orange-600">Ver detalhes</Button>
-                    </Link>
-                  </CardFooter>
-                </Card>
-              ))}
+                      <div className="mt-4 flex items-center justify-between">
+                        <span className="text-lg font-bold text-orange-500">{formatCurrency(property.price)}</span>
+                        <div className="flex items-center gap-1 text-sm">
+                          <span>{property.area} m²</span>
+                          <span className="text-slate-300">|</span>
+                          <span>{property.bedrooms} quartos</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                    <CardFooter className="border-t bg-slate-50 p-4">
+                      <Link href={`/imoveis/${property.slug?.current}`} className="w-full">
+                        <Button className="w-full bg-orange-500 hover:bg-orange-600">Ver detalhes</Button>
+                      </Link>
+                    </CardFooter>
+                  </Card>
+                );
+              })}
             </div>
             <div className="mt-12 text-center">
               <Link href="/imoveis">
@@ -328,7 +336,7 @@ export default async function Home() {
                 <img
                   src={getImageUrl(siteSettings.logo, 150, 50) || "/placeholder.svg"} 
                   alt={siteSettings.title || "Marcelo Victor Imóveis - Logo Rodapé"}
-                  className="h-14 w-auto mb-4" // Tamanho da logo no rodapé ajustado
+                  className="h-14 w-auto mb-4" // Tamanho da logo no rodapé que você definiu
                 />
               )}
               {/* FIM DA LOGO ADICIONADA AO RODAPÉ */}
@@ -394,7 +402,7 @@ export default async function Home() {
           </div>
           <div className="mt-12 border-t pt-6 text-center text-sm text-slate-500">
             <p>
-              © {new Date().getFullYear()} {siteSettings?.title || "Marcelo Victor Imóveis"}. Todos os direitos {/* Copyright usa title */}
+              © {new Date().getFullYear()} {siteSettings?.title || "Marcelo Victor Imóveis"}. Todos os direitos
               reservados. Feito pela ALX Mídias
             </p>
           </div>
