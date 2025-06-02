@@ -40,9 +40,9 @@ export function PropertyGallery({ property }: PropertyGalleryProps) {
 
   return (
     <>
-      <div className="flex gap-4 h-[500px]">
+      <div className="flex flex-col md:flex-row gap-4 h-auto md:h-[500px]">
         {/* Vídeo vertical à esquerda - mais estreito */}
-        <div className="w-1/3 relative overflow-hidden rounded-lg bg-black">
+        <div className="w-full md:w-1/3 relative overflow-hidden rounded-lg bg-black aspect-video md:aspect-auto">
           {property.youtubeVideo ? (
             <>
               <iframe
@@ -70,13 +70,13 @@ export function PropertyGallery({ property }: PropertyGalleryProps) {
         </div>
 
         {/* Grid 3x2 de imagens à direita - mais espaço */}
-        <div className="flex-1 grid grid-cols-3 grid-rows-2 gap-2">
+        <div className="w-full md:flex-1 grid grid-cols-2 md:grid-cols-3 grid-rows-3 md:grid-rows-2 gap-2">
           {property.images.slice(0, 6).map((image, index) => {
             const isLast = index === 5
             const shouldShowButton = isLast && remainingImages > 0
 
             return (
-              <div key={index} className="relative overflow-hidden rounded-lg">
+              <div key={index} className="relative overflow-hidden rounded-lg aspect-square md:aspect-auto">
                 <img
                   src={getImageUrl(image, 400, 300) || "/placeholder.svg"}
                   alt={`${property.title} - Imagem ${index + 1}`}
@@ -101,7 +101,10 @@ export function PropertyGallery({ property }: PropertyGalleryProps) {
           {property.images.length < 6 && (
             <>
               {[...Array(6 - property.images.length)].map((_, index) => (
-                <div key={`empty-${index}`} className="relative overflow-hidden rounded-lg bg-slate-100">
+                <div
+                  key={`empty-${index}`}
+                  className="relative overflow-hidden rounded-lg bg-slate-100 aspect-square md:aspect-auto"
+                >
                   <div className="flex h-full items-center justify-center text-slate-400 text-sm">
                     <Maximize className="w-4 h-4" />
                   </div>
