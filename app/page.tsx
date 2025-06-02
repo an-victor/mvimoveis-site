@@ -1,15 +1,15 @@
 import Link from "next/link";
 import Image from "next/image"; // Importado, mas não usado ativamente pelas tags <img> abaixo. Útil se quiser converter para <Image> do Next.js
 import { ChevronRight, MapPin, Star } from "lucide-react";
-import { client } from "@/sanity/lib/client"; // Verifique se o caminho está correto para seu projeto
-import { getImageUrl } from "@/sanity/lib/image"; // Verifique se o caminho está correto. Assumimos que esta é sua função urlForImage.
-import { FEATURED_PROPERTIES_QUERY, TESTIMONIALS_QUERY, SITE_SETTINGS_QUERY } from "@/sanity/lib/queries"; // Verifique o caminho
-import type { Property, Testimonial, SiteSettings } from "@/types/sanity"; // Verifique o caminho
+import { client } from "@/sanity/lib/client";
+import { getImageUrl } from "@/sanity/lib/image";
+import { FEATURED_PROPERTIES_QUERY, TESTIMONIALS_QUERY, SITE_SETTINGS_QUERY } from "@/sanity/lib/queries";
+import type { Property, Testimonial, SiteSettings } from "@/types/sanity";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { BannerCarousel } from "@/components/banner-carousel"; // Seu componente de Banner Carrossel
+import { BannerCarousel } from "@/components/banner-carousel";
 
 async function getHomeData() {
   try {
@@ -47,24 +47,24 @@ const formatCurrency = (value?: number) => {
 export default async function Home() { // A FUNÇÃO Home COMEÇA AQUI
   const { featuredProperties, testimonials, siteSettings } = await getHomeData();
 
-  // COLOQUE O CONSOLE.LOG AQUI:
+  // CONSOLE.LOG PARA INVESTIGAR O PREÇO DOS IMÓVEIS EM DESTAQUE:
   console.log("Dados dos Imóveis em DESTAQUE (brutos) da Home:", JSON.stringify(featuredProperties, null, 2));  
 
   const whatsappLink = siteSettings?.whatsapp
     ? `https://wa.me/${siteSettings.whatsapp.replace(/\D/g, '')}`
     : "#";
 
-  return (
+  return ( // O RETURN DA FUNÇÃO Home COMEÇA AQUI
     <div className="flex min-h-screen flex-col">
       {/* Header */}
       <header className="absolute top-0 z-50 w-full">
-        <div className="container flex h-36 items-center justify-between"> {/* Altura do cabeçalho mantida como h-36 */}
+        <div className="container flex h-36 items-center justify-between"> {/* Altura do cabeçalho original desta versão */}
           <div className="flex items-center gap-2">
             {siteSettings?.logo ? (
               <img
                 src={getImageUrl(siteSettings.logo, 150, 50) || "/placeholder.svg"}
                 alt={siteSettings.title || "Marcelo Victor Imóveis - Logo Principal"}
-                className="h-24 w-auto" // Altura da logo do cabeçalho mantida como h-24
+                className="h-24 w-auto" // Altura da logo do cabeçalho original desta versão
               />
             ) : (
               <span className="text-2xl font-bold text-orange-500">{siteSettings?.title || "Marcelo Victor"}</span>
@@ -162,8 +162,6 @@ export default async function Home() { // A FUNÇÃO Home COMEÇA AQUI
             </div>
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {featuredProperties.map((property) => {
-                // Adicionando console.log para o preço do imóvel em destaque específico
-                // console.log(`Imóvel: ${property.title}, Preço Bruto: ${property.price}, Tipo: ${typeof property.price}`);
                 return (
                   <Card key={property._id} className="overflow-hidden transition-all hover:shadow-lg">
                     <div className="aspect-video w-full overflow-hidden">
@@ -296,7 +294,7 @@ export default async function Home() { // A FUNÇÃO Home COMEÇA AQUI
                   <div className="bg-orange-500 p-8 text-white">
                     <h3 className="mb-6 text-xl font-bold">Informações de Contato</h3>
                     <div className="space-y-4">
-                      {siteSettings?.phone && ( <div className="flex items-start gap-3"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 shrink-0" > <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /> </svg> <div> <div className="text-sm font-medium text-white/70">Telefone</div> <div>{siteSettings.phone}</div> </div> </div> )}
+                      {siteSettings?.phone && ( <div className="flex items-start gap-3"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 shrink-0" > <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81 .7A2 2 0 0 1 22 16.92z" /> </svg> <div> <div className="text-sm font-medium text-white/70">Telefone</div> <div>{siteSettings.phone}</div> </div> </div> )}
                       {siteSettings?.email && ( <div className="flex items-start gap-3"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 shrink-0" > <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /> <polyline points="22,6 12,13 2,6" /> </svg> <div> <div className="text-sm font-medium text-white/70">Email</div> <div>{siteSettings.email}</div> </div> </div> )}
                       {siteSettings?.address && ( <div className="flex items-start gap-3"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 shrink-0" > <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /> <circle cx="12" cy="10" r="3" /> </svg> <div> <div className="text-sm font-medium text-white/70">Endereço</div> <div>{siteSettings.address}</div> </div> </div> )}
                     </div>
@@ -337,7 +335,7 @@ export default async function Home() { // A FUNÇÃO Home COMEÇA AQUI
                 <img
                   src={getImageUrl(siteSettings.logo, 150, 50) || "/placeholder.svg"} 
                   alt={siteSettings.title || "Marcelo Victor Imóveis - Logo Rodapé"}
-                  className="h-14 w-auto mb-4" // Tamanho da logo no rodapé que você definiu
+                  className="h-14 w-auto mb-4" 
                 />
               )}
               {/* FIM DA LOGO ADICIONADA AO RODAPÉ */}
@@ -369,7 +367,7 @@ export default async function Home() { // A FUNÇÃO Home COMEÇA AQUI
               <div className="mt-4 space-y-2">
                 {siteSettings?.phone && (
                   <p className="flex items-center text-slate-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 h-5 w-5 text-orange-500" > <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /> </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 h-5 w-5 text-orange-500" > <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81 .7A2 2 0 0 1 22 16.92z" /> </svg>
                     {siteSettings.phone}
                   </p>
                 )}
