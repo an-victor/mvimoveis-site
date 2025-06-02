@@ -7,24 +7,20 @@ import { portableTextToPlainText } from "@/sanity/lib/utils" // Verifique o cami
 import type { Property, SiteSettings } from "@/types/sanity" // Verifique o caminho
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card" // Removido CardFooter se não usado aqui
+import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 
 async function getPropertyData(slug: string) {
   try {
-    // Otimização: Se PROPERTIES_QUERY é apenas para 'similarProperties', podemos refinar
-    // para buscar menos campos ou filtrar de forma mais eficiente.
-    // Por agora, mantendo como está.
     const [property, allProperties, siteSettings] = await Promise.all([
       client.fetch<Property>(PROPERTY_QUERY, { slug }),
       client.fetch<Property[]>(PROPERTIES_QUERY), // Usado para 'similarProperties'
       client.fetch<SiteSettings>(SITE_SETTINGS_QUERY),
     ])
 
-    // Filtra o imóvel atual da lista de imóveis similares e pega os 6 primeiros
     const similarProperties = (allProperties || [])
-      .filter(p => p._id !== property?._id) // Garante que property não seja nulo
+      .filter(p => property && p._id !== property._id) // Garante que property exista antes de acessar _id
       .slice(0, 6);
 
     return {
@@ -42,7 +38,7 @@ async function getPropertyData(slug: string) {
   }
 }
 
-// ADICIONANDO A FUNÇÃO formatCurrency AQUI
+// FUNÇÃO formatCurrency ADICIONADA
 const formatCurrency = (value?: number) => {
   if (value === undefined || value === null) {
     // console.log("Valor recebido para formatCurrency (detalhe do imóvel):", value);
@@ -70,7 +66,6 @@ export default async function PropertyDetails({ params }: { params: { slug: stri
     )
   }
 
-  // A função portableTextToPlainText já deve estar importada e funcionando
   const descriptionText = property.description ? portableTextToPlainText(property.description) : "Descrição não disponível.";
   
   const whatsappLink = siteSettings?.whatsapp
@@ -81,13 +76,14 @@ export default async function PropertyDetails({ params }: { params: { slug: stri
     <div className="flex min-h-screen flex-col">
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-        <div className="container flex h-36 items-center justify-between"> {/* Altura do cabeçalho ajustada */}
+        {/* AJUSTANDO ALTURA DO CONTAINER DO HEADER E DA LOGO PARA CONSISTÊNCIA */}
+        <div className="container flex h-36 items-center justify-between">
           <div className="flex items-center gap-2">
             {siteSettings?.logo ? (
               <img
                 src={getImageUrl(siteSettings.logo, 150, 50) || "/placeholder.svg"}
                 alt={siteSettings.title || "Marcelo Victor Imóveis - Logo Principal"}
-                className="h-24 w-auto" // Altura da logo do cabeçalho ajustada
+                className="h-24 w-auto" // Altura da logo consistente com a home
               />
             ) : (
               <span className="text-xl font-bold text-slate-900">
@@ -123,13 +119,9 @@ export default async function PropertyDetails({ params }: { params: { slug: stri
         <div className="bg-slate-50 py-4">
           <div className="container">
             <div className="flex items-center text-sm text-slate-600">
-              <Link href="/" className="hover:text-orange-500">
-                Início
-              </Link>
+              <Link href="/" className="hover:text-orange-500"> Início </Link>
               <ChevronRight className="mx-2 h-4 w-4" />
-              <Link href="/imoveis" className="hover:text-orange-500">
-                Imóveis
-              </Link>
+              <Link href="/imoveis" className="hover:text-orange-500"> Imóveis </Link>
               <ChevronRight className="mx-2 h-4 w-4" />
               <span className="text-slate-900">{property.title}</span>
             </div>
@@ -140,10 +132,7 @@ export default async function PropertyDetails({ params }: { params: { slug: stri
         <section className="py-8">
           <div className="container">
             <div className="mb-6 flex items-center justify-between">
-              <Link href="/imoveis" className="flex items-center text-sm font-medium text-orange-500 hover:underline">
-                <ArrowLeft className="mr-1 h-4 w-4" />
-                Voltar para imóveis
-              </Link>
+              <Link href="/imoveis" className="flex items-center text-sm font-medium text-orange-500 hover:underline"> <ArrowLeft className="mr-1 h-4 w-4" /> Voltar para imóveis </Link>
               <div className="flex gap-2">
                 <Button variant="outline" size="icon" className="rounded-full"> <Heart className="h-4 w-4" /> <span className="sr-only">Favoritar</span> </Button>
                 <Button variant="outline" size="icon" className="rounded-full"> <Share2 className="h-4 w-4" /> <span className="sr-only">Compartilhar</span> </Button>
@@ -160,9 +149,9 @@ export default async function PropertyDetails({ params }: { params: { slug: stri
               </div>
               <div className="grid grid-cols-2 gap-4">
                 {property.youtubeVideo && (
-                  <div className="relative aspect-[16/9] overflow-hidden rounded-lg col-span-1"> {/* Ajustado aspect ratio para 16/9 */}
+                  <div className="relative aspect-[16/9] overflow-hidden rounded-lg col-span-1">
                     <iframe
-                      src={`https://www.youtube.com/embed/${property.youtubeVideo.split('v=')[1]?.split('&')[0] || property.youtubeVideo.split('/').pop()}?rel=0&modestbranding=1`} // Lógica para extrair ID do vídeo
+                      src={`https://www.youtube.com/embed/${property.youtubeVideo.split('v=')[1]?.split('&')[0] || property.youtubeVideo.split('/').pop()}?rel=0&modestbranding=1`} // Lógica melhorada para ID do YouTube
                       title={`Vídeo do ${property.title}`}
                       className="h-full w-full"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -171,19 +160,15 @@ export default async function PropertyDetails({ params }: { params: { slug: stri
                   </div>
                 )}
                 {property.images?.slice(1, property.youtubeVideo ? 4 : 5).map((image, index) => (
-                  <div key={image._key || index} className="relative aspect-square overflow-hidden rounded-lg"> {/* Adicionado _key como fallback */}
+                  <div key={image._key || index} className="relative aspect-square overflow-hidden rounded-lg">
                     <img
                       src={getImageUrl(image, 400, 400) || "/placeholder.svg"}
                       alt={`${property.title || 'Imóvel'} - Imagem ${index + 2}`}
                       className="h-full w-full object-cover"
                     />
-                    {index === (property.youtubeVideo ? 2 : 3) &&
-                      property.images.length > (property.youtubeVideo ? 4 : 5) && (
+                    {index === (property.youtubeVideo ? 2 : 3) && property.images.length > (property.youtubeVideo ? 4 : 5) && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                          <Button variant="outline" className="text-white border-white hover:text-white hover:bg-black/70" >
-                            <Maximize className="mr-2 h-4 w-4" />
-                            Ver todas as fotos
-                          </Button>
+                          <Button variant="outline" className="text-white border-white hover:text-white hover:bg-black/70" > <Maximize className="mr-2 h-4 w-4" /> Ver todas as fotos </Button>
                         </div>
                       )}
                   </div>
@@ -200,10 +185,7 @@ export default async function PropertyDetails({ params }: { params: { slug: stri
               <div className="lg:col-span-2">
                 <div className="mb-6">
                   <h1 className="mb-2 text-3xl font-bold text-slate-900">{property.title}</h1>
-                  <div className="flex items-center text-slate-600">
-                    <MapPin className="mr-1 h-4 w-4" />
-                    <span>{property.location}</span>
-                  </div>
+                  <div className="flex items-center text-slate-600"> <MapPin className="mr-1 h-4 w-4" /> <span>{property.location}</span> </div>
                 </div>
 
                 <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -221,18 +203,13 @@ export default async function PropertyDetails({ params }: { params: { slug: stri
                   </TabsList>
                   <TabsContent value="description" className="mt-4 rounded-lg border p-6">
                     <h3 className="mb-4 text-lg font-bold text-slate-900">Sobre este imóvel</h3>
-                    <div className="space-y-4 text-slate-600">
-                      <p>{descriptionText}</p>
-                    </div>
+                    <div className="space-y-4 text-slate-600"> <p>{descriptionText}</p> </div>
                   </TabsContent>
                   <TabsContent value="features" className="mt-4 rounded-lg border p-6">
                     <h3 className="mb-4 text-lg font-bold text-slate-900">Características e diferenciais</h3>
                     <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3">
-                      {property.features?.map((feature, index) => ( // Adicionado '?' para features
-                        <div key={index} className="flex items-center">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 h-5 w-5 text-orange-500" > <polyline points="20 6 9 17 4 12" /> </svg>
-                          <span className="text-slate-600">{feature}</span>
-                        </div>
+                      {property.features?.map((feature, index) => (
+                        <div key={index} className="flex items-center"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 h-5 w-5 text-orange-500" > <polyline points="20 6 9 17 4 12" /> </svg> <span className="text-slate-600">{feature}</span> </div>
                       ))}
                     </div>
                   </TabsContent>
@@ -246,7 +223,7 @@ export default async function PropertyDetails({ params }: { params: { slug: stri
                       <div className="space-y-4">
                         <div className="aspect-video overflow-hidden rounded-lg">
                           <iframe
-                            src={property.mapUrl.includes("embed") ? property.mapUrl : property.mapUrl.replace("/maps/place/", "/maps/embed/place/").replace("/maps/", "/maps/embed/")} // Lógica melhorada para URL do mapa
+                            src={property.mapUrl.includes("embed") ? property.mapUrl : property.mapUrl.replace("/maps/place/", "/maps/embed/place/").replace("/maps/", "/maps/embed/")}
                             className="h-full w-full border-0"
                             allowFullScreen
                             loading="lazy"
@@ -284,19 +261,11 @@ export default async function PropertyDetails({ params }: { params: { slug: stri
                                 </div>
                                 <CardContent className="p-4">
                                   <h4 className="font-bold text-slate-900">{similarProperty.title}</h4>
-                                  <div className="mt-1 flex items-center text-slate-500">
-                                    <MapPin className="mr-1 h-4 w-4" />
-                                    <span className="text-xs">{similarProperty.location}</span>
-                                  </div>
+                                  <div className="mt-1 flex items-center text-slate-500"> <MapPin className="mr-1 h-4 w-4" /> <span className="text-xs">{similarProperty.location}</span> </div>
                                   <div className="mt-2 flex items-center justify-between">
-                                    {/* APLICANDO A FUNÇÃO formatCurrency AO PREÇO DOS IMÓVEIS SIMILARES */}
+                                    {/* APLICANDO formatCurrency AO PREÇO DOS IMÓVEIS SIMILARES */}
                                     <span className="font-bold text-orange-500">{formatCurrency(similarProperty.price)}</span>
-                                    <Link
-                                      href={`/imoveis/${similarProperty.slug?.current}`}
-                                      className="text-xs text-orange-500 hover:underline"
-                                    >
-                                      Ver detalhes
-                                    </Link>
+                                    <Link href={`/imoveis/${similarProperty.slug?.current}`} className="text-xs text-orange-500 hover:underline" > Ver detalhes </Link>
                                   </div>
                                 </CardContent>
                               </Card>
@@ -318,34 +287,20 @@ export default async function PropertyDetails({ params }: { params: { slug: stri
                   <div className="rounded-lg border bg-white p-6 shadow-sm">
                     <div className="mb-4 text-center">
                       <div className="text-sm text-slate-600">Valor</div>
-                      {/* APLICANDO A FUNÇÃO formatCurrency AO PREÇO PRINCIPAL DO IMÓVEL */}
+                      {/* APLICANDO formatCurrency AO PREÇO PRINCIPAL */}
                       <div className="text-3xl font-bold text-orange-500">{formatCurrency(property.price)}</div>
                     </div>
                     {(property.condoFee || property.tax) && (
                       <div className="mb-6 border-t border-b py-4">
                         <div className="grid grid-cols-2 gap-4">
-                          {property.condoFee && (
-                            <div className="text-center">
-                              <div className="text-sm text-slate-600">Condomínio</div>
-                              {/* Considere formatar property.condoFee se for um número */}
-                              <div className="font-medium text-slate-900">R$ {property.condoFee}</div>
-                            </div>
-                          )}
-                          {property.tax && (
-                            <div className="text-center">
-                              <div className="text-sm text-slate-600">IPTU</div>
-                              {/* Considere formatar property.tax se for um número */}
-                              <div className="font-medium text-slate-900">R$ {property.tax}</div>
-                            </div>
-                          )}
+                          {property.condoFee && ( <div className="text-center"> <div className="text-sm text-slate-600">Condomínio</div> <div className="font-medium text-slate-900">R$ {property.condoFee}</div> </div> )}
+                          {property.tax && ( <div className="text-center"> <div className="text-sm text-slate-600">IPTU</div> <div className="font-medium text-slate-900">R$ {property.tax}</div> </div> )}
                         </div>
                       </div>
                     )}
                     <div className="space-y-4">
                       <Button className="w-full bg-orange-500 hover:bg-orange-600">Agendar visita</Button>
-                      <Button variant="outline" className="w-full border-orange-500 text-orange-500 hover:bg-orange-50">
-                        Entrar em contato
-                      </Button>
+                      <Button variant="outline" className="w-full border-orange-500 text-orange-500 hover:bg-orange-50"> Entrar em contato </Button>
                     </div>
                   </div>
 
@@ -354,21 +309,21 @@ export default async function PropertyDetails({ params }: { params: { slug: stri
                     <div className="mb-6 flex items-center gap-4">
                       <div className="h-16 w-16 overflow-hidden rounded-full">
                         <img
-                          src={getImageUrl(siteSettings?.aboutImage, 200, 200) || "/placeholder.svg"} // Usando a imagem "sobre" do corretor
+                          src={getImageUrl(siteSettings?.aboutImage) || "/placeholder.svg"} // Usando a imagem "sobre" do corretor
                           alt={siteSettings?.aboutTitle || "Corretor"}
                           className="h-full w-full object-cover"
                         />
                       </div>
                       <div>
-                        <div className="font-bold text-slate-900">{siteSettings?.title || "Marcelo Victor"}</div>
+                        <div className="font-bold text-slate-900">{siteSettings?.title || "Marcelo Victor"}</div> {/* Idealmente o nome do corretor viria de siteSettings */}
                         <div className="text-sm text-slate-600">Especialista em imóveis de alto padrão</div>
                       </div>
                     </div>
                     <form className="space-y-4">
-                      <div className="space-y-2"> <label htmlFor="name" className="text-sm font-medium text-slate-700"> Nome </label> <input id="name" type="text" className="w-full rounded-md border border-slate-300 p-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500" placeholder="Seu nome completo" /> </div>
-                      <div className="space-y-2"> <label htmlFor="email" className="text-sm font-medium text-slate-700"> Email </label> <input id="email" type="email" className="w-full rounded-md border border-slate-300 p-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500" placeholder="seu@email.com" /> </div>
-                      <div className="space-y-2"> <label htmlFor="phoneProperty" className="text-sm font-medium text-slate-700"> Telefone </label> <input id="phoneProperty" type="tel" className="w-full rounded-md border border-slate-300 p-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500" placeholder="(00) 00000-0000" /> </div>
-                      <div className="space-y-2"> <label htmlFor="messageProperty" className="text-sm font-medium text-slate-700"> Mensagem </label> <textarea id="messageProperty" rows={4} className="w-full rounded-md border border-slate-300 p-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500" placeholder="Olá, tenho interesse neste imóvel e gostaria de mais informações." ></textarea> </div>
+                      <div className="space-y-2"> <label htmlFor="nameDetail" className="text-sm font-medium text-slate-700"> Nome </label> <input id="nameDetail" type="text" className="w-full rounded-md border border-slate-300 p-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500" placeholder="Seu nome completo" /> </div>
+                      <div className="space-y-2"> <label htmlFor="emailDetail" className="text-sm font-medium text-slate-700"> Email </label> <input id="emailDetail" type="email" className="w-full rounded-md border border-slate-300 p-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500" placeholder="seu@email.com" /> </div>
+                      <div className="space-y-2"> <label htmlFor="phoneDetail" className="text-sm font-medium text-slate-700"> Telefone </label> <input id="phoneDetail" type="tel" className="w-full rounded-md border border-slate-300 p-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500" placeholder="(00) 00000-0000" /> </div>
+                      <div className="space-y-2"> <label htmlFor="messageDetail" className="text-sm font-medium text-slate-700"> Mensagem </label> <textarea id="messageDetail" rows={4} className="w-full rounded-md border border-slate-300 p-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500" placeholder="Olá, tenho interesse neste imóvel e gostaria de mais informações." ></textarea> </div>
                       <Button className="w-full bg-orange-500 hover:bg-orange-600">Enviar mensagem</Button>
                     </form>
                   </div>
@@ -384,19 +339,16 @@ export default async function PropertyDetails({ params }: { params: { slug: stri
         <div className="container">
           <div className="grid gap-8 md:grid-cols-3">
             <div>
-              {/* LOGO ADICIONADA AO RODAPÉ ABAIXO */}
               {siteSettings?.logo && (
                 <img
                   src={getImageUrl(siteSettings.logo, 150, 50) || "/placeholder.svg"}
                   alt={siteSettings.title || "Marcelo Victor Imóveis - Logo Rodapé"}
-                  className="h-14 w-auto mb-4" // Tamanho da logo no rodapé que você definiu
+                  className="h-14 w-auto mb-4" // Tamanho da logo no rodapé
                 />
               )}
-              {/* FIM DA LOGO ADICIONADA AO RODAPÉ */}
               <div className="text-xl font-bold text-slate-900">{siteSettings?.title || "Marcelo Victor Imóveis"}</div>
               <p className="mt-4 text-slate-600">
-                {siteSettings?.description ||
-                  "Especialista em imóveis de alto padrão, oferecendo um serviço personalizado e exclusivo para cada cliente."}
+                {siteSettings?.description || "Especialista em imóveis de alto padrão, oferecendo um serviço personalizado e exclusivo para cada cliente."}
               </p>
             </div>
             <div>
