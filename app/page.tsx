@@ -19,7 +19,7 @@ async function getHomeData() {
       client.fetch<SiteSettings>(SITE_SETTINGS_QUERY),
     ])
 
-    return {
+    return { // ESTE RETURN PERTENCE A getHomeData
       featuredProperties: featuredProperties || [],
       testimonials: testimonials || [],
       siteSettings: siteSettings || null,
@@ -32,12 +32,10 @@ async function getHomeData() {
       siteSettings: null,
     }
   }
-}
+} // A FUNÇÃO getHomeData TERMINA AQUI
 
 const formatCurrency = (value?: number) => {
   if (value === undefined || value === null) {
-    // Se o problema de "R$ NaN" persistir apenas aqui, adicione um log para investigar 'value'
-    // console.log("Valor recebido para formatCurrency (featured):", value);
     return "Valor não informado";
   }
   return new Intl.NumberFormat("pt-BR", {
@@ -46,8 +44,11 @@ const formatCurrency = (value?: number) => {
   }).format(value);
 };
 
-export default async function Home() {
-  const { featuredProperties, testimonials, siteSettings } = await getHomeData()
+export default async function Home() { // A FUNÇÃO Home COMEÇA AQUI
+  const { featuredProperties, testimonials, siteSettings } = await getHomeData();
+
+  // COLOQUE O CONSOLE.LOG AQUI:
+  console.log("Dados dos Imóveis em DESTAQUE (brutos) da Home:", JSON.stringify(featuredProperties, null, 2));  
 
   const whatsappLink = siteSettings?.whatsapp
     ? `https://wa.me/${siteSettings.whatsapp.replace(/\D/g, '')}`
