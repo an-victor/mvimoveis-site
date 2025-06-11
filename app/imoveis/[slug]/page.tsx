@@ -560,8 +560,8 @@ export default async function PropertyDetails({ params }: { params: { slug: stri
           </div>
           <div className="mt-12 border-t pt-6 text-center text-sm text-slate-500">
             <p>
-              © {new Date().getFullYear()} {siteSettings?.title || "Marcelo Victor Imóveis"}. Todos os direitos
-              reservados.
+              © {new Date().getFullYear()} {siteSettings?.heroSubtitle || "Marcelo Victor Imóveis"}. Todos os direitos
+              reservados. Feita pela ALX Mídias.
             </p>
           </div>
         </div>
