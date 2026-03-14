@@ -3,17 +3,19 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Menu, X, MessageSquare } from "lucide-react"
+import { Menu, X, MessageSquare, LayoutDashboard, LogIn } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { getImageUrl } from "@/sanity/lib/image"
 import { NavigationLink } from "@/components/navigation-link"
 import type { SiteSettings } from "@/types/sanity"
+import type { Session } from "next-auth"
 
 interface HeaderProps {
   siteSettings: SiteSettings | null
+  session?: Session | null
 }
 
-export function Header({ siteSettings }: HeaderProps) {
+export function Header({ siteSettings, session }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const pathname = usePathname()
@@ -74,6 +76,24 @@ export function Header({ siteSettings }: HeaderProps) {
         </nav>
 
         <div className="flex items-center gap-4">
+          {session ? (
+            <Link
+              href="/dashboard"
+              className={`hidden md:inline-flex items-center text-sm font-medium transition-colors ${textClasses}`}
+            >
+              <LayoutDashboard className="mr-2 h-4 w-4" />
+              Dashboard
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              className={`hidden md:inline-flex items-center text-sm font-medium transition-colors ${textClasses}`}
+            >
+              <LogIn className="mr-2 h-4 w-4" />
+              Login
+            </Link>
+          )}
+
           {siteSettings?.whatsapp && (
             <Link
               href={`https://wa.me/${siteSettings.whatsapp.replace(/\D/g, "")}`}
@@ -133,6 +153,29 @@ export function Header({ siteSettings }: HeaderProps) {
             >
               Contato
             </NavigationLink>
+
+            <hr className="my-1 border-slate-100" />
+
+            {session ? (
+              <Link
+                href="/dashboard"
+                onClick={() => setIsMenuOpen(false)}
+                className="flex items-center text-lg font-medium text-slate-900 hover:text-brand-primary p-2"
+              >
+                <LayoutDashboard className="mr-3 h-5 w-5" />
+                Dashboard
+              </Link>
+            ) : (
+              <Link
+                href="/login"
+                onClick={() => setIsMenuOpen(false)}
+                className="flex items-center text-lg font-medium text-slate-900 hover:text-brand-primary p-2"
+              >
+                <LogIn className="mr-3 h-5 w-5" />
+                Área do Corretor
+              </Link>
+            )}
+
             {siteSettings?.whatsapp && (
               <Link
                 href={`https://wa.me/${siteSettings.whatsapp.replace(/\D/g, "")}`}

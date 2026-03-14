@@ -8,6 +8,7 @@ import { Footer } from "@/components/footer"
 import { client } from "@/sanity/lib/client"
 import { SITE_SETTINGS_QUERY } from "@/sanity/lib/queries"
 import type { SiteSettings } from "@/types/sanity"
+import { auth } from "@/auth"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -32,6 +33,7 @@ export default async function RootLayout({
   children: React.ReactNode
 }) {
   const siteSettings = await getSiteSettings()
+  const session = await auth()
 
   const brandStyles = {
     "--brand-primary": siteSettings?.primaryColor || "#f97316",
@@ -44,7 +46,7 @@ export default async function RootLayout({
       <body className={inter.className} style={brandStyles}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           <div className="flex min-h-screen flex-col">
-            <Header siteSettings={siteSettings} />
+            <Header siteSettings={siteSettings} session={session} />
             <main className="flex-1">
               {children}
             </main>
