@@ -9,11 +9,39 @@ import type { Property, SiteSettings } from "@/types/sanity"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { PropertyCard } from "@/components/property-card"
+import { PropertyFilters } from "@/components/property-filters"
+import { PropertySearch } from "@/components/property-search"
+import { PropertySort } from "@/components/property-sort"
 
-async function getPropertiesData() {
+async function getPropertiesData(searchParams: any) {
   try {
+    const { 
+      search = "", 
+      type = "", 
+      minPrice = 0, 
+      maxPrice = 100000000, 
+      bedrooms = 0, 
+      bathrooms = 0,
+      sort = "recent" 
+    } = searchParams;
+
+    // Define ordering
+    let order = "_createdAt desc";
+    if (sort === "price-asc") order = "price asc";
+    if (sort === "price-desc") order = "price desc";
+    if (sort === "area-asc") order = "area asc";
+    if (sort === "area-desc") order = "area desc";
+
     const [properties, siteSettings] = await Promise.all([
-      client.fetch<Property[]>(PROPERTIES_QUERY),
+      client.fetch<Property[]>(PROPERTIES_QUERY, { 
+        search, 
+        type, 
+        minPrice: Number(minPrice), 
+        maxPrice: Number(maxPrice), 
+        bedrooms: Number(bedrooms), 
+        bathrooms: Number(bathrooms),
+        order
+      }),
       client.fetch<SiteSettings>(SITE_SETTINGS_QUERY),
     ])
 
@@ -30,8 +58,9 @@ async function getPropertiesData() {
   }
 }
 
-export default async function PropertiesPage() {
-  const { properties, siteSettings } = await getPropertiesData()
+export default async function PropertiesPage({ searchParams }: { searchParams: Promise<any> }) {
+  const params = await searchParams;
+  const { properties, siteSettings } = await getPropertiesData(params)
 
   return (
     <>
@@ -68,36 +97,10 @@ export default async function PropertiesPage() {
                 Voltar para página inicial
               </Link>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <div className="relative w-full sm:w-auto">
-                <input
-                  type="search"
-                  placeholder="Buscar imóveis..."
-                  className="w-full rounded-md border border-slate-300 py-2 pl-9 pr-4 text-sm sm:w-[250px]"
-                />
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
-                >
-                  <circle cx="11" cy="11" r="8" />
-                  <path d="m21 21-4.3-4.3" />
-                </svg>
-              </div>
-              <select className="rounded-md border border-slate-300 py-2 px-4 text-sm w-full sm:w-auto">
-                <option value="recent">Mais recentes</option>
-                <option value="price-asc">Menor preço</option>
-                <option value="price-desc">Maior preço</option>
-                <option value="area-asc">Menor área</option>
-                <option value="area-desc">Maior área</option>
-              </select>
+            <div className="flex flex-wrap gap-2 items-center">
+              <PropertySearch />
+              <PropertyFilters />
+              <PropertySort />
             </div>
           </div>
 

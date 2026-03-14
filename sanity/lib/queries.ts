@@ -1,6 +1,12 @@
 import { groq } from "next-sanity"
 
-export const PROPERTIES_QUERY = groq`*[_type == "property" && status == "available"] | order(_createdAt desc) {
+export const PROPERTIES_QUERY = groq`*[_type == "property" && status == "available" 
+  && ($search == "" || title match $search + "*" || location match $search + "*")
+  && ($type == "" || type == $type)
+  && (price >= $minPrice && price <= $maxPrice)
+  && ($bedrooms == 0 || bedrooms >= $bedrooms)
+  && ($bathrooms == 0 || bathrooms >= $bathrooms)
+] | order($order) {
   _id,
   title,
   slug,
@@ -12,14 +18,10 @@ export const PROPERTIES_QUERY = groq`*[_type == "property" && status == "availab
   parkingSpots,
   condoFee,
   tax,
-  images,
-  youtubeVideo,
-  mapUrl,
-  virtualTour,
-  description,
-  features,
+  "mainImage": images[0],
   featured,
-  status
+  status,
+  type
 }`
 
 export const FEATURED_PROPERTIES_QUERY = groq`*[_type == "property" && featured == true && status == "available"] | order(_createdAt desc) [0...3] {
