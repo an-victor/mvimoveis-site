@@ -1,85 +1,72 @@
 # Marcelo Victor Imóveis - Arquitetura Brownfield
 
 ## 📝 Introdução
-Este documento captura o ESTADO ATUAL do projeto Marcelo Victor Imóveis. Ele serve como referência para as rodadas de refatoração, melhoria de SEO e implementação de novas funcionalidades (Login/CRM).
+Este documento captura o estado da arquitetura do projeto Marcelo Victor Imóveis, evoluindo de uma estrutura monolítica para uma arquitetura modular e orientada a tokens (Design System).
 
 ### Escopo do Documento
-Análise abrangente focada em: Performance, SEO, Filtros Avançados e Preparação para Área Logada.
+Referência técnica para: Performance, Design System, SEO e Infraestrutura de Dados.
 
 ---
 
-## 🚀 Referência Rápida - Arquivos Críticos
+## 🏗️ Arquitetura de Alto Nível (Atualizada)
 
-### Pontos de Entrada e Layout
-- **Layout Raiz**: `app/layout.tsx` (Contém metadados estáticos e ThemeProvider).
-- **Página Inicial**: `app/page.tsx` (Página principal com Server Side Rendering).
-- **Listagem de Imóveis**: `app/imoveis/page.tsx` (Concentra lógica de busca e filtros).
-
-### Lógica de Dados (Sanity)
-- **Queries**: `sanity/lib/queries.ts` (Definições GROQ para busca de dados).
-- **Schemas**: `sanity/schemas/` (`property.ts`, `siteSettings.ts`, `testimonial.ts`).
-- **Cliente**: `sanity/lib/client.ts`.
-
----
-
-## 🏗️ Arquitetura de Alto Nível
-
-### Stack Tecnológica Atual
+### Stack Tecnológica
 | Categoria | Tecnologia | Versão | Notas |
 |----------|------------|---------|--------|
-| Framework | Next.js | 15.2.4 | Usando App Router. |
-| Estilização | Tailwind CSS | 3.4.17 | Cores primárias/secundárias no Sanity mas não integradas ao CSS/Tailwind. |
-| CMS | Sanity.io | Latest | Centraliza conteúdo e configurações. |
-| UI Components | Radix UI / Lucide | - | Base para componentes shadcn/ui. |
+| Framework | Next.js | **15.2.6** | Atualizado para correção de segurança (CVE-2025-66478). |
+| Estilização | Tailwind CSS | 3.4.17 | **Design Tokens Semânticos** implementados. |
+| CMS | Sanity.io | v3 (Fixa) | Gerencia conteúdo e **Tokens de Cor Dinâmicos**. |
+| UI Components | Radix / Lucide | - | Componentes atômicos e moleculares. |
+
+### 🎨 Design System & DesignOps
+O projeto agora utiliza uma abordagem de **Design Tokens** em três níveis:
+1.  **Tokens de CMS (Dinâmicos)**: `primaryColor` e `secondaryColor` definidos no Sanity.
+2.  **Variáveis CSS (Ponte)**: Injetadas no `RootLayout` via objeto `style` no `body`.
+3.  **Tailwind Semântico**: Cores `brand-primary`, `brand-secondary` e `brand-accent` vinculadas às variáveis CSS.
 
 ---
 
-## ⚠️ Débito Técnico e Pontos de Melhoria
+## 🚀 Organização de Componentes (Padrão Atômico)
 
-### 1. Performance e Estrutura
-- **Repetição de Código**: O `Header` e o `Footer` estão duplicados dentro de `app/page.tsx` e `app/imoveis/page.tsx`. Devem ser movidos para o `layout.tsx`.
-- **Componentes Gigantes**: Páginas principais contêm centenas de linhas de JSX que deveriam ser componentes menores (ex: Seção de Contato, Call to Action).
-- **Hydration Warnings**: Detectado `suppressHydrationWarning` no `html`, indicando possíveis inconsistências entre Server/Client rendering.
+### Componentes Moleculares
+- **PropertyCard**: Centraliza a lógica de exibição de cards de imóveis em todo o site. Reutilizável na Home, Listagem e Similares.
 
-### 2. SEO e Meta Tags
-- **Metadados Estáticos**: O `title` e `description` estão fixos no `layout.tsx`. Precisam ser dinâmicos, buscando as informações do `siteSettings` do Sanity.
-- **Falta de Tags OpenGraph**: Não há implementação de imagens de compartilhamento (OG Images) dinâmicas.
-
-### 3. Filtros e Busca
-- **Filtros Estáticos**: Os componentes de filtro em `app/imoveis/page.tsx` são majoritariamente visuais e não filtram os dados via GROQ/URL Params.
-- **Busca**: A barra de busca atual não está funcional no servidor.
-
-### 4. Área de Login e CRM (Novas Funcionalidades)
-- **Inexistente**: Não há sistema de autenticação (sugestão: NextAuth.js ou Clerk).
-- **Dashboard**: Necessário criar uma rota `/admin` ou `/dashboard` para o corretor gerenciar leads e imóveis.
+### Layout Global Unificado
+- **RootLayout**: Gerencia o `Header` e `Footer` globalmente, eliminando duplicidade de código nas rotas individuais.
+- **Header Adaptativo**: Alterna entre transparente (Home) e sólido (Subpáginas) baseado no scroll e rota.
 
 ---
 
-## 🗺️ Organização do Código (Realidade)
+## ⚠️ Débito Técnico Resolvido & Pendente
+
+### ✅ Resolvido
+- [x] **Duplicidade de Layout**: Header/Footer unificados no `layout.tsx`.
+- [x] **Cores Hardcoded**: Removido `orange-500` fixo; agora utiliza `brand-primary`.
+- [x] **Consistência de [slug]**: Removido cabeçalhos duplicados na página de detalhes.
+- [x] **Segurança**: Patch do Next.js aplicado.
+
+### ⏳ Pendente
+- [ ] **SEO Dinâmico**: Implementar `generateMetadata` (Épico 2).
+- [ ] **Filtros Reais**: Barra de busca e filtros de URL (Épico 3).
+- [ ] **Supabase Transition**: Planejar migração do Sanity para Supabase + PostgreSQL.
+
+---
+
+## 🗺️ Organização do Código
 ```text
 project-root/
 ├── app/
-│   ├── imoveis/         # Rotas de listagem e detalhes (slug)
-│   ├── globals.css      # Estilos globais (precisa integrar cores do Sanity)
-│   └── layout.tsx       # Layout raiz (precisa de limpeza)
+│   ├── imoveis/         # Rotas de listagem e detalhes
+│   ├── globals.css      # Definição de fallback de tokens (:root)
+│   └── layout.tsx       # Injetor de tokens dinâmicos e Layout Global
 ├── components/
-│   ├── ui/              # Componentes base (shadcn)
-│   └── (diversos)       # Componentes de negócio (alguns não utilizados)
-├── sanity/
-│   ├── schemas/         # Definições de dados (precisa de campos de SEO)
-│   └── lib/             # Configurações de cliente e imagem
-└── lib/                 # Utilitários (formatadores, etc)
+│   ├── ui/              # Átomos (Botões, Inputs base)
+│   ├── property-card.tsx# Molécula principal de dados
+│   └── ...              # Organismos (Header, Footer, Banners)
+├── squads/
+│   └── design-system-orchestration/ # Metadados e Governança AIOX
+└── ...
 ```
 
 ---
-
-## 🎯 Plano de Ação Imediato
-
-1.  **Refatoração de Layout**: Mover Header/Footer para `layout.tsx` e unificar a navegação.
-2.  **SEO Dinâmico**: Implementar a função `generateMetadata` no Next.js consumindo dados do Sanity.
-3.  **Filtros Reais**: Implementar lógica de busca baseada em URL (`?priceMin=...&bedrooms=...`).
-4.  **Sistema de Cores**: Integrar `primaryColor` e `secondaryColor` do Sanity com variáveis CSS para controle total do tema via CMS.
-5.  **Área de Login**: Iniciar setup de autenticação.
-
----
-*Documento gerado por Orion (aiox-master) em 2026-03-13.*
+*Documento atualizado por Orion (aiox-master) e Gage (devops) em 2026-03-14.*
