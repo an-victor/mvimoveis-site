@@ -79,7 +79,7 @@ export function Header({ siteSettings, session }: HeaderProps) {
           {session ? (
             <Link
               href="/dashboard"
-              className={`hidden md:inline-flex items-center text-sm font-medium transition-colors ${textClasses}`}
+              className={`hidden md:inline-flex items-center rounded-md border-2 border-brand-primary px-3 py-1.5 text-sm font-medium transition-all hover:bg-brand-primary hover:text-white ${textClasses}`}
             >
               <LayoutDashboard className="mr-2 h-4 w-4" />
               Dashboard
@@ -87,7 +87,7 @@ export function Header({ siteSettings, session }: HeaderProps) {
           ) : (
             <Link
               href="/login"
-              className={`hidden md:inline-flex items-center text-sm font-medium transition-colors ${textClasses}`}
+              className={`hidden md:inline-flex items-center rounded-md border-2 border-brand-primary px-3 py-1.5 text-sm font-medium transition-all hover:bg-brand-primary hover:text-white ${textClasses}`}
             >
               <LogIn className="mr-2 h-4 w-4" />
               Login
