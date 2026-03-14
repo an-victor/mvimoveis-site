@@ -18,7 +18,7 @@ export const PROPERTIES_QUERY = groq`*[_type == "property" && status == "availab
   parkingSpots,
   condoFee,
   tax,
-  "mainImage": images[0],
+  images,
   featured,
   status,
   type

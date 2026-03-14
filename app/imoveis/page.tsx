@@ -19,11 +19,11 @@ async function getPropertiesData(searchParams: any) {
       search = "", 
       type = "", 
       minPrice = 0, 
-      maxPrice = 100000000, 
+      maxPrice = 10000000, 
       bedrooms = 0, 
       bathrooms = 0,
       sort = "recent" 
-    } = searchParams;
+    } = params;
 
     // Define ordering
     let order = "_createdAt desc";
