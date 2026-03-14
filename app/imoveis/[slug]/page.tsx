@@ -12,6 +12,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PropertyGallery } from "@/components/property-gallery"
 import { PropertyCard } from "@/components/property-card"
+import type { Metadata } from "next"
 
 async function getPropertyData(slug: string) {
   try {
@@ -33,6 +34,24 @@ async function getPropertyData(slug: string) {
       similarProperties: [],
       siteSettings: null,
     }
+  }
+}
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const { property, siteSettings } = await getPropertyData(params.slug)
+  
+  if (!property) return {}
+
+  const description = portableTextToPlainText(property.description).slice(0, 160)
+  
+  return {
+    title: `${property.title} | ${siteSettings?.title || "Marcelo Victor Imóveis"}`,
+    description: description || siteSettings?.description,
+    openGraph: {
+      title: property.title,
+      description: description,
+      images: property.mainImage ? [getImageUrl(property.mainImage, 1200, 630)] : [],
+    },
   }
 }
 

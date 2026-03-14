@@ -21,10 +21,18 @@ async function getSiteSettings() {
   }
 }
 
-export const metadata: Metadata = {
-  title: "Marcelo Victor Imóveis | Especialista em Imóveis de Alto Padrão",
-  description:
-    "Encontre o imóvel dos seus sonhos com Marcelo Victor, especialista em imóveis de alto padrão em São Paulo.",
+export async function generateMetadata(): Promise<Metadata> {
+  const siteSettings = await getSiteSettings()
+  
+  return {
+    title: siteSettings?.title || "Marcelo Victor Imóveis | Especialista em Imóveis de Alto Padrão",
+    description: siteSettings?.description || "Encontre o imóvel dos seus sonhos com Marcelo Victor, especialista em imóveis de alto padrão em São Paulo.",
+    openGraph: {
+      title: siteSettings?.title,
+      description: siteSettings?.description,
+      images: siteSettings?.logo ? [getImageUrl(siteSettings.logo, 1200, 630)] : [],
+    },
+  }
 }
 
 export default async function RootLayout({
