@@ -35,8 +35,8 @@ export function Header({ siteSettings }: HeaderProps) {
       : "absolute top-0 z-50 w-full bg-transparent transition-all duration-300"
     : "sticky top-0 z-50 w-full bg-white border-b shadow-sm"
 
-  const textClasses = isHome && !isScrolled ? "text-white hover:text-orange-300" : "text-slate-600 hover:text-orange-500"
-  const logoTextClasses = isHome && !isScrolled ? "text-orange-400" : "text-orange-500"
+  const textClasses = isHome && !isScrolled ? "text-white hover:text-brand-accent" : "text-slate-600 hover:text-brand-primary"
+  const logoTextClasses = isHome && !isScrolled ? "text-brand-accent" : "text-brand-primary"
 
   return (
     <header className={headerClasses}>
@@ -79,7 +79,7 @@ export function Header({ siteSettings }: HeaderProps) {
               href={`https://wa.me/${siteSettings.whatsapp.replace(/\D/g, "")}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden md:inline-flex items-center rounded-md bg-orange-500 px-4 py-2 text-sm font-medium text-white hover:bg-orange-600 shadow-sm"
+              className="hidden md:inline-flex items-center rounded-md bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-brand-secondary shadow-sm"
             >
               <MessageSquare className="mr-2 h-4 w-4" />
               WhatsApp
@@ -108,28 +108,28 @@ export function Header({ siteSettings }: HeaderProps) {
             <Link 
               href="/" 
               onClick={() => setIsMenuOpen(false)}
-              className="text-lg font-medium text-slate-900 hover:text-orange-500 p-2"
+              className="text-lg font-medium text-slate-900 hover:text-brand-primary p-2"
             >
               Home
             </Link>
             <Link 
               href="/imoveis" 
               onClick={() => setIsMenuOpen(false)}
-              className="text-lg font-medium text-slate-900 hover:text-orange-500 p-2"
+              className="text-lg font-medium text-slate-900 hover:text-brand-primary p-2"
             >
               Imóveis
             </Link>
             <NavigationLink 
               href="/#sobre" 
               onClick={() => setIsMenuOpen(false)}
-              className="text-lg font-medium text-slate-900 hover:text-orange-500 p-2"
+              className="text-lg font-medium text-slate-900 hover:text-brand-primary p-2"
             >
               Sobre
             </NavigationLink>
             <NavigationLink 
               href="/#contato" 
               onClick={() => setIsMenuOpen(false)}
-              className="text-lg font-medium text-slate-900 hover:text-orange-500 p-2"
+              className="text-lg font-medium text-slate-900 hover:text-brand-primary p-2"
             >
               Contato
             </NavigationLink>
@@ -138,7 +138,7 @@ export function Header({ siteSettings }: HeaderProps) {
                 href={`https://wa.me/${siteSettings.whatsapp.replace(/\D/g, "")}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center rounded-md bg-orange-500 px-4 py-3 text-base font-medium text-white hover:bg-orange-600"
+                className="flex items-center justify-center rounded-md bg-brand-primary px-4 py-3 text-base font-medium text-white hover:bg-brand-secondary"
               >
                 <MessageSquare className="mr-2 h-5 w-5" />
                 Falar no WhatsApp

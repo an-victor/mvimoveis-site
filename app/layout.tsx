@@ -33,9 +33,15 @@ export default async function RootLayout({
 }) {
   const siteSettings = await getSiteSettings()
 
+  const brandStyles = {
+    "--brand-primary": siteSettings?.primaryColor || "#f97316",
+    "--brand-secondary": siteSettings?.secondaryColor || "#ea580c",
+    "--brand-accent": siteSettings?.primaryColor ? `${siteSettings.primaryColor}cc` : "#fb923c",
+  } as React.CSSProperties
+
   return (
     <html lang="pt-BR" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className={inter.className} style={brandStyles}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           <div className="flex min-h-screen flex-col">
             <Header siteSettings={siteSettings} />

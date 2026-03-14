@@ -40,16 +40,16 @@ export function Footer({ siteSettings }: FooterProps) {
           <div>
             <h3 className="text-lg font-bold text-slate-900 mb-4">Links Rápidos</h3>
             <nav className="flex flex-col space-y-2">
-              <Link href="/" className="text-slate-600 hover:text-orange-500 transition-colors">
+              <Link href="/" className="text-slate-600 hover:text-brand-primary transition-colors">
                 Início
               </Link>
-              <Link href="/imoveis" className="text-slate-600 hover:text-orange-500 transition-colors">
+              <Link href="/imoveis" className="text-slate-600 hover:text-brand-primary transition-colors">
                 Imóveis
               </Link>
-              <NavigationLink href="/#sobre" className="text-slate-600 hover:text-orange-500 transition-colors">
+              <NavigationLink href="/#sobre" className="text-slate-600 hover:text-brand-primary transition-colors">
                 Sobre
               </NavigationLink>
-              <NavigationLink href="/#contato" className="text-slate-600 hover:text-orange-500 transition-colors">
+              <NavigationLink href="/#contato" className="text-slate-600 hover:text-brand-primary transition-colors">
                 Contato
               </NavigationLink>
             </nav>
@@ -61,19 +61,19 @@ export function Footer({ siteSettings }: FooterProps) {
             <div className="space-y-3">
               {siteSettings?.phone && (
                 <p className="flex items-center text-slate-600 text-sm">
-                  <Phone className="mr-3 h-4 w-4 text-orange-500" />
+                  <Phone className="mr-3 h-4 w-4 text-brand-primary" />
                   {siteSettings.phone}
                 </p>
               )}
               {siteSettings?.email && (
                 <p className="flex items-center text-slate-600 text-sm">
-                  <Mail className="mr-3 h-4 w-4 text-orange-500" />
+                  <Mail className="mr-3 h-4 w-4 text-brand-primary" />
                   {siteSettings.email}
                 </p>
               )}
               {siteSettings?.address && (
                 <p className="flex items-start text-slate-600 text-sm">
-                  <MapPin className="mr-3 h-4 w-4 text-orange-500 mt-0.5" />
+                  <MapPin className="mr-3 h-4 w-4 text-brand-primary mt-0.5" />
                   <span className="flex-1">{siteSettings.address}</span>
                 </p>
               )}

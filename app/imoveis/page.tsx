@@ -8,6 +8,7 @@ import type { Property, SiteSettings } from "@/types/sanity"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import { PropertyCard } from "@/components/property-card"
 
 async function getPropertiesData() {
   try {
@@ -49,7 +50,7 @@ export default async function PropertiesPage() {
         <div className="container">
           <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2">
-              <Link href="/" className="flex items-center text-sm font-medium text-orange-500 hover:underline">
+              <Link href="/" className="flex items-center text-sm font-medium text-brand-primary hover:underline">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -106,35 +107,7 @@ export default async function PropertiesPage() {
 
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {properties.map((property) => (
-              <Card key={property._id} className="overflow-hidden transition-all hover:shadow-lg">
-                <div className="aspect-video w-full overflow-hidden">
-                  <img
-                    src={getImageUrl(property.images?.[0], 800, 600) || "/placeholder.svg"}
-                    alt={property.title}
-                    className="h-full w-full object-cover transition-transform hover:scale-105"
-                  />
-                </div>
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-bold text-slate-900">{property.title}</h3>
-                  <div className="mt-2 flex items-center text-slate-500">
-                    <MapPin className="mr-1 h-4 w-4" />
-                    <span className="text-sm">{property.location}</span>
-                  </div>
-                  <div className="mt-4 flex items-center justify-between">
-                    <span className="text-lg font-bold text-orange-500">{formatCurrency(property.price)}</span>
-                    <div className="flex items-center gap-1 text-sm">
-                      <span>{property.area}</span>
-                      <span className="text-slate-300">|</span>
-                      <span>{property.bedrooms} quartos</span>
-                    </div>
-                  </div>
-                </CardContent>
-                <CardFooter className="border-t bg-slate-50 p-4">
-                  <Link href={`/imoveis/${property.slug.current}`} className="w-full">
-                    <Button className="w-full bg-orange-500 hover:bg-orange-600">Ver detalhes</Button>
-                  </Link>
-                </CardFooter>
-              </Card>
+              <PropertyCard key={property._id} property={property} />
             ))}
           </div>
 

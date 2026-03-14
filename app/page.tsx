@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { BannerCarousel } from "@/components/banner-carousel"
+import { PropertyCard } from "@/components/property-card"
 
 async function getHomeData() {
   try {
@@ -83,7 +84,7 @@ export default async function Home() {
           <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
             {siteSettings?.whatsapp && (
               <Link href={`https://wa.me/${siteSettings.whatsapp.replace(/\D/g, "")}`}>
-                <Button className="bg-orange-500 hover:bg-orange-600 shadow-lg" size="lg">
+                <Button className="bg-brand-primary hover:bg-brand-secondary shadow-lg" size="lg">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
@@ -105,7 +106,7 @@ export default async function Home() {
             <Link href="/imoveis">
               <Button
                 variant="outline"
-                className="border-orange-400 text-orange-400 hover:bg-orange-400 hover:text-white shadow-lg"
+                className="border-brand-accent text-brand-accent hover:bg-brand-accent hover:text-white shadow-lg"
                 size="lg"
               >
                 Ver Imóveis
@@ -125,40 +126,12 @@ export default async function Home() {
           </div>
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {featuredProperties.map((property) => (
-              <Card key={property._id} className="overflow-hidden transition-all hover:shadow-lg">
-                <div className="aspect-video w-full overflow-hidden">
-                  <img
-                    src={getImageUrl(property.images?.[0], 800, 600) || "/placeholder.svg"}
-                    alt={property.title}
-                    className="h-full w-full object-cover transition-transform hover:scale-105"
-                  />
-                </div>
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-bold text-slate-900">{property.title}</h3>
-                  <div className="mt-2 flex items-center text-slate-500">
-                    <MapPin className="mr-1 h-4 w-4" />
-                    <span className="text-sm">{property.location}</span>
-                  </div>
-                  <div className="mt-4 flex items-center justify-between">
-                    <span className="text-lg font-bold text-orange-500">{formatCurrency(property.price)}</span>
-                    <div className="flex items-center gap-1 text-sm">
-                      <span>{property.area}</span>
-                      <span className="text-slate-300">|</span>
-                      <span>{property.bedrooms} quartos</span>
-                    </div>
-                  </div>
-                </CardContent>
-                <CardFooter className="border-t bg-slate-50 p-4">
-                  <Link href={`/imoveis/${property.slug.current}`} className="w-full">
-                    <Button className="w-full bg-orange-500 hover:bg-orange-600">Ver detalhes</Button>
-                  </Link>
-                </CardFooter>
-              </Card>
+              <PropertyCard key={property._id} property={property} />
             ))}
           </div>
           <div className="mt-12 text-center">
             <Link href="/imoveis">
-              <Button variant="outline" className="border-orange-500 text-orange-500 hover:bg-orange-50">
+              <Button variant="outline" className="border-brand-primary text-brand-primary hover:bg-orange-50">
                 Ver todos os imóveis
                 <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
@@ -276,14 +249,14 @@ export default async function Home() {
       </section>
 
       {/* Call to Action - WhatsApp */}
-      <section id="contato" className="py-20 bg-gradient-to-br from-orange-500 via-orange-600 to-red-600">
+      <section id="contato" className="py-20 bg-gradient-to-br from-brand-primary via-brand-secondary to-brand-primary">
         <div className="container">
           <div className="mx-auto max-w-4xl text-center text-white">
             <div className="mb-8">
               <h2 className="text-4xl font-bold tracking-tight sm:text-5xl mb-4">
                 Pronto para Encontrar seu Imóvel?
               </h2>
-              <p className="text-xl text-orange-100 max-w-2xl mx-auto">
+              <p className="text-xl opacity-90 max-w-2xl mx-auto">
                 Fale comigo agora mesmo pelo WhatsApp e receba atendimento personalizado para encontrar o imóvel dos
                 seus sonhos!
               </p>
