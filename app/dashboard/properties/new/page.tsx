@@ -1,4 +1,4 @@
-import PropertyForm from "./property-form"
+import PropertyForm from "../property-form"
 
 export const metadata = {
   title: "Cadastrar Imóvel | Área do Usuário",
