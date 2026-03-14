@@ -35,12 +35,12 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
             <div className="space-y-2">
               <Label htmlFor="title">Título do Imóvel</Label>
               <p className="text-xs text-slate-500 mb-2">Um título atrativo para a listagem (ex: Cobertura Duplex no Jardins).</p>
-              <Input id="title" name="title" defaultValue={initialData?.title} placeholder="Digite o título..." required className="bg-slate-50 focus:bg-white transition-colors" />
+              <Input id="title" name="title" defaultValue={initialData?.title} placeholder="Digite o título..." required />
             </div>
             <div className="space-y-2">
               <Label htmlFor="price">Preço de Venda ou Locação</Label>
               <p className="text-xs text-slate-500 mb-2">Insira o valor formatado (ex: R$ 1.500.000,00).</p>
-              <Input id="price" name="price" defaultValue={initialData?.price} placeholder="R$ 0,00" required className="bg-slate-50 focus:bg-white transition-colors" />
+              <Input id="price" name="price" defaultValue={initialData?.price} placeholder="R$ 0,00" required />
             </div>
           </div>
           
@@ -48,7 +48,7 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
             <div className="space-y-2">
               <Label htmlFor="location">Localização / Bairro</Label>
               <p className="text-xs text-slate-500 mb-2">A região principal onde o imóvel está situado.</p>
-              <Input id="location" name="location" defaultValue={initialData?.location} placeholder="Ex: Itaim Bibi, São Paulo" required className="bg-slate-50 focus:bg-white transition-colors" />
+              <Input id="location" name="location" defaultValue={initialData?.location} placeholder="Ex: Itaim Bibi, São Paulo" required />
             </div>
             <div className="space-y-2">
               <Label htmlFor="status">Status de Disponibilidade</Label>
@@ -58,7 +58,7 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
                   id="status" 
                   name="status" 
                   defaultValue={initialData?.status || "available"} 
-                  className="flex h-10 w-full appearance-none rounded-md border border-input bg-slate-50 px-3 py-2 text-base md:text-sm ring-offset-background placeholder:text-muted-foreground focus:bg-white focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                  className="flex h-10 w-full appearance-none rounded-md border border-input bg-slate-100/50 px-3 py-2 text-base md:text-sm ring-offset-background placeholder:text-muted-foreground focus:bg-white focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
                 >
                   <option value="available">Disponível para Negociação</option>
                   <option value="sold">Vendido</option>
@@ -82,26 +82,26 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="space-y-2">
               <Label htmlFor="area">Área Total (m²)</Label>
-              <Input id="area" name="area" defaultValue={initialData?.area} placeholder="Ex: 120" required className="bg-slate-50 focus:bg-white" />
+              <Input id="area" name="area" defaultValue={initialData?.area} placeholder="Ex: 120" required />
             </div>
             <div className="space-y-2">
               <Label htmlFor="bedrooms">Nº de Quartos</Label>
-              <Input id="bedrooms" name="bedrooms" type="number" min="0" defaultValue={initialData?.bedrooms || 0} required className="bg-slate-50 focus:bg-white" />
+              <Input id="bedrooms" name="bedrooms" type="number" min="0" defaultValue={initialData?.bedrooms || 0} required />
             </div>
             <div className="space-y-2">
               <Label htmlFor="bathrooms">Nº de Banheiros</Label>
-              <Input id="bathrooms" name="bathrooms" type="number" min="0" defaultValue={initialData?.bathrooms || 0} required className="bg-slate-50 focus:bg-white" />
+              <Input id="bathrooms" name="bathrooms" type="number" min="0" defaultValue={initialData?.bathrooms || 0} required />
             </div>
             <div className="space-y-2">
               <Label htmlFor="parkingSpots">Vagas de Garagem</Label>
-              <Input id="parkingSpots" name="parkingSpots" type="number" min="0" defaultValue={initialData?.parkingSpots || 0} required className="bg-slate-50 focus:bg-white" />
+              <Input id="parkingSpots" name="parkingSpots" type="number" min="0" defaultValue={initialData?.parkingSpots || 0} required />
             </div>
           </div>
           
           <div className="space-y-2">
             <Label htmlFor="features">Características e Diferenciais</Label>
             <p className="text-xs text-slate-500 mb-2">Separe as características por vírgula (Ex: Piscina, Varanda Gourmet, Segurança 24h).</p>
-            <Input id="features" name="features" defaultValue={initialData?.features} placeholder="Digite as características..." className="bg-slate-50 focus:bg-white" />
+            <Input id="features" name="features" defaultValue={initialData?.features} placeholder="Digite as características..." />
           </div>
         </CardContent>
       </Card>
@@ -130,7 +130,7 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
               placeholder="Descreva os detalhes em profundidade..." 
               rows={6} 
               required 
-              className="bg-slate-50 focus:bg-white resize-y"
+              className="resize-y"
             />
           </div>
         </CardContent>

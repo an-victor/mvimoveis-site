@@ -34,7 +34,7 @@ export default function SettingsForm({ initialData, documentId }: { initialData:
             <div className="space-y-2">
               <Label htmlFor="title">Título do Site (Aba do navegador)</Label>
               <p className="text-xs text-slate-500 mb-2">Este texto aparece na aba do navegador e no título das buscas do Google.</p>
-              <Input id="title" name="title" defaultValue={initialData?.title} required className="bg-slate-50 focus:bg-white transition-colors" />
+              <Input id="title" name="title" defaultValue={initialData?.title} required />
             </div>
             <div className="space-y-2 border-2 border-dashed border-slate-200 rounded-lg p-4 bg-slate-50 hover:bg-slate-100 transition-colors">
               <Label htmlFor="logo">Upload da Logo</Label>
@@ -56,7 +56,7 @@ export default function SettingsForm({ initialData, documentId }: { initialData:
                   onChange={(e) => setPrimaryColor(e.target.value)}
                   className="w-14 p-1 h-10 cursor-pointer rounded-md border-slate-300" 
                 />
-                <Input type="text" value={primaryColor} onChange={(e) => setPrimaryColor(e.target.value)} className="flex-1 bg-slate-50 focus:bg-white" />
+                <Input type="text" value={primaryColor} onChange={(e) => setPrimaryColor(e.target.value)} className="flex-1" />
               </div>
             </div>
             <div className="space-y-2">
@@ -71,7 +71,7 @@ export default function SettingsForm({ initialData, documentId }: { initialData:
                   onChange={(e) => setSecondaryColor(e.target.value)}
                   className="w-14 p-1 h-10 cursor-pointer rounded-md border-slate-300" 
                 />
-                <Input type="text" value={secondaryColor} onChange={(e) => setSecondaryColor(e.target.value)} className="flex-1 bg-slate-50 focus:bg-white" />
+                <Input type="text" value={secondaryColor} onChange={(e) => setSecondaryColor(e.target.value)} className="flex-1" />
               </div>
             </div>
           </div>
@@ -79,7 +79,7 @@ export default function SettingsForm({ initialData, documentId }: { initialData:
           <div className="space-y-2 pt-4">
             <Label htmlFor="description">Descrição do Site (SEO)</Label>
             <p className="text-xs text-slate-500 mb-2">Um resumo sobre você ou sua imobiliária. Isso ajuda clientes a te encontrarem no Google.</p>
-            <Textarea id="description" name="description" defaultValue={initialData?.description} required rows={3} className="bg-slate-50 focus:bg-white" />
+            <Textarea id="description" name="description" defaultValue={initialData?.description} required rows={3} />
           </div>
         </CardContent>
       </Card>
@@ -94,12 +94,12 @@ export default function SettingsForm({ initialData, documentId }: { initialData:
             <div className="space-y-2">
               <Label htmlFor="heroTitle">Título Principal (Hero)</Label>
               <p className="text-xs text-slate-500 mb-2">A frase de maior impacto (ex: Encontre o Imóvel dos Seus Sonhos).</p>
-              <Input id="heroTitle" name="heroTitle" defaultValue={initialData?.heroTitle} required className="bg-slate-50 focus:bg-white" />
+              <Input id="heroTitle" name="heroTitle" defaultValue={initialData?.heroTitle} required />
             </div>
             <div className="space-y-2">
               <Label htmlFor="heroSubtitle">Subtítulo Destacado</Label>
               <p className="text-xs text-slate-500 mb-2">Pequeno texto acima do título (ex: Marcelo Victor - Corretor de Imóveis).</p>
-              <Input id="heroSubtitle" name="heroSubtitle" defaultValue={initialData?.heroSubtitle} required className="bg-slate-50 focus:bg-white" />
+              <Input id="heroSubtitle" name="heroSubtitle" defaultValue={initialData?.heroSubtitle} required />
             </div>
           </div>
           
@@ -112,7 +112,7 @@ export default function SettingsForm({ initialData, documentId }: { initialData:
           <div className="space-y-2">
             <Label htmlFor="heroDescription">Texto Descritivo de Apoio</Label>
             <p className="text-xs text-slate-500 mb-2">Parágrafo que complementa o título principal no banner.</p>
-            <Textarea id="heroDescription" name="heroDescription" defaultValue={initialData?.heroDescription} required rows={3} className="bg-slate-50 focus:bg-white" />
+            <Textarea id="heroDescription" name="heroDescription" defaultValue={initialData?.heroDescription} required rows={3} />
           </div>
         </CardContent>
       </Card>
@@ -127,23 +127,23 @@ export default function SettingsForm({ initialData, documentId }: { initialData:
             <div className="space-y-2">
               <Label htmlFor="phone">Telefone Fixo / Direto</Label>
               <p className="text-xs text-slate-500 mb-2">Ex: (11) 3333-3333</p>
-              <Input id="phone" name="phone" defaultValue={initialData?.phone} required className="bg-slate-50 focus:bg-white" />
+              <Input id="phone" name="phone" defaultValue={initialData?.phone} required />
             </div>
             <div className="space-y-2">
               <Label htmlFor="whatsapp">WhatsApp (com DDD)</Label>
               <p className="text-xs text-slate-500 mb-2">Apenas números. Ex: 11999999999</p>
-              <Input id="whatsapp" name="whatsapp" defaultValue={initialData?.whatsapp} required className="bg-slate-50 focus:bg-white" />
+              <Input id="whatsapp" name="whatsapp" defaultValue={initialData?.whatsapp} required />
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">E-mail Profissional</Label>
               <p className="text-xs text-slate-500 mb-2">Ex: contato@marcelovictor.com</p>
-              <Input id="email" name="email" type="email" defaultValue={initialData?.email} required className="bg-slate-50 focus:bg-white" />
+              <Input id="email" name="email" type="email" defaultValue={initialData?.email} required />
             </div>
           </div>
           <div className="space-y-2">
             <Label htmlFor="address">Endereço do Escritório</Label>
             <p className="text-xs text-slate-500 mb-2">Onde seus clientes podem te visitar presencialmente.</p>
-            <Input id="address" name="address" defaultValue={initialData?.address} required className="bg-slate-50 focus:bg-white" />
+            <Input id="address" name="address" defaultValue={initialData?.address} required />
           </div>
         </CardContent>
       </Card>
