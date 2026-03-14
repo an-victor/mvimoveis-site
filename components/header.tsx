@@ -76,24 +76,6 @@ export function Header({ siteSettings, session }: HeaderProps) {
         </nav>
 
         <div className="flex items-center gap-4">
-          {session ? (
-            <Link
-              href="/dashboard"
-              className={`hidden md:inline-flex items-center rounded-md border-2 border-brand-primary px-3 py-1.5 text-sm font-medium transition-all hover:bg-brand-primary hover:text-white ${textClasses}`}
-            >
-              <LayoutDashboard className="mr-2 h-4 w-4" />
-              Dashboard
-            </Link>
-          ) : (
-            <Link
-              href="/login"
-              className={`hidden md:inline-flex items-center rounded-md border-2 border-brand-primary px-3 py-1.5 text-sm font-medium transition-all hover:bg-brand-primary hover:text-white ${textClasses}`}
-            >
-              <LogIn className="mr-2 h-4 w-4" />
-              Login
-            </Link>
-          )}
-
           {siteSettings?.whatsapp && (
             <Link
               href={`https://wa.me/${siteSettings.whatsapp.replace(/\D/g, "")}`}
@@ -103,6 +85,24 @@ export function Header({ siteSettings, session }: HeaderProps) {
             >
               <MessageSquare className="mr-2 h-4 w-4" />
               WhatsApp
+            </Link>
+          )}
+
+          {session ? (
+            <Link
+              href="/dashboard"
+              className="hidden md:inline-flex items-center rounded-md bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-900 shadow-sm"
+            >
+              <LayoutDashboard className="mr-2 h-4 w-4" />
+              Dashboard
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              className="hidden md:inline-flex items-center rounded-md bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-900 shadow-sm"
+            >
+              <LogIn className="mr-2 h-4 w-4" />
+              Login
             </Link>
           )}
 
