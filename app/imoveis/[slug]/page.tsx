@@ -37,8 +37,9 @@ async function getPropertyData(slug: string) {
   }
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const { property, siteSettings } = await getPropertyData(params.slug)
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params
+  const { property, siteSettings } = await getPropertyData(slug)
   
   if (!property) return {}
 
@@ -55,8 +56,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 }
 
-export default async function PropertyDetails({ params }: { params: { slug: string } }) {
-  const { property, similarProperties, siteSettings } = await getPropertyData(params.slug)
+export default async function PropertyDetails({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+  const { property, similarProperties, siteSettings } = await getPropertyData(slug)
 
   if (!property) {
     return (
