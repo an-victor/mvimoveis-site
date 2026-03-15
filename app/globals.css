@@ -2,15 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: Arial, Helvetica, sans-serif;
-}
-
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+  
+  /* Utilitários Atômicos Visuais Premium (criados pelo Visual Generator) */
+  .glass-panel {
+    @apply bg-white/10 backdrop-blur-md border border-white/20 shadow-2xl;
+  }
+  .glass-card {
+    @apply bg-white/70 backdrop-blur-lg border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:bg-black/50 dark:border-white/10;
+  }
 }
+
 
 @layer base {
   :root {

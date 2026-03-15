@@ -58,33 +58,34 @@ export default async function Home() {
         }}
       >
         <div className="container text-center relative z-10">
-          <p className="mb-4 text-xl font-light text-white/90">
-            {siteSettings?.heroSubtitle || "Marcelo Victor - Corretor de Imóveis"}
-          </p>
-          <h1 className="max-w-4xl mx-auto text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl">
-            {siteSettings?.heroTitle ? (
-              <span
-                dangerouslySetInnerHTML={{
-                  __html: siteSettings.heroTitle.replace(
-                    /Seus Sonhos/g,
-                    '<span class="text-orange-400">Seus Sonhos</span>',
-                  ),
-                }}
-              />
-            ) : (
-              <>
-                Encontre o Imóvel dos <span className="text-orange-400">Seus Sonhos</span>
-              </>
-            )}
-          </h1>
-          <p className="mt-6 max-w-2xl mx-auto text-lg text-white/90">
-            {siteSettings?.heroDescription ||
-              "Mais de 15 anos de experiência ajudando famílias a encontrar o lar perfeito. Venda, compra e locação com total segurança e transparência."}
-          </p>
-          <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="glass-panel p-10 rounded-2xl max-w-4xl mx-auto transform transition-all duration-700 hover:scale-[1.01]">
+            <p className="mb-4 text-xl font-medium tracking-wide text-orange-400 uppercase drop-shadow-sm">
+              {siteSettings?.heroSubtitle || "Marcelo Victor - Corretor de Imóveis"}
+            </p>
+            <h1 className="text-5xl font-extrabold tracking-tight text-white sm:text-6xl md:text-7xl drop-shadow-md leading-tight">
+              {siteSettings?.heroTitle ? (
+                <span
+                  dangerouslySetInnerHTML={{
+                    __html: siteSettings.heroTitle.replace(
+                      /Seus Sonhos/g,
+                      '<span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-300">Seus Sonhos</span>',
+                    ),
+                  }}
+                />
+              ) : (
+                <>
+                  Encontre o Imóvel dos <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-300">Seus Sonhos</span>
+                </>
+              )}
+            </h1>
+            <p className="mt-8 text-lg md:text-xl text-slate-200 font-light leading-relaxed max-w-2xl mx-auto">
+              {siteSettings?.heroDescription ||
+                "Mais de 15 anos de experiência ajudando famílias a encontrar o lar perfeito. Venda, compra e locação com total segurança e transparência."}
+            </p>
+            <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
             {siteSettings?.whatsapp && (
               <Link href={`https://wa.me/${siteSettings.whatsapp.replace(/\D/g, "")}`}>
-                <Button className="bg-brand-primary hover:bg-brand-secondary shadow-lg" size="lg">
+                <Button className="bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-secondary hover:to-orange-700 text-white shadow-[0_0_20px_rgba(249,115,22,0.4)] hover:shadow-[0_0_30px_rgba(249,115,22,0.6)] border-none transition-all duration-300 transform hover:-translate-y-1 rounded-full px-8" size="lg">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
@@ -106,13 +107,14 @@ export default async function Home() {
             <Link href="/imoveis">
               <Button
                 variant="outline"
-                className="border-brand-accent text-brand-accent hover:bg-brand-accent hover:text-white shadow-lg"
+                className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 hover:text-white shadow-xl transition-all duration-300 transform hover:-translate-y-1 rounded-full px-8"
                 size="lg"
               >
                 Ver Imóveis
-                <ChevronRight className="ml-2 h-4 w-4" />
+                <ChevronRight className="ml-2 h-4 w-4 opacity-70 group-hover:opacity-100 transition-opacity" />
               </Button>
             </Link>
+          </div>
           </div>
         </div>
       </section>
