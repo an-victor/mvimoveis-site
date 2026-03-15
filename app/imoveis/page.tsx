@@ -23,7 +23,7 @@ async function getPropertiesData(searchParams: any) {
       bedrooms = 0, 
       bathrooms = 0,
       sort = "recent" 
-    } = params;
+    } = searchParams;
 
     // Define ordering
     let order = "_createdAt desc";
@@ -36,8 +36,6 @@ async function getPropertiesData(searchParams: any) {
       client.fetch<Property[]>(PROPERTIES_QUERY, { 
         search, 
         type, 
-        minPrice: Number(minPrice), 
-        maxPrice: Number(maxPrice), 
         bedrooms: Number(bedrooms), 
         bathrooms: Number(bathrooms),
         order

@@ -3,7 +3,6 @@ import { groq } from "next-sanity"
 export const PROPERTIES_QUERY = groq`*[_type == "property" && status == "available" 
   && ($search == "" || title match $search + "*" || location match $search + "*")
   && ($type == "" || type == $type)
-  && (price >= $minPrice && price <= $maxPrice)
   && ($bedrooms == 0 || bedrooms >= $bedrooms)
   && ($bathrooms == 0 || bathrooms >= $bathrooms)
 ] | order($order) {
