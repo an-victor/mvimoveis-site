@@ -58,7 +58,7 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
                   id="status" 
                   name="status" 
                   defaultValue={initialData?.status || "available"} 
-                  className="flex h-10 w-full appearance-none rounded-md border border-input bg-slate-100/50 px-3 py-2 text-base md:text-sm ring-offset-background placeholder:text-muted-foreground focus:bg-white focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                  className="flex h-11 w-full appearance-none rounded-md border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 px-4 py-2 text-base text-slate-800 dark:text-slate-200 md:text-sm ring-offset-background placeholder:text-slate-400/80 shadow-inner hover:bg-slate-200/50 dark:hover:bg-slate-800/50 focus:bg-white dark:focus:bg-slate-950 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/30 focus:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200"
                 >
                   <option value="available">Disponível para Negociação</option>
                   <option value="sold">Vendido</option>
