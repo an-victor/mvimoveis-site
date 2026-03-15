@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Maximize, Play } from "lucide-react"
+import { Maximize } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { getImageUrl } from "@/sanity/lib/image"
 import { ImageGallery } from "@/components/image-gallery"
@@ -31,6 +31,9 @@ interface PropertyGalleryProps {
 
 export function PropertyGallery({ property }: PropertyGalleryProps) {
   const [galleryOpen, setGalleryOpen] = useState(false)
+  const [videoPlaying, setVideoPlaying] = useState(false)
+
+  const youtubeId = property.youtubeVideo ? extractYouTubeId(property.youtubeVideo) : null
 
   if (!property.images || property.images.length === 0) {
     return (
@@ -61,21 +64,66 @@ export function PropertyGallery({ property }: PropertyGalleryProps) {
       <div className="flex flex-col md:flex-row gap-4 h-auto md:h-[500px]">
         {/* Vídeo vertical à esquerda - mais estreito */}
         <div className="w-full md:w-1/3 relative overflow-hidden rounded-lg bg-black aspect-video md:aspect-auto">
-          {property.youtubeVideo ? (
-            <>
-              <iframe
-                src={`https://www.youtube-nocookie.com/embed/${extractYouTubeId(property.youtubeVideo)}?rel=0&modestbranding=1&playsinline=1&enablejsapi=1`}
-                title={`Vídeo do ${property.title}`}
-                className="h-full w-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                referrerPolicy="strict-origin-when-cross-origin"
-                allowFullScreen
-              />
-              <div className="absolute top-3 left-3 bg-black/70 text-white px-2 py-1 rounded text-sm flex items-center">
-                <Play className="w-4 h-4 mr-1" />
-                Vídeo
-              </div>
-            </>
+          {youtubeId ? (
+            <div className="relative h-full w-full group">
+              {videoPlaying ? (
+                /* Iframe carrega APENAS após o clique no play */
+                <iframe
+                  src={`https://www.youtube-nocookie.com/embed/${youtubeId}?rel=0&modestbranding=1&playsinline=1&autoplay=1&enablejsapi=1`}
+                  title={`Vídeo do ${property.title}`}
+                  className="h-full w-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allowFullScreen
+                />
+              ) : (
+                /* Thumbnail do YouTube com botão de play */
+                <>
+                  <img
+                    src={`https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`}
+                    alt={`Thumbnail do vídeo: ${property.title}`}
+                    className="h-full w-full object-cover"
+                    onError={(e) => {
+                      // Fallback para thumbnail de menor qualidade
+                      const t = e.target as HTMLImageElement
+                      t.src = `https://img.youtube.com/vi/${youtubeId}/mqdefault.jpg`
+                    }}
+                  />
+                  {/* Overlay escuro */}
+                  <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors" />
+                  {/* Botão de play */}
+                  <button
+                    onClick={() => setVideoPlaying(true)}
+                    className="absolute inset-0 flex flex-col items-center justify-center gap-3 cursor-pointer"
+                    aria-label="Assistir vídeo"
+                  >
+                    <div className="flex items-center justify-center w-16 h-16 rounded-full bg-red-600 hover:bg-red-500 shadow-2xl hover:scale-110 transition-all duration-200">
+                      <svg viewBox="0 0 24 24" className="h-7 w-7 fill-white ml-1" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8 5v14l11-7z"/>
+                      </svg>
+                    </div>
+                    <span className="text-white text-sm font-semibold bg-black/60 px-3 py-1 rounded-full backdrop-blur-sm">
+                      Ver vídeo do imóvel
+                    </span>
+                  </button>
+                  {/* Badge Vídeo */}
+                  <div className="absolute top-3 left-3 bg-black/70 text-white px-2 py-1 rounded text-xs flex items-center gap-1">
+                    <svg viewBox="0 0 24 24" className="h-3 w-3 fill-current"><path d="M8 5v14l11-7z"/></svg>
+                    Vídeo
+                  </div>
+                  {/* Link externo caso embed seja bloqueado */}
+                  <a
+                    href={`https://www.youtube.com/watch?v=${youtubeId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="absolute bottom-3 right-3 text-white/70 hover:text-white text-xs underline"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Abrir no YouTube ↗
+                  </a>
+                </>
+              )}
+            </div>
           ) : (
             <>
               <img
