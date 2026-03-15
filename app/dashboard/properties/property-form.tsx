@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import Link from "next/link"
+import { Youtube, MapPin, Globe, Image as ImageIcon, DollarSign } from "lucide-react"
 
 export default function PropertyForm({ initialData, isEditing }: { initialData?: any, isEditing?: boolean }) {
   const action = isEditing ? updatePropertyAction : createPropertyAction
@@ -25,6 +26,7 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
         </div>
       )}
 
+      {/* ── Informações Básicas ── */}
       <Card className="border-slate-200 shadow-sm">
         <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4">
           <CardTitle className="text-xl text-slate-800">Informações Básicas</CardTitle>
@@ -70,9 +72,27 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
               </div>
             </div>
           </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="condoFee" className="flex items-center gap-2">
+                <DollarSign className="h-4 w-4 text-slate-400" />
+                Taxa de Condomínio (opcional)
+              </Label>
+              <Input id="condoFee" name="condoFee" defaultValue={initialData?.condoFee} placeholder="Ex: R$ 800,00" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="tax" className="flex items-center gap-2">
+                <DollarSign className="h-4 w-4 text-slate-400" />
+                IPTU Mensal (opcional)
+              </Label>
+              <Input id="tax" name="tax" defaultValue={initialData?.tax} placeholder="Ex: R$ 350,00" />
+            </div>
+          </div>
         </CardContent>
       </Card>
 
+      {/* ── Detalhes Estruturais ── */}
       <Card className="border-slate-200 shadow-sm">
         <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4">
           <CardTitle className="text-xl text-slate-800">Detalhes Estruturais</CardTitle>
@@ -106,18 +126,28 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
         </CardContent>
       </Card>
 
+      {/* ── Mídia & Apresentação ── */}
       <Card className="border-slate-200 shadow-sm">
         <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4">
-          <CardTitle className="text-xl text-slate-800">Mídia & Apresentação</CardTitle>
-          <CardDescription>Adicione a foto principal e o texto descritivo do imóvel.</CardDescription>
+          <CardTitle className="text-xl text-slate-800 flex items-center gap-2">
+            <ImageIcon className="h-5 w-5 text-brand-primary" />
+            Fotos do Imóvel
+          </CardTitle>
+          <CardDescription>
+            {isEditing 
+              ? "Selecione novas fotos apenas se quiser adicionar ou substituir as atuais." 
+              : "Adicione as fotos do imóvel. A primeira foto será a foto de destaque."}
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6 pt-6">
           <div className="space-y-2 border-2 border-dashed border-slate-200 rounded-lg p-6 bg-slate-50 hover:bg-slate-100 transition-colors">
-            <Label htmlFor="image" className="text-base">Upload da Foto Principal</Label>
+            <Label htmlFor="image" className="text-base cursor-pointer">
+              📷 Clique para selecionar fotos (múltiplas permitidas)
+            </Label>
             <p className="text-xs text-slate-500 mb-4">
-              {isEditing ? "Selecione um novo arquivo apenas se desejar substituir a foto atual." : "A foto principal será o destaque nos resultados de busca. Formatos aceitos: JPG, PNG, WEBP."}
+              Formatos aceitos: JPG, PNG, WEBP. Recomendado: fotos em alta resolução (1920x1080).
             </p>
-            <Input id="image" name="image" type="file" accept="image/*" required={!isEditing} className="bg-white cursor-pointer" />
+            <Input id="image" name="image" type="file" accept="image/*" multiple required={!isEditing} className="bg-white cursor-pointer" />
           </div>
 
           <div className="space-y-2">
@@ -132,6 +162,76 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
               required 
               className="resize-y"
             />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* ── Links e Mídia Avançada ── */}
+      <Card className="border-slate-200 shadow-sm">
+        <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4">
+          <CardTitle className="text-xl text-slate-800">Links e Mídia Avançada</CardTitle>
+          <CardDescription>Adicione vídeo do YouTube, localização no mapa e tour virtual 360°.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6 pt-6">
+          <div className="space-y-2">
+            <Label htmlFor="youtubeVideo" className="flex items-center gap-2">
+              <Youtube className="h-4 w-4 text-red-500" />
+              ID do Vídeo do YouTube
+            </Label>
+            <p className="text-xs text-slate-500 mb-2">
+              Cole <strong>apenas o ID</strong> do vídeo, não a URL completa. 
+              Exemplo: se a URL for <code className="bg-slate-100 px-1 rounded">youtube.com/watch?v=<strong>dQw4w9WgXcQ</strong></code>, cole apenas <code className="bg-slate-100 px-1 rounded">dQw4w9WgXcQ</code>
+            </p>
+            <Input 
+              id="youtubeVideo" 
+              name="youtubeVideo" 
+              defaultValue={initialData?.youtubeVideo} 
+              placeholder="Ex: dQw4w9WgXcQ" 
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="mapUrl" className="flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-blue-500" />
+              Link do Google Maps
+            </Label>
+            <p className="text-xs text-slate-500 mb-2">Acesse o Google Maps, encontre o endereço e clique em "Compartilhar" para copiar o link.</p>
+            <Input 
+              id="mapUrl" 
+              name="mapUrl" 
+              defaultValue={initialData?.mapUrl} 
+              placeholder="https://maps.google.com/..." 
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="virtualTour" className="flex items-center gap-2">
+              <Globe className="h-4 w-4 text-green-500" />
+              Tour Virtual 360° (opcional)
+            </Label>
+            <p className="text-xs text-slate-500 mb-2">Link para tour virtual imersivo do imóvel (ex: Matterport, Google Street View, etc.).</p>
+            <Input 
+              id="virtualTour" 
+              name="virtualTour" 
+              defaultValue={initialData?.virtualTour} 
+              placeholder="https://..." 
+            />
+          </div>
+
+          <div className="flex items-center gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+            <input 
+              type="checkbox" 
+              id="featured" 
+              name="featured" 
+              defaultChecked={initialData?.featured ?? false} 
+              className="h-4 w-4 accent-orange-500 cursor-pointer"
+            />
+            <div>
+              <Label htmlFor="featured" className="cursor-pointer font-semibold text-amber-800">
+                ⭐ Destacar este imóvel na página inicial
+              </Label>
+              <p className="text-xs text-amber-600 mt-0.5">Imóveis em destaque aparecem na seção principal do site.</p>
+            </div>
           </div>
         </CardContent>
       </Card>
