@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { groq } from "next-sanity"
-import { ArrowLeft, Bath, Bed, Car, ChevronRight, Heart, MapPin, Maximize, Share2 } from "lucide-react"
+import { ArrowLeft, Bath, Bed, Car, ChevronRight, Heart, MapPin, Maximize } from "lucide-react"
 import { client } from "@/sanity/lib/client"
 import { getImageUrl } from "@/sanity/lib/image"
 import { formatCurrency } from "@/lib/format-currency"
@@ -13,6 +13,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PropertyGallery } from "@/components/property-gallery"
 import { PropertyCard } from "@/components/property-card"
+import { PropertyShareButton } from "@/components/property-share-button"
 import type { Metadata } from "next"
 
 async function getPropertyData(slug: string) {
@@ -107,15 +108,12 @@ export default async function PropertyDetails({ params }: { params: Promise<{ sl
               <ArrowLeft className="mr-1 h-4 w-4" />
               Voltar para imóveis
             </Link>
-            <div className="flex gap-2">
-              <Button variant="outline" size="icon" className="rounded-full hover:text-red-500">
+            <div className="flex gap-2 items-center">
+              <Button variant="outline" size="icon" className="rounded-full hover:text-red-500" title="Favoritar">
                 <Heart className="h-4 w-4" />
                 <span className="sr-only">Favoritar</span>
               </Button>
-              <Button variant="outline" size="icon" className="rounded-full hover:text-brand-primary">
-                <Share2 className="h-4 w-4" />
-                <span className="sr-only">Compartilhar</span>
-              </Button>
+              <PropertyShareButton property={property} getImageUrl={getImageUrl} />
             </div>
           </div>
 
