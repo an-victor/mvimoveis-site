@@ -1,9 +1,10 @@
 import Link from "next/link"
+import { groq } from "next-sanity"
 import { ArrowLeft, Bath, Bed, Car, ChevronRight, Heart, MapPin, Maximize, Share2 } from "lucide-react"
 import { client } from "@/sanity/lib/client"
 import { getImageUrl } from "@/sanity/lib/image"
 import { formatCurrency } from "@/lib/format-currency"
-import { PROPERTY_QUERY, PROPERTIES_QUERY, SITE_SETTINGS_QUERY } from "@/sanity/lib/queries"
+import { PROPERTY_QUERY, SITE_SETTINGS_QUERY } from "@/sanity/lib/queries"
 import { portableTextToPlainText } from "@/sanity/lib/utils"
 import type { Property, SiteSettings } from "@/types/sanity"
 
@@ -18,13 +19,17 @@ async function getPropertyData(slug: string) {
   try {
     const [property, similarProperties, siteSettings] = await Promise.all([
       client.fetch<Property>(PROPERTY_QUERY, { slug }),
-      client.fetch<Property[]>(PROPERTIES_QUERY),
+      client.fetch<Property[]>(
+        groq`*[_type == "property" && status == "available"] | order(_createdAt desc) [0...7] {
+          _id, title, slug, price, location, area, bedrooms, bathrooms, parkingSpots, images, featured, status, type
+        }`
+      ),
       client.fetch<SiteSettings>(SITE_SETTINGS_QUERY),
     ])
 
     return {
       property: property || null,
-      similarProperties: (similarProperties || []).slice(0, 6),
+      similarProperties: (similarProperties || []).slice(0, 7),
       siteSettings: siteSettings || null,
     }
   } catch (error) {
@@ -51,7 +56,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     openGraph: {
       title: property.title,
       description: description,
-      images: property.mainImage ? [getImageUrl(property.mainImage, 1200, 630)] : [],
+      images: property.images?.[0] ? [getImageUrl(property.images[0] as any, 1200, 630)] : [],
     },
   }
 }
