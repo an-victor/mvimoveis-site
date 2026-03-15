@@ -53,6 +53,11 @@ export interface SiteSettings {
   linkedin?: string
   primaryColor?: string
   secondaryColor?: string
+  // Perfil do corretor
+  brokerName?: string
+  brokerTitle?: string
+  brokerBio?: string
+  brokerPhoto?: SanityImage | string
 }
 
 export interface SanityImage {

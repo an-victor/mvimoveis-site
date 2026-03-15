@@ -168,8 +168,16 @@ export default async function PropertyDetails({ params }: { params: Promise<{ sl
                 </TabsList>
                 <TabsContent value="description" className="mt-4 rounded-lg border p-6 bg-white shadow-sm">
                   <h3 className="mb-4 text-lg font-bold text-slate-900">Sobre este imóvel</h3>
-                  <div className="space-y-4 text-slate-600 leading-relaxed">
-                    <p>{descriptionText}</p>
+                  <div className="text-slate-600 leading-relaxed space-y-3">
+                    {descriptionText
+                      .split("\n")
+                      .map((line, i) =>
+                        line.trim() === "" ? (
+                          <br key={i} />
+                        ) : (
+                          <p key={i}>{line}</p>
+                        )
+                      )}
                   </div>
                 </TabsContent>
                 <TabsContent value="features" className="mt-4 rounded-lg border p-6 bg-white shadow-sm">
@@ -309,22 +317,34 @@ export default async function PropertyDetails({ params }: { params: Promise<{ sl
 
                 <div className="rounded-lg border bg-white p-6 shadow-md">
                   <h3 className="mb-4 text-lg font-bold text-slate-900 border-b pb-2">Sobre o Corretor</h3>
-                  <div className="mb-6 flex items-center gap-4">
-                    <div className="h-16 w-16 overflow-hidden rounded-full border-2 border-brand-primary">
+                  <div className="mb-4 flex items-center gap-4">
+                    <div className="h-16 w-16 overflow-hidden rounded-full border-2 border-brand-primary flex-shrink-0">
                       <img
-                        src="/placeholder-user.jpg"
-                        alt="Marcelo Victor"
+                        src={
+                          siteSettings?.brokerPhoto
+                            ? (typeof siteSettings.brokerPhoto === 'string'
+                                ? siteSettings.brokerPhoto
+                                : getImageUrl(siteSettings.brokerPhoto as any, 200, 200))
+                            : "/placeholder-user.jpg"
+                        }
+                        alt={siteSettings?.brokerName || "Corretor"}
                         className="h-full w-full object-cover"
                       />
                     </div>
                     <div>
-                      <div className="font-bold text-slate-900">Marcelo Victor</div>
-                      <div className="text-sm text-slate-600">Especialista imobiliário</div>
+                      <div className="font-bold text-slate-900">
+                        {siteSettings?.brokerName || "Marcelo Victor"}
+                      </div>
+                      <div className="text-sm text-slate-500">
+                        {siteSettings?.brokerTitle || "Especialista Imobiliário"}
+                      </div>
                     </div>
                   </div>
-                  <div className="text-sm text-slate-600 italic">
-                    "Meu compromisso é encontrar o lar ideal para você e sua família com total transparência e dedicação."
-                  </div>
+                  {(siteSettings?.brokerBio) && (
+                    <div className="text-sm text-slate-600 italic border-t pt-4">
+                      &ldquo;{siteSettings.brokerBio}&rdquo;
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

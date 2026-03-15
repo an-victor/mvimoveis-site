@@ -148,6 +148,59 @@ export default function SettingsForm({ initialData, documentId }: { initialData:
         </CardContent>
       </Card>
 
+      <Card className="border-slate-200 shadow-sm">
+        <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4">
+          <CardTitle className="text-xl text-slate-800">Perfil do Corretor</CardTitle>
+          <CardDescription>Informações e foto que aparecem na página de cada imóvel na seção "Sobre o Corretor".</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6 pt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="brokerName">Nome Completo</Label>
+              <p className="text-xs text-slate-500 mb-2">Como seu nome aparecerá para os clientes.</p>
+              <Input id="brokerName" name="brokerName" defaultValue={initialData?.brokerName} placeholder="Ex: Marcelo Victor" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="brokerTitle">Título / Especialidade</Label>
+              <p className="text-xs text-slate-500 mb-2">Sua especialização ou cargo.</p>
+              <Input id="brokerTitle" name="brokerTitle" defaultValue={initialData?.brokerTitle} placeholder="Ex: Especialista em Alto Padrão" />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="brokerBio">Frase de Apresentação</Label>
+            <p className="text-xs text-slate-500 mb-2">Uma frase curta e impactante que transmita seu compromisso com os clientes.</p>
+            <Textarea 
+              id="brokerBio" 
+              name="brokerBio" 
+              defaultValue={initialData?.brokerBio} 
+              placeholder="Ex: Meu compromisso é encontrar o lar ideal para você e sua família com total transparência e dedicação."
+              rows={3}
+            />
+          </div>
+
+          <div className="space-y-3 border-2 border-dashed border-slate-200 rounded-lg p-6 bg-slate-50 hover:bg-slate-100 transition-colors">
+            <Label htmlFor="brokerPhoto" className="text-base cursor-pointer">
+              📸 Foto de Perfil do Corretor
+            </Label>
+            <p className="text-xs text-slate-500">Recomendado: foto profissional quadrada (400x400px). Será exibida na página de cada imóvel.</p>
+            {initialData?.brokerPhoto && (
+              <div className="flex items-center gap-4 py-2">
+                <div className="h-16 w-16 overflow-hidden rounded-full border-2 border-brand-primary flex-shrink-0">
+                  <img 
+                    src={typeof initialData.brokerPhoto === 'string' ? initialData.brokerPhoto : '/placeholder-user.jpg'} 
+                    alt="Foto atual do corretor" 
+                    className="h-full w-full object-cover" 
+                  />
+                </div>
+                <span className="text-sm text-slate-600">Foto atual. Selecione um novo arquivo para substituir.</span>
+              </div>
+            )}
+            <Input id="brokerPhoto" name="brokerPhoto" type="file" accept="image/*" className="bg-white cursor-pointer" />
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="flex justify-end pt-4 border-t border-slate-200 mt-8">
         <Button type="submit" size="lg" disabled={isPending} className="w-full md:w-auto px-8 bg-brand-primary hover:bg-brand-secondary text-white font-semibold shadow-md">
           {isPending ? "Salvando Alterações..." : "Salvar Configurações"}
