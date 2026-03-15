@@ -161,10 +161,62 @@ export default async function PropertyDetails({ params }: { params: Promise<{ sl
               </div>
 
               <Tabs defaultValue="description" className="mb-8">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="description">Descrição</TabsTrigger>
-                  <TabsTrigger value="features">Características</TabsTrigger>
-                  <TabsTrigger value="location">Localização</TabsTrigger>
+                {/* Indicador de navegação */}
+                <p className="text-xs text-slate-400 text-center mb-3 flex items-center justify-center gap-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 15l-6-6M9 15l6-6"/></svg>
+                  Selecione uma seção para visualizar
+                </p>
+                <TabsList className="grid w-full grid-cols-3 h-auto p-1.5 gap-2 bg-slate-100 rounded-xl border border-slate-200">
+                  <TabsTrigger
+                    value="description"
+                    className="
+                      flex flex-col items-center gap-1.5 py-3 px-2 rounded-lg
+                      text-slate-500 font-medium transition-all duration-200
+                      data-[state=active]:bg-white data-[state=active]:text-brand-primary
+                      data-[state=active]:shadow-md data-[state=active]:font-bold
+                      data-[state=active]:scale-[1.02]
+                      hover:text-slate-700 hover:bg-white/60
+                    "
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+                    </svg>
+                    <span className="text-xs sm:text-sm">Descrição</span>
+                  </TabsTrigger>
+
+                  <TabsTrigger
+                    value="features"
+                    className="
+                      flex flex-col items-center gap-1.5 py-3 px-2 rounded-lg
+                      text-slate-500 font-medium transition-all duration-200
+                      data-[state=active]:bg-white data-[state=active]:text-brand-primary
+                      data-[state=active]:shadow-md data-[state=active]:font-bold
+                      data-[state=active]:scale-[1.02]
+                      hover:text-slate-700 hover:bg-white/60
+                    "
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                    </svg>
+                    <span className="text-xs sm:text-sm">Características</span>
+                  </TabsTrigger>
+
+                  <TabsTrigger
+                    value="location"
+                    className="
+                      flex flex-col items-center gap-1.5 py-3 px-2 rounded-lg
+                      text-slate-500 font-medium transition-all duration-200
+                      data-[state=active]:bg-white data-[state=active]:text-brand-primary
+                      data-[state=active]:shadow-md data-[state=active]:font-bold
+                      data-[state=active]:scale-[1.02]
+                      hover:text-slate-700 hover:bg-white/60
+                    "
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+                    </svg>
+                    <span className="text-xs sm:text-sm">Localização</span>
+                  </TabsTrigger>
                 </TabsList>
                 <TabsContent value="description" className="mt-4 rounded-lg border p-6 bg-white shadow-sm">
                   <h3 className="mb-4 text-lg font-bold text-slate-900">Sobre este imóvel</h3>
