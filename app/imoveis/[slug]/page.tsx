@@ -113,7 +113,7 @@ export default async function PropertyDetails({ params }: { params: Promise<{ sl
                 <Heart className="h-4 w-4" />
                 <span className="sr-only">Favoritar</span>
               </Button>
-              <PropertyShareButton property={property} getImageUrl={getImageUrl} />
+              <PropertyShareButton property={property} />
             </div>
           </div>
 

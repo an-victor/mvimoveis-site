@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Share2, Copy, Check, X, MessageCircle, ChevronLeft, ChevronRight, Link as LinkIcon } from "lucide-react"
+import { getImageUrl } from "@/sanity/lib/image"
 
 interface PropertyShareButtonProps {
   property: {
@@ -14,10 +15,9 @@ interface PropertyShareButtonProps {
     slug: { current: string }
     images?: any[]
   }
-  getImageUrl: (image: any, w: number, h: number) => string | null
 }
 
-export function PropertyShareButton({ property, getImageUrl }: PropertyShareButtonProps) {
+export function PropertyShareButton({ property }: PropertyShareButtonProps) {
   const [open, setOpen] = useState(false)
   const [copied, setCopied] = useState(false)
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
