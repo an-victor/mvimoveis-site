@@ -7,6 +7,24 @@ import { getImageUrl } from "@/sanity/lib/image"
 import { ImageGallery } from "@/components/image-gallery"
 import type { Property } from "@/types/sanity"
 
+// Extrai o ID do YouTube de qualquer formato de URL
+function extractYouTubeId(input: string): string {
+  if (!input) return ""
+  // Já é um ID puro (11 chars, sem espaços ou /)
+  if (/^[a-zA-Z0-9_-]{11}$/.test(input.trim())) return input.trim()
+  // Tenta extrair de URLs
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/)([a-zA-Z0-9_-]{11})/,
+    /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
+  ]
+  for (const pattern of patterns) {
+    const match = input.match(pattern)
+    if (match) return match[1]
+  }
+  // Fallback: retorna o que foi passado
+  return input.trim()
+}
+
 interface PropertyGalleryProps {
   property: Property
 }
@@ -46,10 +64,11 @@ export function PropertyGallery({ property }: PropertyGalleryProps) {
           {property.youtubeVideo ? (
             <>
               <iframe
-                src={`https://www.youtube.com/embed/${property.youtubeVideo}?rel=0&modestbranding=1`}
+                src={`https://www.youtube-nocookie.com/embed/${extractYouTubeId(property.youtubeVideo)}?rel=0&modestbranding=1&playsinline=1&enablejsapi=1`}
                 title={`Vídeo do ${property.title}`}
                 className="h-full w-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerPolicy="strict-origin-when-cross-origin"
                 allowFullScreen
               />
               <div className="absolute top-3 left-3 bg-black/70 text-white px-2 py-1 rounded text-sm flex items-center">
@@ -60,7 +79,7 @@ export function PropertyGallery({ property }: PropertyGalleryProps) {
           ) : (
             <>
               <img
-                src={getImageUrl(property.images[0], 400, 600) || "/placeholder.svg"}
+                src={getImageUrl(property.images[0] as any, 400, 600) || "/placeholder.svg"}
                 alt={property.title}
                 className="h-full w-full object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
                 onClick={() => setGalleryOpen(true)}
@@ -78,7 +97,7 @@ export function PropertyGallery({ property }: PropertyGalleryProps) {
             return (
               <div key={index} className="relative overflow-hidden rounded-lg aspect-square md:aspect-auto">
                 <img
-                  src={getImageUrl(image, 400, 300) || "/placeholder.svg"}
+                  src={getImageUrl(image as any, 400, 300) || "/placeholder.svg"}
                   alt={`${property.title} - Imagem ${index + 1}`}
                   className="h-full w-full object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
                   onClick={() => setGalleryOpen(true)}
