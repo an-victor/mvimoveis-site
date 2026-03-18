@@ -1,18 +1,33 @@
 "use client"
 
-import { useActionState, useState } from "react"
-import { updateSiteSettingsAction } from "./actions"
+import { useActionState, useState, useTransition } from "react"
+import { updateSiteSettingsAction, removeBannerImageAction } from "./actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { X, Loader2 } from "lucide-react"
+import Image from "next/image"
+import { getImageUrl } from "@/sanity/lib/image"
 
 export default function SettingsForm({ initialData, documentId }: { initialData: any, documentId: string }) {
   const [state, formAction, isPending] = useActionState(updateSiteSettingsAction, { success: false, message: "" })
   
   const [primaryColor, setPrimaryColor] = useState(initialData?.primaryColor || "#f97316")
   const [secondaryColor, setSecondaryColor] = useState(initialData?.secondaryColor || "#1e293b")
+  const [isPendingRemoveBanner, startRemoveBannerTransition] = useTransition()
+  const [removingBannerKey, setRemovingBannerKey] = useState<string | null>(null)
+  const [localBanners, setLocalBanners] = useState<any[]>(initialData?.bannerImages || [])
+
+  const handleRemoveBanner = (imageKey: string) => {
+    setRemovingBannerKey(imageKey)
+    startRemoveBannerTransition(async () => {
+      await removeBannerImageAction(documentId, imageKey)
+      setLocalBanners(prev => prev.filter((img: any) => img._key !== imageKey))
+      setRemovingBannerKey(null)
+    })
+  }
 
   return (
     <form action={formAction} className="space-y-8">
@@ -103,9 +118,50 @@ export default function SettingsForm({ initialData, documentId }: { initialData:
             </div>
           </div>
           
+          {/* Miniaturas do Banner */}
+          {localBanners.length > 0 && (
+            <div className="space-y-3">
+              <Label className="text-sm font-semibold text-slate-700">
+                Imagens atuais do banner ({localBanners.length})
+              </Label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {localBanners.map((img: any) => (
+                  <div key={img._key} className="relative group rounded-lg overflow-hidden aspect-video border border-slate-200 shadow-sm bg-slate-100">
+                    <Image
+                      src={getImageUrl(img as any, 400, 225) || "/placeholder.svg"}
+                      alt="Imagem do banner"
+                      fill
+                      sizes="(max-width: 640px) 50vw, 33vw"
+                      className="object-cover"
+                    />
+                    <button
+                      type="button"
+                      disabled={isPendingRemoveBanner}
+                      onClick={() => handleRemoveBanner(img._key)}
+                      className="absolute top-1.5 right-1.5 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 shadow-md opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50"
+                      title="Remover imagem do banner"
+                    >
+                      {removingBannerKey === img._key
+                        ? <Loader2 className="h-3 w-3 animate-spin" />
+                        : <X className="h-3 w-3" />}
+                    </button>
+                    {img._key === localBanners[0]?._key && (
+                      <span className="absolute bottom-1.5 left-1.5 bg-brand-primary/90 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                        Principal
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-slate-400">Passe o mouse sobre uma imagem e clique no ❌ para removê-la. A primeira imagem é a principal.</p>
+            </div>
+          )}
+
           <div className="space-y-2 border-2 border-dashed border-slate-200 rounded-lg p-4 bg-slate-50 hover:bg-slate-100 transition-colors">
-            <Label htmlFor="banner">Trocar Imagem de Fundo do Banner</Label>
-            <p className="text-xs text-slate-500 mb-2">Recomendado: Imagem de alta qualidade em formato paisagem (1920x1080).</p>
+            <Label htmlFor="banner">
+              {localBanners.length > 0 ? "🖼️ Adicionar nova imagem ao banner" : "🖼️ Adicionar imagem de fundo ao banner"}
+            </Label>
+            <p className="text-xs text-slate-500 mb-2">Recomendado: Imagem de alta qualidade em formato paisagem (1920x1080). Você pode adicionar várias imagens para criar um carrossel.</p>
             <Input id="banner" name="banner" type="file" accept="image/*" className="bg-white cursor-pointer" />
           </div>
 

@@ -42,28 +42,36 @@ export async function updateSiteSettingsAction(prevState: any, formData: FormDat
       }
     }
 
-    // Upload da Imagem do Banner se houver novo arquivo
+    // Upload do Banner — ADICIONA ao array existente (não substitui)
     if (bannerFile && bannerFile.size > 0) {
       const buffer = Buffer.from(await bannerFile.arrayBuffer())
       const asset = await writeClient.assets.upload('image', buffer, {
         filename: bannerFile.name,
         contentType: bannerFile.type
       })
-      // No schema o bannerImages é um array. Aqui simplificamos para atualizar a primeira posição.
-      dataToUpdate.bannerImages = [{
-        _type: 'image',
-        _key: asset._id,
-        asset: { _type: 'reference', _ref: asset._id }
-      }]
+      // Usa append para guardar todas as imagens do carrossel
+      dataToUpdate.bannerImages = {
+        _type: 'reference',  // sinalizador para o patch abaixo usar append
+        _asset: asset._id
+      }
     }
 
     const existingDoc = await writeClient.getDocument(documentId)
-    
+
+    // Separa o banner do resto do patch para usar insert em vez de set
+    const bannerAsset = dataToUpdate.bannerImages as any
+    delete dataToUpdate.bannerImages
+
     if (existingDoc) {
-      await writeClient
-        .patch(documentId)
-        .set(dataToUpdate)
-        .commit()
+      let patch = writeClient.patch(documentId).set(dataToUpdate)
+      if (bannerAsset?._asset) {
+        patch = patch.insert('after', 'bannerImages[-1]', [{
+          _type: 'image',
+          _key: bannerAsset._asset,
+          asset: { _type: 'reference', _ref: bannerAsset._asset }
+        }])
+      }
+      await patch.commit()
     } else {
       await writeClient.create({
         _type: "siteSettings",
@@ -80,5 +88,25 @@ export async function updateSiteSettingsAction(prevState: any, formData: FormDat
   } catch (error: any) {
     console.error("Erro ao salvar:", error)
     return { success: false, message: error.message || "Erro ao salvar as configurações." }
+  }
+}
+
+// Remove uma imagem específica do banner pelo _key
+export async function removeBannerImageAction(documentId: string, imageKey: string) {
+  const session = await auth()
+  if (!session?.user) return { success: false, message: "Acesso negado." }
+
+  try {
+    await writeClient
+      .patch(documentId)
+      .unset([`bannerImages[_key=="${imageKey}"]`])
+      .commit()
+
+    revalidatePath("/", "layout")
+    revalidatePath("/dashboard/settings")
+    return { success: true }
+  } catch (error: any) {
+    console.error("Erro ao remover imagem do banner:", error)
+    return { success: false, message: error.message }
   }
 }
