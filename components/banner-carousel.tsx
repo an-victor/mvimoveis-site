@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Image from "next/image"
 import { getImageUrl } from "@/sanity/lib/image"
 import type { SanityImage } from "@/types/sanity"
 
@@ -25,10 +26,14 @@ export function BannerCarousel({ images }: BannerCarouselProps) {
     // Fallback para imagem padrão se não houver imagens
     return (
       <section className="relative h-screen w-full overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000"
-          style={{ backgroundImage: "url('/placeholder.svg?height=1080&width=1920')" }}
-        >
+        <div className="absolute inset-0 transition-opacity duration-1000">
+          <Image
+            src="/placeholder.svg?height=1080&width=1920"
+            alt="Placeholder Banner"
+            fill
+            className="object-cover"
+            priority
+          />
           <div className="absolute inset-0 bg-slate-900/20" />
         </div>
 
@@ -45,13 +50,18 @@ export function BannerCarousel({ images }: BannerCarouselProps) {
       {images.map((image, index) => (
         <div
           key={index}
-          className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${
+          className={`absolute inset-0 transition-opacity duration-1000 ${
             index === currentIndex ? "opacity-100" : "opacity-0"
           }`}
-          style={{
-            backgroundImage: `url(${getImageUrl(image, 1920, 1080)})`,
-          }}
         >
+          <Image
+            src={getImageUrl(image as any, 1920, 1080)}
+            alt={`Banner image ${index + 1}`}
+            fill
+            className="object-cover"
+            priority={index === 0}
+            sizes="100vw"
+          />
           {/* Overlay mais sutil para manter as imagens nítidas */}
           <div className="absolute inset-0 bg-slate-900/20" />
         </div>

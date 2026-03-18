@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import { Maximize } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { getImageUrl } from "@/sanity/lib/image"
@@ -126,10 +127,13 @@ export function PropertyGallery({ property }: PropertyGalleryProps) {
             </div>
           ) : (
             <>
-              <img
+              <Image
                 src={getImageUrl(property.images[0] as any, 400, 600) || "/placeholder.svg"}
                 alt={property.title}
-                className="h-full w-full object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
+                fill
+                priority
+                sizes="(max-width: 768px) 100vw, 33vw"
+                className="object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
                 onClick={() => setGalleryOpen(true)}
               />
             </>
@@ -144,10 +148,12 @@ export function PropertyGallery({ property }: PropertyGalleryProps) {
 
             return (
               <div key={index} className="relative overflow-hidden rounded-lg aspect-square md:aspect-auto">
-                <img
+                <Image
                   src={getImageUrl(image as any, 400, 300) || "/placeholder.svg"}
                   alt={`${property.title} - Imagem ${index + 1}`}
-                  className="h-full w-full object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
+                  fill
+                  sizes="(max-width: 768px) 50vw, 33vw"
+                  className="object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
                   onClick={() => setGalleryOpen(true)}
                 />
                 {shouldShowButton && (

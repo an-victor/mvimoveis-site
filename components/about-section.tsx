@@ -1,3 +1,4 @@
+import Image from "next/image"
 import { getImageUrl } from "@/sanity/lib/image"
 import type { SiteSettings } from "@/types/sanity"
 
@@ -11,10 +12,12 @@ export function AboutSection({ siteSettings }: AboutSectionProps) {
       <div className="container">
         <div className="grid gap-12 md:grid-cols-2 md:items-center">
           <div className="relative aspect-square overflow-hidden rounded-lg md:aspect-auto md:h-[600px]">
-            <img
-              src={getImageUrl(siteSettings?.aboutImage, 600, 600) || "/placeholder.svg"}
+            <Image
+              src={getImageUrl(siteSettings?.aboutImage as any, 600, 600) || "/placeholder.svg"}
               alt={siteSettings?.aboutTitle || "Sobre o corretor"}
-              className="h-full w-full object-cover"
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover"
             />
           </div>
           <div className="space-y-6">
