@@ -7,6 +7,8 @@ export const metadata = {
   title: "Leads Recebidos | Dashboard",
 }
 
+export const dynamic = 'force-dynamic'
+
 async function getLeads() {
   try {
     const { data, error } = await supabase
