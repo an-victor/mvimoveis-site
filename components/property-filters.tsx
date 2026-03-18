@@ -61,6 +61,7 @@ export function PropertyFilters() {
     { value: "house", label: "Casa" },
     { value: "penthouse", label: "Cobertura" },
     { value: "land", label: "Terreno" },
+    { value: "commercial", label: "Comercial" },
   ]
 
   return (

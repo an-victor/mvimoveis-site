@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Building2, Settings } from "lucide-react"
+import { Building2, Settings, Users } from "lucide-react"
 import Link from "next/link"
 
 export const metadata = {
@@ -23,6 +23,18 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <p className="text-xs text-muted-foreground">Adicione, edite ou remova imóveis do seu catálogo. Controle os preços e galerias de fotos.</p>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/dashboard/leads">
+          <Card className="hover:border-primary/50 transition-colors cursor-pointer h-full border-green-100 bg-green-50/20">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Leads Recebidos</CardTitle>
+              <Users className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <p className="text-xs text-muted-foreground">Veja quem entrou em contato pelo seu site. Nomes, telefones e imóveis de interesse.</p>
             </CardContent>
           </Card>
         </Link>

@@ -5,6 +5,7 @@ export const PROPERTIES_QUERY = groq`*[_type == "property" && status == "availab
   && ($type == "" || type == $type)
   && ($bedrooms == 0 || bedrooms >= $bedrooms)
   && ($bathrooms == 0 || bathrooms >= $bathrooms)
+  && (price >= $minPrice && price <= $maxPrice)
 ] | order($order) {
   _id,
   title,
@@ -54,7 +55,8 @@ export const PROPERTY_QUERY = groq`*[_type == "property" && slug.current == $slu
   virtualTour,
   description,
   features,
-  status
+  status,
+  type
 }`
 
 export const TESTIMONIALS_QUERY = groq`*[_type == "testimonial"] | order(_createdAt desc) [0...6] {
@@ -86,5 +88,9 @@ export const SITE_SETTINGS_QUERY = groq`*[_type == "siteSettings"][0] {
   instagram,
   linkedin,
   primaryColor,
-  secondaryColor
+  secondaryColor,
+  brokerName,
+  brokerTitle,
+  brokerBio,
+  brokerPhoto
 }`

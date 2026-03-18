@@ -21,6 +21,7 @@ export interface Property {
   description: PortableTextBlock[]
   features: string[]
   featured?: boolean
+  type: "apartment" | "house" | "penthouse" | "land" | "commercial"
   status: "available" | "sold" | "rented"
 }
 

@@ -1,6 +1,7 @@
 import { client } from "@/sanity/lib/client"
 import { groq } from "next-sanity"
 import Link from "next/link"
+import { getImageUrl } from "@/sanity/lib/image"
 import { Button } from "@/components/ui/button"
 import { Plus, Pencil, Trash2, Home as HomeIcon } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -13,7 +14,7 @@ export const metadata = {
 
 // Uma query um pouco mais abrangente que a PROPERTIES_QUERY (que filtrava só disponíveis)
 const DASHBOARD_PROPERTIES_QUERY = groq`*[_type == "property"] | order(_createdAt desc) {
-  _id, title, price, location, status
+  _id, title, price, location, status, images
 }`
 
 export default async function PropertiesPage() {
@@ -47,6 +48,7 @@ export default async function PropertiesPage() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-[80px]">Imagem</TableHead>
                   <TableHead>Título</TableHead>
                   <TableHead>Localização</TableHead>
                   <TableHead>Preço</TableHead>
@@ -57,6 +59,15 @@ export default async function PropertiesPage() {
               <TableBody>
                 {properties.map((property: any) => (
                   <TableRow key={property._id}>
+                    <TableCell>
+                      <div className="relative h-12 w-16 overflow-hidden rounded-md bg-muted">
+                        <img 
+                          src={getImageUrl(property.images?.[0] as any, 120, 100) || "/placeholder.svg"} 
+                          alt={property.title}
+                          className="object-cover h-full w-full"
+                        />
+                      </div>
+                    </TableCell>
                     <TableCell className="font-medium">{property.title}</TableCell>
                     <TableCell>{property.location}</TableCell>
                     <TableCell>{property.price}</TableCell>
@@ -87,7 +98,7 @@ export default async function PropertiesPage() {
                 ))}
                 {properties.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                       Nenhum imóvel cadastrado. Clique em "Cadastrar Imóvel" para começar.
                     </TableCell>
                   </TableRow>

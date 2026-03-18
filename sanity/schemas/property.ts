@@ -127,6 +127,21 @@ export default defineType({
       initialValue: false,
     }),
     defineField({
+      name: "type",
+      title: "Tipo",
+      type: "string",
+      options: {
+        list: [
+          { title: "Apartamento", value: "apartment" },
+          { title: "Casa", value: "house" },
+          { title: "Cobertura", value: "penthouse" },
+          { title: "Terreno", value: "land" },
+          { title: "Comercial", value: "commercial" },
+        ],
+      },
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
       name: "status",
       title: "Status",
       type: "string",

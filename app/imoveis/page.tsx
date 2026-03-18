@@ -38,6 +38,8 @@ async function getPropertiesData(searchParams: any) {
         type, 
         bedrooms: Number(bedrooms), 
         bathrooms: Number(bathrooms),
+        minPrice: Number(minPrice),
+        maxPrice: Number(maxPrice),
         order
       }),
       client.fetch<SiteSettings>(SITE_SETTINGS_QUERY),

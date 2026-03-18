@@ -6,7 +6,7 @@ Transformar o site de um corretor de imóveis em uma **plataforma SaaS escaláve
 - **Status**: Em Desenvolvimento Ativo (Fase 3 — UX + Leads)
 - **Documento de Referência**: `docs/brownfield-architecture.md`
 - **Stack**: Next.js 15, Sanity.io (CMS), Supabase (Leads + Auth), Vercel (Deploy), Tailwind CSS.
-- **Último Update**: 2026-03-14
+- **Último Update**: 2026-03-16
 
 ---
 
@@ -44,26 +44,26 @@ Transformar o site de um corretor de imóveis em uma **plataforma SaaS escaláve
 - ✅ RF6.5: Botão WhatsApp com mensagem pré-preenchida (título, local, preço)
 - ✅ RF6.6: Botão Compartilhar com modal (foto selecionável, mensagem editável, copiar link)
 
-### 🔄 Épico 3: Filtros Avançados na Listagem (PENDENTE)
-- ⬜ RF3.1: Filtro por tipo de imóvel (Casa, Apto, Terreno, Comercial)
-- ⬜ RF3.2: Filtro por quartos (1, 2, 3, 4+)
-- ⬜ RF3.3: Range de preço (slider min/max)
-- ⬜ RF3.4: Sincronização com URL via Search Params
-- ⬜ RF3.5: Busca por texto (título ou localização)
+### ✅ Épico 3: Filtros Avançados na Listagem (CONCLUÍDO)
+- ✅ RF3.1: Filtro por tipo de imóvel (Casa, Apto, Terreno, Comercial, Cobertura)
+- ✅ RF3.2: Filtro por quartos (1, 2, 3, 4, 5+)
+- ✅ RF3.3: Range de preço (min/max price no Sanity)
+- ✅ RF3.4: Sincronização com URL via Search Params
+- ✅ RF3.5: Busca por texto (título ou localização)
 
-### 🔄 Épico 7: Mapa e Tour Virtual na Página (PENDENTE)
-- ⬜ RF7.1: Aba "Localização" com embed Google Maps via `mapUrl`
-- ⬜ RF7.2: Aba "Tour Virtual" com embed do link cadastrado
-- ⬜ RF7.3: Fallback se campos não preenchidos (ocultar aba)
+### ✅ Épico 7: Mapa e Tour Virtual na Página (CONCLUÍDO)
+- ✅ RF7.1: Aba "Localização" com embed Google Maps via `mapUrl`
+- ✅ RF7.2: Aba "Tour Virtual" com embed do link 360° cadastrado
+- ✅ RF7.3: Fallback dinâmico (aba de tour só aparece se houver link)
 
-### 🔥 Épico 8: Captura de Leads — Supabase (PRÓXIMO)
-- ⬜ RF8.1: Modal de captura (Nome + Telefone) antes de abrir WhatsApp
-- ⬜ RF8.2: Tabela `leads` no Supabase: `id, name, phone, property_slug, property_title, source, created_at`
-- ⬜ RF8.3: Seção "Leads Recebidos" no Dashboard com tabela e data/hora
+### ✅ Épico 8: Captura de Leads — Supabase (CONCLUÍDO)
+- ✅ RF8.1: Modal de captura (Nome + Telefone) antes de abrir WhatsApp
+- ✅ RF8.2: Tabela `leads` no Supabase: `id, name, phone, property_slug, property_title, created_at`
+- ✅ RF8.3: Seção "Leads Recebidos" no Dashboard com tabela e data/hora
 - ⬜ RF8.4: Formulário de contato alternativo (e-mail) na página do imóvel
 - ⬜ RF8.5: Exportar leads para CSV no Dashboard
 
-### 🎯 Épico 9: Módulo de Agendamentos (FUTURO)
+### 🎯 Épico 9: Módulo de Agendamentos (PRÓXIMO)
 - ⬜ RF9.1: Formulário de solicitação de visita com data/hora preferida
 - ⬜ RF9.2: Agenda do corretor no Dashboard (visualização semana/dia)
 - ⬜ RF9.3: Notificação por e-mail ao corretor quando nova visita solicitada
@@ -96,12 +96,13 @@ Transformar o site de um corretor de imóveis em uma **plataforma SaaS escaláve
 | M2: Google Ready | Épico 2 — SEO | ✅ Concluído |
 | M3: Dashboard Completo | Épico 5 — Dashboard | ✅ Concluído |
 | M4: UX Premium | Épico 6 — Página Imóvel | ✅ Concluído |
-| M5: Smart Search | Épico 3 — Filtros | 🔄 Pendente |
-| **M6: Lead Machine** | **Épico 8 — Leads** | **⬜ Próximo** |
-| M7: Agenda | Épico 9 — Agendamentos | ⬜ Planejado |
-| M8: SaaS v1 | Épico 10 — Multi-Corretor | ⬜ Visão |
+| M5: Smart Search | Épico 3 — Filtros | ✅ Concluído |
+| M6: Lead Machine | Épico 8 — Leads | ✅ Concluído |
+| M7: Mapa & Tour | Épico 7 — Mídia | ✅ Concluído |
+| **M8: Agenda** | **Épico 9 — Agendamentos** | **⬜ Próximo** |
+| M9: SaaS v1 | Épico 10 — Multi-Corretor | ⬜ Visão |
 
 ---
 
 *Documento originalmente gerado por Orion (aiox-master) em 2026-03-13.*
-*Atualizado por Antigravity + Orion em 2026-03-14 — Épicos 5, 6, 8, 9, 10 adicionados.*
+*Atualizado por Antigravity em 2026-03-16 — Épicos 3, 7 e 8 concluídos.*
