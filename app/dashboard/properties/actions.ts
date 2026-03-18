@@ -146,3 +146,82 @@ export async function updatePropertyAction(prevState: any, formData: FormData) {
     return { success: false, message: error.message || "Erro ao atualizar imóvel." }
   }
 }
+
+// Remove uma foto específica do array de imagens de um imóvel
+export async function removePropertyImageAction(propertyId: string, imageKey: string) {
+  const session = await auth()
+  if (!session?.user) throw new Error("Acesso negado")
+
+  try {
+    await writeClient
+      .patch(propertyId)
+      .unset([`images[_key=="${imageKey}"]`])
+      .commit()
+
+    revalidatePath("/")
+    revalidatePath("/imoveis")
+    revalidatePath("/dashboard/properties")
+    return { success: true }
+  } catch (error: any) {
+    console.error("Erro ao remover imagem:", error)
+    return { success: false, message: error.message }
+  }
+}
+
+// Cria ou atualiza um depoimento
+export async function saveTestimonialAction(prevState: any, formData: FormData) {
+  const session = await auth()
+  if (!session?.user) return { success: false, message: "Acesso negado." }
+
+  const id = formData.get("id") as string
+  const avatarFile = formData.get("avatar") as File
+
+  try {
+    const data: any = {
+      name: formData.get("name") as string,
+      location: formData.get("location") as string,
+      text: formData.get("text") as string,
+      rating: Number(formData.get("rating") || 5),
+      featured: formData.get("featured") === "on",
+    }
+
+    if (avatarFile && avatarFile.size > 0) {
+      const buffer = Buffer.from(await avatarFile.arrayBuffer())
+      const asset = await writeClient.assets.upload('image', buffer, {
+        filename: avatarFile.name,
+        contentType: avatarFile.type
+      })
+      data.avatar = { _type: 'image', asset: { _type: 'reference', _ref: asset._id } }
+    }
+
+    if (id) {
+      await writeClient.patch(id).set(data).commit()
+    } else {
+      await writeClient.create({ _type: "testimonial", ...data })
+    }
+
+    revalidatePath("/")
+    revalidatePath("/dashboard/settings")
+    return { success: true, message: id ? "Depoimento atualizado!" : "Depoimento criado com sucesso!" }
+  } catch (error: any) {
+    console.error("Erro ao salvar depoimento:", error)
+    return { success: false, message: error.message || "Erro ao salvar depoimento." }
+  }
+}
+
+// Delete um depoimento
+export async function deleteTestimonialAction(formData: FormData) {
+  const session = await auth()
+  if (!session?.user) throw new Error("Acesso negado")
+
+  const id = formData.get("id") as string
+  if (!id) return
+
+  try {
+    await writeClient.delete(id)
+    revalidatePath("/")
+    revalidatePath("/dashboard/settings")
+  } catch (error: any) {
+    console.error("Erro ao deletar depoimento:", error)
+  }
+}

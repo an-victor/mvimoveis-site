@@ -1,19 +1,33 @@
 "use client"
 
-import { useActionState, useRef } from "react"
-import { createPropertyAction, updatePropertyAction } from "./actions"
+import { useActionState, useRef, useTransition, useState } from "react"
+import { createPropertyAction, updatePropertyAction, removePropertyImageAction } from "./actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import Link from "next/link"
-import { Youtube, MapPin, Globe, Image as ImageIcon, DollarSign } from "lucide-react"
+import { Youtube, MapPin, Globe, Image as ImageIcon, DollarSign, X, Loader2 } from "lucide-react"
+import Image from "next/image"
+import { getImageUrl } from "@/sanity/lib/image"
 
 export default function PropertyForm({ initialData, isEditing }: { initialData?: any, isEditing?: boolean }) {
   const action = isEditing ? updatePropertyAction : createPropertyAction
   const [state, formAction, isPending] = useActionState(action, { success: false, message: "" })
   const formRef = useRef<HTMLFormElement>(null)
+  const [isPendingRemove, startRemoveTransition] = useTransition()
+  const [removingKey, setRemovingKey] = useState<string | null>(null)
+  const [localImages, setLocalImages] = useState<any[]>(initialData?.images || [])
+
+  const handleRemoveImage = (imageKey: string) => {
+    setRemovingKey(imageKey)
+    startRemoveTransition(async () => {
+      await removePropertyImageAction(initialData?._id, imageKey)
+      setLocalImages(prev => prev.filter((img: any) => img._key !== imageKey))
+      setRemovingKey(null)
+    })
+  }
 
   return (
     <form ref={formRef} action={formAction} className="space-y-8">
@@ -142,13 +156,45 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
         <CardContent className="space-y-6 pt-6">
           <div className="space-y-2 border-2 border-dashed border-slate-200 rounded-lg p-6 bg-slate-50 hover:bg-slate-100 transition-colors">
             <Label htmlFor="image" className="text-base cursor-pointer">
-              📷 Clique para selecionar fotos (múltiplas permitidas)
+              📷 {isEditing ? "Adicionar mais fotos" : "Clique para selecionar fotos (múltiplas permitidas)"}
             </Label>
             <p className="text-xs text-slate-500 mb-4">
               Formatos aceitos: JPG, PNG, WEBP. Recomendado: fotos em alta resolução (1920x1080).
             </p>
             <Input id="image" name="image" type="file" accept="image/*" multiple required={!isEditing} className="bg-white cursor-pointer" />
           </div>
+
+          {/* Miniaturas das fotos existentes */}
+          {isEditing && localImages.length > 0 && (
+            <div className="space-y-3">
+              <Label className="text-sm font-semibold text-slate-700">Fotos atuais ({localImages.length})</Label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                {localImages.map((img: any) => (
+                  <div key={img._key} className="relative group rounded-lg overflow-hidden aspect-square border border-slate-200 shadow-sm">
+                    <Image
+                      src={getImageUrl(img as any, 300, 300) || "/placeholder.svg"}
+                      alt="Foto do imóvel"
+                      fill
+                      sizes="(max-width: 640px) 50vw, 25vw"
+                      className="object-cover"
+                    />
+                    <button
+                      type="button"
+                      disabled={isPendingRemove}
+                      onClick={() => handleRemoveImage(img._key)}
+                      className="absolute top-1.5 right-1.5 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 shadow-md opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50"
+                      title="Remover foto"
+                    >
+                      {removingKey === img._key
+                        ? <Loader2 className="h-3 w-3 animate-spin" />
+                        : <X className="h-3 w-3" />}
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-slate-400">Passe o mouse sobre uma foto e clique no ❌ para removê-la.</p>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="description">Descrição Completa</Label>
