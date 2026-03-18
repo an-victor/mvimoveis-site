@@ -23,6 +23,7 @@ export function LeadCaptureButton({
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     name: "",
+    email: "",
     phone: ""
   })
 
@@ -38,6 +39,7 @@ export function LeadCaptureButton({
     try {
       const result = await saveLead({
         name: formData.name,
+        email: formData.email,
         phone: formData.phone,
         property_slug: propertySlug,
         property_title: propertyTitle
@@ -51,7 +53,7 @@ export function LeadCaptureButton({
         
         window.open(whatsappUrl, "_blank")
         setOpen(false)
-        setFormData({ name: "", phone: "" })
+        setFormData({ name: "", email: "", phone: "" })
       } else {
         alert("Erro ao salvar seus dados. Por favor, tente novamente.")
       }
@@ -113,6 +115,22 @@ export function LeadCaptureButton({
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="Ex: João Silva"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent transition-all"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="email" className="text-sm font-semibold text-slate-700">
+                  Seu E-mail
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="Ex: joao@email.com"
                   className="w-full rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent transition-all"
                 />
               </div>

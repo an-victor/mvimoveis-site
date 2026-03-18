@@ -1,7 +1,7 @@
 import { supabase } from "@/lib/supabase"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Users, Calendar, Phone, Home } from "lucide-react"
+import { Users, Calendar, Phone, Home, Mail } from "lucide-react"
 
 export const metadata = {
   title: "Leads Recebidos | Dashboard",
@@ -52,6 +52,7 @@ export default async function LeadsPage() {
                 <TableRow>
                   <TableHead>Data/Hora</TableHead>
                   <TableHead>Nome</TableHead>
+                  <TableHead>E-mail</TableHead>
                   <TableHead>WhatsApp</TableHead>
                   <TableHead>Imóvel de Interesse</TableHead>
                 </TableRow>
@@ -59,7 +60,7 @@ export default async function LeadsPage() {
               <TableBody>
                 {leads.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center">
+                    <TableCell colSpan={5} className="h-24 text-center">
                       Nenhum lead recebido ainda.
                     </TableCell>
                   </TableRow>
@@ -73,6 +74,15 @@ export default async function LeadsPage() {
                         </div>
                       </TableCell>
                       <TableCell className="font-medium">{lead.name}</TableCell>
+                      <TableCell>
+                        <a 
+                          href={`mailto:${lead.email}`} 
+                          className="flex items-center gap-2 text-blue-600 hover:underline"
+                        >
+                          <Mail className="h-3.5 w-3.5" />
+                          {lead.email || "-"}
+                        </a>
+                      </TableCell>
                       <TableCell>
                         <a 
                           href={`https://wa.me/${lead.phone.replace(/\D/g, "")}`} 

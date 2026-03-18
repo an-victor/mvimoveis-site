@@ -4,6 +4,7 @@ import { supabase } from "@/lib/supabase"
 
 export async function saveLead(formData: {
   name: string
+  email: string
   phone: string
   property_slug: string
   property_title: string
@@ -14,6 +15,7 @@ export async function saveLead(formData: {
       .insert([
         {
           name: formData.name,
+          email: formData.email,
           phone: formData.phone,
           property_slug: formData.property_slug,
           property_title: formData.property_title,
