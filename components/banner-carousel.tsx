@@ -55,7 +55,7 @@ export function BannerCarousel({ images }: BannerCarouselProps) {
           }`}
         >
           <Image
-            src={getImageUrl(image as any, 1920, 1080)}
+            src={getImageUrl(image, 1920, 1080)}
             alt={`Banner image ${index + 1}`}
             fill
             className="object-cover"

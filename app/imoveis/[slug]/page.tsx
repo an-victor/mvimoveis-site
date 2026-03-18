@@ -6,7 +6,7 @@ import { getImageUrl } from "@/sanity/lib/image"
 import { formatCurrency } from "@/lib/format-currency"
 import { PROPERTY_QUERY, SITE_SETTINGS_QUERY } from "@/sanity/lib/queries"
 import { portableTextToPlainText } from "@/sanity/lib/utils"
-import type { Property, SiteSettings } from "@/types/sanity"
+import type { Property, SiteSettings, SanityImage } from "@/types/sanity"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -15,6 +15,7 @@ import { PropertyGallery } from "@/components/property-gallery"
 import { PropertyCard } from "@/components/property-card"
 import { PropertyShareButton } from "@/components/property-share-button"
 import { LeadCaptureButton } from "@/components/lead-capture-button"
+import { LeadContactForm } from "@/components/lead-contact-form"
 import type { Metadata } from "next"
 
 async function getPropertyData(slug: string) {
@@ -58,7 +59,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     openGraph: {
       title: property.title,
       description: description,
-      images: property.images?.[0] ? [getImageUrl(property.images[0] as any, 1200, 630)] : [],
+      images: property.images?.[0] ? [getImageUrl(property.images[0], 1200, 630)] : [],
     },
   }
 }
@@ -340,6 +341,11 @@ export default async function PropertyDetails({ params }: { params: Promise<{ sl
                   </TabsContent>
                 )}
               </Tabs>
+              
+              {/* Formulário de Contato Direto */}
+              <div className="mb-12">
+                <LeadContactForm propertyTitle={property.title} propertySlug={property.slug.current} />
+              </div>
 
               {/* Imóveis Similares */}
               {similarProperties.length > 0 && (
@@ -403,7 +409,7 @@ export default async function PropertyDetails({ params }: { params: Promise<{ sl
                           siteSettings?.brokerPhoto
                             ? (typeof siteSettings.brokerPhoto === 'string'
                                 ? siteSettings.brokerPhoto
-                                : getImageUrl(siteSettings.brokerPhoto as any, 200, 200))
+                                : getImageUrl(siteSettings.brokerPhoto as SanityImage, 200, 200))
                             : "/placeholder-user.jpg"
                         }
                         alt={siteSettings?.brokerName || "Corretor"}

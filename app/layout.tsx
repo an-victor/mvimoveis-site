@@ -10,6 +10,7 @@ import { getImageUrl } from "@/sanity/lib/image"
 import { SITE_SETTINGS_QUERY } from "@/sanity/lib/queries"
 import type { SiteSettings } from "@/types/sanity"
 import { auth } from "@/auth"
+import { SecurityProvider } from "@/components/security-provider"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -54,13 +55,15 @@ export default async function RootLayout({
     <html lang="pt-BR" suppressHydrationWarning>
       <body className={inter.className} style={brandStyles}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
-          <div className="flex min-h-screen flex-col">
-            <Header siteSettings={siteSettings} session={session} />
-            <main className="flex-1">
-              {children}
-            </main>
-            <Footer siteSettings={siteSettings} />
-          </div>
+          <SecurityProvider>
+            <div className="flex min-h-screen flex-col">
+              <Header siteSettings={siteSettings} session={session} />
+              <main className="flex-1">
+                {children}
+              </main>
+              <Footer siteSettings={siteSettings} />
+            </div>
+          </SecurityProvider>
         </ThemeProvider>
       </body>
     </html>

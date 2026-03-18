@@ -2,6 +2,7 @@ import { supabase } from "@/lib/supabase"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Users, Calendar, Phone, Home, Mail } from "lucide-react"
+import { ExportLeadsButton } from "./export-button"
 
 export const metadata = {
   title: "Leads Recebidos | Dashboard",
@@ -33,9 +34,12 @@ export default async function LeadsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Leads Recebidos</h1>
-        <p className="text-muted-foreground">Pessoas que demonstraram interesse em imóveis pelo site.</p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Leads Recebidos</h1>
+          <p className="text-muted-foreground">Pessoas que demonstraram interesse em imóveis pelo site.</p>
+        </div>
+        <ExportLeadsButton leads={leads} />
       </div>
 
       <Card>

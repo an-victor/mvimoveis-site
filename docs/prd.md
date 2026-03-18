@@ -6,7 +6,7 @@ Transformar o site de um corretor de imóveis em uma **plataforma SaaS escaláve
 - **Status**: Em Desenvolvimento Ativo (Fase 3 — UX + Leads)
 - **Documento de Referência**: `docs/brownfield-architecture.md`
 - **Stack**: Next.js 15, Sanity.io (CMS), Supabase (Leads + Auth), Vercel (Deploy), Tailwind CSS.
-- **Último Update**: 2026-03-16
+- **Último Update**: 2026-03-18
 
 ---
 
@@ -60,8 +60,8 @@ Transformar o site de um corretor de imóveis em uma **plataforma SaaS escaláve
 - ✅ RF8.1: Modal de captura (Nome + Telefone) antes de abrir WhatsApp
 - ✅ RF8.2: Tabela `leads` no Supabase: `id, name, phone, property_slug, property_title, created_at`
 - ✅ RF8.3: Seção "Leads Recebidos" no Dashboard com tabela e data/hora
-- ⬜ RF8.4: Formulário de contato alternativo (e-mail) na página do imóvel
-- ⬜ RF8.5: Exportar leads para CSV no Dashboard
+- ✅ RF8.4: Formulário de contato alternativo (e-mail) na página do imóvel
+- ✅ RF8.5: Exportar leads para CSV no Dashboard
 
 ### 🎯 Épico 9: Módulo de Agendamentos (PRÓXIMO)
 - ⬜ RF9.1: Formulário de solicitação de visita com data/hora preferida
@@ -105,4 +105,4 @@ Transformar o site de um corretor de imóveis em uma **plataforma SaaS escaláve
 ---
 
 *Documento originalmente gerado por Orion (aiox-master) em 2026-03-13.*
-*Atualizado por Antigravity em 2026-03-16 — Épicos 3, 7 e 8 concluídos.*
+*Atualizado por Antigravity em 2026-03-18 — Épicos 3, 7 e 8 concluídos. Adicionada segurança anti-inspect e animações Framer.*

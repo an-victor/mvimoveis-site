@@ -66,6 +66,8 @@ export interface SanityImage {
   asset: {
     _ref: string
     _type: "reference"
+    [key: string]: any
   }
   alt?: string
+  [key: string]: any
 }
