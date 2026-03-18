@@ -25,24 +25,38 @@ async function getPropertiesData(searchParams: any) {
       sort = "recent" 
     } = searchParams;
 
-    // Define ordering
-    let order = "_createdAt desc";
-    if (sort === "price-asc") order = "price asc";
-    if (sort === "price-desc") order = "price desc";
-    if (sort === "area-asc") order = "area asc";
-    if (sort === "area-desc") order = "area desc";
-
-    const [properties, siteSettings] = await Promise.all([
-      client.fetch<Property[]>(buildPropertiesQuery(order), { 
+    const [rawProperties, siteSettings] = await Promise.all([
+      client.fetch<Property[]>(buildPropertiesQuery("_createdAt desc"), { 
         search, 
         type, 
         bedrooms: Number(bedrooms), 
         bathrooms: Number(bathrooms),
-        minPrice: Number(minPrice),
-        maxPrice: Number(maxPrice),
       }),
       client.fetch<SiteSettings>(SITE_SETTINGS_QUERY),
     ])
+
+    const getNum = (str: string | undefined | null) => {
+      if (!str) return 0;
+      return Number(str.replace(/\./g, '').replace(',', '.').replace(/[^\d.-]/g, ''));
+    };
+
+    const minP = Number(minPrice);
+    const maxP = Number(maxPrice);
+    
+    let properties = (rawProperties || []).filter(p => {
+      const pPrice = getNum(p.price);
+      return pPrice >= minP && pPrice <= maxP;
+    });
+
+    if (sort === "price-asc") {
+      properties.sort((a, b) => getNum(a.price) - getNum(b.price));
+    } else if (sort === "price-desc") {
+      properties.sort((a, b) => getNum(b.price) - getNum(a.price));
+    } else if (sort === "area-asc") {
+      properties.sort((a, b) => getNum(a.area) - getNum(b.area));
+    } else if (sort === "area-desc") {
+      properties.sort((a, b) => getNum(b.area) - getNum(a.area));
+    }
 
     return {
       properties: properties || [],

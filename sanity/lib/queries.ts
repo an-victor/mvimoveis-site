@@ -5,7 +5,6 @@ export const buildPropertiesQuery = (order: string = "_createdAt desc") => groq`
   && ($type == "" || type == $type)
   && ($bedrooms == 0 || bedrooms >= $bedrooms)
   && ($bathrooms == 0 || bathrooms >= $bathrooms)
-  && (price >= $minPrice && price <= $maxPrice)
 ] | order(${order}) {
   _id,
   title,
