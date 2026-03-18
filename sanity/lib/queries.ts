@@ -1,12 +1,12 @@
 import { groq } from "next-sanity"
 
-export const PROPERTIES_QUERY = groq`*[_type == "property" && status == "available" 
+export const buildPropertiesQuery = (order: string = "_createdAt desc") => groq`*[_type == "property" && status == "available" 
   && ($search == "" || title match $search + "*" || location match $search + "*")
   && ($type == "" || type == $type)
   && ($bedrooms == 0 || bedrooms >= $bedrooms)
   && ($bathrooms == 0 || bathrooms >= $bathrooms)
   && (price >= $minPrice && price <= $maxPrice)
-] | order($order) {
+] | order(${order}) {
   _id,
   title,
   slug,

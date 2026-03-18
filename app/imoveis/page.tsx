@@ -3,7 +3,7 @@ import { MapPin } from "lucide-react"
 import { client } from "@/sanity/lib/client"
 import { getImageUrl } from "@/sanity/lib/image"
 import { formatCurrency } from "@/lib/format-currency"
-import { PROPERTIES_QUERY, SITE_SETTINGS_QUERY } from "@/sanity/lib/queries"
+import { buildPropertiesQuery, SITE_SETTINGS_QUERY } from "@/sanity/lib/queries"
 import type { Property, SiteSettings } from "@/types/sanity"
 
 import { Button } from "@/components/ui/button"
@@ -33,14 +33,13 @@ async function getPropertiesData(searchParams: any) {
     if (sort === "area-desc") order = "area desc";
 
     const [properties, siteSettings] = await Promise.all([
-      client.fetch<Property[]>(PROPERTIES_QUERY, { 
+      client.fetch<Property[]>(buildPropertiesQuery(order), { 
         search, 
         type, 
         bedrooms: Number(bedrooms), 
         bathrooms: Number(bathrooms),
         minPrice: Number(minPrice),
         maxPrice: Number(maxPrice),
-        order
       }),
       client.fetch<SiteSettings>(SITE_SETTINGS_QUERY),
     ])
