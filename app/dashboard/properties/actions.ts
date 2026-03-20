@@ -144,9 +144,9 @@ export async function updatePropertyAction(prevState: any, formData: FormData) {
 
     const patch = writeClient.patch(id).set(updateData)
 
-    // Se houver novas imagens, adiciona-as ao array existente
+    // Se houver novas imagens, anexa-as ao array existente de forma robusta
     if (newImages.length > 0) {
-      patch.insert('after', 'images[-1]', newImages).setIfMissing({ images: [] })
+      patch.setIfMissing({ images: [] }).append('images', newImages)
     }
 
     await patch.commit()
