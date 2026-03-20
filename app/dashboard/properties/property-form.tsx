@@ -1,6 +1,7 @@
 "use client"
 
-import { useActionState, useRef, useTransition, useState } from "react"
+import { useActionState, useRef, useTransition, useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { createPropertyAction, updatePropertyAction, removePropertyImageAction } from "./actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -8,13 +9,14 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import Link from "next/link"
-import { Youtube, MapPin, Globe, Image as ImageIcon, DollarSign, X, Loader2, Upload, Info } from "lucide-react"
+import { Youtube, MapPin, Globe, Image as ImageIcon, DollarSign, X, Loader2, Upload, Info, CheckCircle2 } from "lucide-react"
 import Image from "next/image"
 import { getImageUrl } from "@/sanity/lib/image"
 import { optimizeImage } from "@/lib/image-utils"
 import { useToast } from "@/hooks/use-toast"
 
 export default function PropertyForm({ initialData, isEditing }: { initialData?: any, isEditing?: boolean }) {
+  const router = useRouter()
   const { toast } = useToast()
   const action = isEditing ? updatePropertyAction : createPropertyAction
   const [state, formAction, isPending] = useActionState(action, { success: false, message: "" })
@@ -26,6 +28,39 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
   // Estados para o sistema de preview local
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [isOptimizing, setIsOptimizing] = useState(false)
+  const [uploadStatus, setUploadStatus] = useState<string>("")
+
+  // Efeito para lidar com o sucesso do salvamento
+  useEffect(() => {
+    if (state?.success) {
+      setUploadStatus("finalizado")
+      
+      // Pequeno delay para o usuário ver a mensagem de sucesso próximo ao botão antes de redirecionar
+      const timer = setTimeout(() => {
+        router.push("/dashboard/properties")
+      }, 2500)
+      
+      return () => clearTimeout(timer)
+    } else if (state?.message && !state.success) {
+      setUploadStatus("")
+      toast({
+        title: "Erro no salvamento",
+        description: state.message,
+        variant: "destructive",
+      })
+    }
+  }, [state, isEditing, router, toast])
+
+  // Atualiza o status textual durante o processo
+  useEffect(() => {
+    if (isPending) {
+      if (selectedFiles.length > 0) {
+        setUploadStatus("uploading")
+      } else {
+        setUploadStatus("saving")
+      }
+    }
+  }, [isPending, selectedFiles])
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -106,12 +141,6 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
     <form ref={formRef} onSubmit={handleSubmit} className="space-y-8">
       <input type="hidden" name="id" value={initialData?._id} />
       <input type="hidden" name="slug" value={initialData?.slug?.current} />
-
-      {state?.message && (
-        <div className={`p-4 rounded-md text-sm font-medium border ${state.success ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'}`}>
-          {state.message}
-        </div>
-      )}
 
       {/* ── Informações Básicas ── */}
       <Card className="border-slate-200 shadow-sm">
@@ -414,13 +443,49 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
         </CardContent>
       </Card>
 
-      <div className="flex justify-end gap-4 pt-4 border-t border-slate-200 mt-8">
-        <Link href="/dashboard/properties">
-          <Button type="button" variant="outline" className="px-6">Cancelar Operação</Button>
-        </Link>
-        <Button type="submit" disabled={isPending || isOptimizing} className="bg-brand-primary hover:bg-brand-secondary text-white px-8 font-semibold shadow-md">
-          {isPending ? "Processando..." : isEditing ? "Salvar Alterações" : "Cadastrar Imóvel"}
-        </Button>
+      <div className="flex flex-col sm:flex-row items-center justify-end gap-4 pt-4 border-t border-slate-200 mt-8 bg-slate-50/50 p-4 rounded-lg">
+        {uploadStatus && (
+          <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm mr-auto animate-in fade-in slide-in-from-left-4 duration-300">
+            {uploadStatus === "uploading" && (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+                <span className="text-sm font-medium text-slate-700">Fazendo upload das fotos... aguarde</span>
+              </>
+            )}
+            {uploadStatus === "saving" && (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin text-brand-primary" />
+                <span className="text-sm font-medium text-slate-700">Salvando dados do imóvel...</span>
+              </>
+            )}
+            {uploadStatus === "finalizado" && (
+              <>
+                <CheckCircle2 className="h-4 w-4 text-green-500" />
+                <span className="text-sm font-bold text-green-700">Salvo com sucesso! Voltando para a lista...</span>
+              </>
+            )}
+          </div>
+        )}
+        
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <Link href="/dashboard/properties" className="flex-1 sm:flex-none">
+            <Button type="button" variant="outline" className="w-full px-6" disabled={isPending}>
+              Cancelar
+            </Button>
+          </Link>
+          <Button 
+            type="submit" 
+            disabled={isPending || isOptimizing} 
+            className="flex-1 sm:flex-none bg-brand-primary hover:bg-brand-secondary text-white px-8 font-semibold shadow-md min-w-[160px]"
+          >
+            {isPending ? (
+              <div className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Processando</span>
+              </div>
+            ) : isEditing ? "Salvar Alterações" : "Cadastrar Imóvel"}
+          </Button>
+        </div>
       </div>
     </form>
   )

@@ -12,9 +12,31 @@ import { PropertyCard } from "@/components/property-card"
 import { AboutSection } from "@/components/about-section"
 import { ContactSection } from "@/components/contact-section"
 
+// Revalidar a página a cada 1 hora (3600 segundos) para rotacionar os imóveis em destaque
+export const revalidate = 3600
+
+// Função simples de shuffle com semente para garantir ordem consistente na mesma hora
+function seededShuffle<T>(array: T[], seed: number): T[] {
+  const result = [...array]
+  let m = result.length, t, i
+  
+  // Algoritmo Fisher-Yates com semente
+  while (m) {
+    // Gerador de número pseudo-aleatório baseado na semente
+    const x = Math.sin(seed++) * 10000
+    i = Math.floor((x - Math.floor(x)) * m--)
+    
+    t = result[m]
+    result[m] = result[i]
+    result[i] = t
+  }
+  
+  return result
+}
+
 async function getHomeData() {
   try {
-    const [featuredProperties, testimonials, siteSettings] = await Promise.all([
+    const [allFeaturedProperties, testimonials, siteSettings] = await Promise.all([
       client.fetch<Property[]>(FEATURED_PROPERTIES_QUERY),
       client.fetch<Testimonial[]>(`*[_type == "testimonial"] | order(_createdAt desc) [0...6] {
   _id,
@@ -27,8 +49,20 @@ async function getHomeData() {
       client.fetch<SiteSettings>(SITE_SETTINGS_QUERY),
     ])
 
+    // Lógica de rotação a cada 60 minutos
+    let featuredProperties = allFeaturedProperties || []
+    
+    if (featuredProperties.length > 6) {
+      // Semente baseada na hora atual desde o epoch (muda a cada 60 min)
+      const currentHourSeed = Math.floor(Date.now() / (1000 * 60 * 60))
+      featuredProperties = seededShuffle(featuredProperties, currentHourSeed).slice(0, 6)
+    } else {
+      // Se houver 6 ou menos, apenas limita o máximo
+      featuredProperties = featuredProperties.slice(0, 6)
+    }
+
     return {
-      featuredProperties: featuredProperties || [],
+      featuredProperties,
       testimonials: testimonials || [],
       siteSettings: siteSettings || null,
     }

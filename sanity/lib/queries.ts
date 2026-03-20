@@ -23,7 +23,7 @@ export const buildPropertiesQuery = (order: string = "_createdAt desc") => groq`
   type
 }`
 
-export const FEATURED_PROPERTIES_QUERY = groq`*[_type == "property" && featured == true && status == "available"] | order(_createdAt desc) [0...3] {
+export const FEATURED_PROPERTIES_QUERY = groq`*[_type == "property" && featured == true && status == "available"] {
   _id,
   title,
   slug,
