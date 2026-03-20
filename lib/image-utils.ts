@@ -19,17 +19,13 @@ export async function optimizeImage(file: File, maxWidth = 1920, maxHeight = 108
         let width = img.width
         let height = img.height
 
-        // Calcula novas dimensões mantendo o aspect ratio
-        if (width > height) {
-          if (width > maxWidth) {
-            height = Math.round((height * maxWidth) / width)
-            width = maxWidth
-          }
-        } else {
-          if (height > maxHeight) {
-            width = Math.round((width * maxHeight) / height)
-            height = maxHeight
-          }
+        // Calcula o fator de escala para manter a proporção perfeita
+        const scale = Math.min(maxWidth / width, maxHeight / height)
+
+        // Se a imagem for menor que o máximo, mantém o tamanho original (não aumenta)
+        if (scale < 1) {
+          width = Math.round(width * scale)
+          height = Math.round(height * scale)
         }
 
         canvas.width = width
