@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Star, Plus, Pencil, Trash2, X, Loader2, Upload } from "lucide-react"
 import Image from "next/image"
 import { getImageUrl } from "@/sanity/lib/image"
+import { optimizeImage } from "@/lib/image-utils"
 
 interface Testimonial {
   _id: string
@@ -201,7 +202,15 @@ export function TestimonialsManager({ testimonials }: Props) {
                       type="file" 
                       accept="image/*" 
                       className="bg-white cursor-pointer text-xs h-9" 
-                      onChange={(e) => setAvatarFile(e.target.files?.[0] || null)}
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0]
+                        if (file) {
+                          const optimized = await optimizeImage(file, 400, 400)
+                          setAvatarFile(optimized)
+                        } else {
+                          setAvatarFile(null)
+                        }
+                      }}
                     />
                     {avatarFile && <p className="absolute -bottom-4 left-0 text-[8px] text-blue-600 font-bold uppercase tracking-tighter">PRONTA PARA SALVAR</p>}
                   </div>

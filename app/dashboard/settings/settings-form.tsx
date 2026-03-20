@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { X, Loader2, Upload, Info } from "lucide-react"
 import Image from "next/image"
 import { getImageUrl } from "@/sanity/lib/image"
+import { optimizeImage } from "@/lib/image-utils"
 
 export default function SettingsForm({ initialData, documentId }: { initialData: any, documentId: string }) {
   const [state, formAction, isPending] = useActionState(updateSiteSettingsAction, { success: false, message: "" })
@@ -99,7 +100,15 @@ export default function SettingsForm({ initialData, documentId }: { initialData:
                   type="file" 
                   accept="image/*" 
                   className="bg-white cursor-pointer h-9 text-xs" 
-                  onChange={(e) => setLogoFile(e.target.files?.[0] || null)}
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      const optimized = await optimizeImage(file, 800, 800)
+                      setLogoFile(optimized)
+                    } else {
+                      setLogoFile(null)
+                    }
+                  }}
                 />
                 {logoFile && (
                   <div className="relative h-10 w-10 border border-brand-primary rounded overflow-hidden shadow-sm flex-shrink-0 bg-white">
@@ -227,9 +236,11 @@ export default function SettingsForm({ initialData, documentId }: { initialData:
                 accept="image/*" 
                 multiple 
                 className="bg-white cursor-pointer" 
-                onChange={(e) => {
+                onChange={async (e) => {
                   if (e.target.files) {
-                    setSelectedBanners(prev => [...prev, ...Array.from(e.target.files!)])
+                    const filesArray = Array.from(e.target.files)
+                    const optimized = await Promise.all(filesArray.map(f => optimizeImage(f)))
+                    setSelectedBanners(prev => [...prev, ...optimized])
                     e.target.value = ""
                   }
                 }}
@@ -363,7 +374,15 @@ export default function SettingsForm({ initialData, documentId }: { initialData:
                   type="file" 
                   accept="image/*" 
                   className="bg-white cursor-pointer h-9 text-xs" 
-                  onChange={(e) => setBrokerPhotoFile(e.target.files?.[0] || null)}
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      const optimized = await optimizeImage(file, 600, 600)
+                      setBrokerPhotoFile(optimized)
+                    } else {
+                      setBrokerPhotoFile(null)
+                    }
+                  }}
                 />
                 {brokerPhotoFile && <p className="text-[10px] text-blue-600 font-bold uppercase">Pronta para enviar</p>}
               </div>

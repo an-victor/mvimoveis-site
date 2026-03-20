@@ -11,6 +11,7 @@ import Link from "next/link"
 import { Youtube, MapPin, Globe, Image as ImageIcon, DollarSign, X, Loader2, Upload, Info } from "lucide-react"
 import Image from "next/image"
 import { getImageUrl } from "@/sanity/lib/image"
+import { optimizeImage } from "@/lib/image-utils"
 
 export default function PropertyForm({ initialData, isEditing }: { initialData?: any, isEditing?: boolean }) {
   const action = isEditing ? updatePropertyAction : createPropertyAction
@@ -23,10 +24,16 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
   // Estados para o sistema de preview local
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const filesArray = Array.from(e.target.files)
-      setSelectedFiles(prev => [...prev, ...filesArray])
+      
+      // Otimiza cada imagem antes de adicionar ao estado
+      const optimizedFiles = await Promise.all(
+        filesArray.map(file => optimizeImage(file))
+      )
+      
+      setSelectedFiles(prev => [...prev, ...optimizedFiles])
       // Limpa o input para permitir selecionar os mesmos arquivos novamente se desejar
       e.target.value = ""
     }
