@@ -23,19 +23,26 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
   
   // Estados para o sistema de preview local
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+  const [isOptimizing, setIsOptimizing] = useState(false)
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
+    if (e.target.files && e.target.files.length > 0) {
       const filesArray = Array.from(e.target.files)
       
-      // Otimiza cada imagem antes de adicionar ao estado
-      const optimizedFiles = await Promise.all(
-        filesArray.map(file => optimizeImage(file))
-      )
-      
-      setSelectedFiles(prev => [...prev, ...optimizedFiles])
-      // Limpa o input para permitir selecionar os mesmos arquivos novamente se desejar
-      e.target.value = ""
+      setIsOptimizing(true)
+      try {
+        // Otimiza cada imagem antes de adicionar ao estado
+        const optimizedFiles = await Promise.all(
+          filesArray.map(file => optimizeImage(file))
+        )
+        setSelectedFiles(prev => [...prev, ...optimizedFiles])
+      } catch (error) {
+        console.error("Erro na otimização:", error)
+      } finally {
+        setIsOptimizing(false)
+        // Limpa o input para permitir selecionar os mesmos arquivos novamente se desejar
+        e.target.value = ""
+      }
     }
   }
 
@@ -56,10 +63,8 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
       formData.append("image", file)
     })
 
-    // Chama a formAction original com o formData modificado
-    startTransition(() => {
-      formAction(formData)
-    })
+    // Chama a formAction diretamente (useActionState já lida com a transição)
+    formAction(formData)
   }
 
   const handleRemoveImage = (imageKey: string) => {

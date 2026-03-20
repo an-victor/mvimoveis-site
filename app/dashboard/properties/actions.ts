@@ -43,20 +43,26 @@ export async function createPropertyAction(prevState: any, formData: FormData) {
   }))
 
   try {
-    // Processar arquivos que possam ter sido enviados via form tradicional
-    for (const file of imageFiles) {
-      if (file && file.size > 0) {
-        const buffer = Buffer.from(await file.arrayBuffer())
-        const asset = await writeClient.assets.upload('image', buffer, {
-          filename: file.name,
-          contentType: file.type
-        })
-        images.push({
-          _type: 'image',
-          _key: asset._id,
-          asset: { _type: 'reference', _ref: asset._id }
-        })
-      }
+    // Processar arquivos em paralelo para maior velocidade
+    if (imageFiles.length > 0) {
+      const uploadPromises = imageFiles.map(async (file) => {
+        if (file && file.size > 0) {
+          const buffer = Buffer.from(await file.arrayBuffer())
+          const asset = await writeClient.assets.upload('image', buffer, {
+            filename: file.name,
+            contentType: file.type
+          })
+          return {
+            _type: 'image',
+            _key: asset._id,
+            asset: { _type: 'reference', _ref: asset._id }
+          }
+        }
+        return null
+      })
+
+      const uploadedImages = (await Promise.all(uploadPromises)).filter(Boolean) as any[]
+      images.push(...uploadedImages)
     }
 
     const propertyData = {
@@ -126,20 +132,26 @@ export async function updatePropertyAction(prevState: any, formData: FormData) {
       features: (formData.get("features") as string).split(",").map(f => f.trim()).filter(Boolean),
     }
 
-    // Processar arquivos que possam ter sido enviados via form tradicional
-    for (const file of imageFiles) {
-      if (file && file.size > 0) {
-        const buffer = Buffer.from(await file.arrayBuffer())
-        const asset = await writeClient.assets.upload('image', buffer, {
-          filename: file.name,
-          contentType: file.type
-        })
-        newImages.push({
-          _type: 'image',
-          _key: asset._id,
-          asset: { _type: 'reference', _ref: asset._id }
-        })
-      }
+    // Processar arquivos em paralelo para maior velocidade
+    if (imageFiles.length > 0) {
+      const uploadPromises = imageFiles.map(async (file) => {
+        if (file && file.size > 0) {
+          const buffer = Buffer.from(await file.arrayBuffer())
+          const asset = await writeClient.assets.upload('image', buffer, {
+            filename: file.name,
+            contentType: file.type
+          })
+          return {
+            _type: 'image',
+            _key: asset._id,
+            asset: { _type: 'reference', _ref: asset._id }
+          }
+        }
+        return null
+      })
+
+      const uploadedImages = (await Promise.all(uploadPromises)).filter(Boolean) as any[]
+      newImages.push(...uploadedImages)
     }
 
     const patch = writeClient.patch(id).set(updateData)
