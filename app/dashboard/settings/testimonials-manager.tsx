@@ -1,13 +1,13 @@
 "use client"
 
-import { useActionState, useState } from "react"
+import { useActionState, useState, useTransition } from "react"
 import { saveTestimonialAction, deleteTestimonialAction } from "@/app/dashboard/properties/actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Star, Plus, Pencil, Trash2, X } from "lucide-react"
+import { Star, Plus, Pencil, Trash2, X, Loader2, Upload } from "lucide-react"
 import Image from "next/image"
 import { getImageUrl } from "@/sanity/lib/image"
 
@@ -30,9 +30,41 @@ export function TestimonialsManager({ testimonials }: Props) {
   const [editingItem, setEditingItem] = useState<Testimonial | null>(null)
   const [saveState, saveAction, isSavePending] = useActionState(saveTestimonialAction, { success: false, message: "" })
 
-  const openNew = () => { setEditingItem(null); setIsFormOpen(true) }
-  const openEdit = (t: Testimonial) => { setEditingItem(t); setIsFormOpen(true) }
-  const closeForm = () => { setIsFormOpen(false); setEditingItem(null) }
+  const [avatarFile, setAvatarFile] = useState<File | null>(null)
+  const [_, startTransition] = useTransition()
+
+  const openNew = () => { 
+    setEditingItem(null)
+    setAvatarFile(null)
+    setIsFormOpen(true) 
+  }
+  
+  const openEdit = (t: Testimonial) => { 
+    setEditingItem(t)
+    setAvatarFile(null)
+    setIsFormOpen(true) 
+  }
+  
+  const closeForm = () => { 
+    setIsFormOpen(false)
+    setEditingItem(null) 
+    setAvatarFile(null)
+  }
+
+  // Intercepta o submit para anexar o arquivo do estado
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const formData = new FormData(e.currentTarget)
+    
+    if (avatarFile) {
+      formData.delete("avatar")
+      formData.append("avatar", avatarFile)
+    }
+
+    startTransition(() => {
+      saveAction(formData)
+    })
+  }
 
   return (
     <div className="space-y-6">
@@ -65,128 +97,132 @@ export function TestimonialsManager({ testimonials }: Props) {
                   </div>
                 )}
               </div>
-              <div>
-                <p className="font-semibold text-slate-800 text-sm">{t.name}</p>
-                <p className="text-xs text-slate-500">{t.location}</p>
-                <div className="flex gap-0.5 mt-1">
-                  {[1, 2, 3, 4, 5].map(s => (
-                    <Star key={s} className={`h-3 w-3 ${s <= t.rating ? "fill-amber-400 text-amber-400" : "text-slate-200 fill-slate-200"}`} />
-                  ))}
-                </div>
+              <div className="flex-1 overflow-hidden">
+                <h4 className="font-bold text-slate-800 truncate">{t.name}</h4>
+                <p className="text-xs text-slate-500 truncate">{t.location}</p>
               </div>
             </div>
-            <p className="text-xs text-slate-600 italic leading-relaxed line-clamp-3">"{t.text}"</p>
-            <div className="flex gap-2 pt-1 border-t border-slate-100">
-              <button
-                type="button"
-                onClick={() => openEdit(t)}
-                className="flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-800 font-medium"
-              >
-                <Pencil className="h-3 w-3" /> Editar
-              </button>
-              <form action={deleteTestimonialAction} className="ml-auto">
+            
+            <div className="flex gap-0.5">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} className={`h-3 w-3 ${i < t.rating ? "fill-amber-400 text-amber-400" : "text-slate-200"}`} />
+              ))}
+            </div>
+            
+            <p className="text-xs text-slate-600 line-clamp-3 italic">"{t.text}"</p>
+            
+            <div className="flex gap-2 pt-2 border-t border-slate-100">
+              <Button variant="ghost" size="sm" onClick={() => openEdit(t)} className="h-8 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50">
+                <Pencil className="h-3 w-3 mr-1" /> Editar
+              </Button>
+              <form action={deleteTestimonialAction} className="inline">
                 <input type="hidden" name="id" value={t._id} />
-                <button
-                  type="submit"
-                  className="flex items-center gap-1.5 text-xs text-red-500 hover:text-red-700 font-medium"
-                  onClick={(e) => { if (!confirm("Remover este depoimento?")) e.preventDefault() }}
-                >
-                  <Trash2 className="h-3 w-3" /> Remover
-                </button>
+                <Button variant="ghost" size="sm" type="submit" className="h-8 text-xs text-red-600 hover:text-red-700 hover:bg-red-50">
+                  <Trash2 className="h-3 w-3 mr-1" /> Excluir
+                </Button>
               </form>
             </div>
           </div>
         ))}
+        
+        {!isFormOpen && (
+          <button 
+            onClick={openNew}
+            className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-slate-200 rounded-xl p-6 bg-slate-50 hover:bg-slate-100 hover:border-slate-300 transition-all text-slate-500 hover:text-brand-primary"
+          >
+            <Plus className="h-8 w-8" />
+            <span className="text-sm font-semibold">Adicionar Depoimento</span>
+          </button>
+        )}
       </div>
 
-      {/* Botão abrir form */}
-      {!isFormOpen && (
-        <button
-          type="button"
-          onClick={openNew}
-          className="flex items-center gap-2 px-4 py-2.5 border-2 border-dashed border-slate-300 hover:border-brand-primary rounded-lg text-sm text-slate-600 hover:text-brand-primary font-medium transition-colors w-full justify-center"
-        >
-          <Plus className="h-4 w-4" />
-          Adicionar Depoimento
-        </button>
-      )}
-
-      {/* Formulário */}
+      {/* Formulário de Depoimento */}
       {isFormOpen && (
-        <div className="border border-brand-primary/30 bg-slate-50 rounded-xl p-6 space-y-4 relative">
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-slate-800">{editingItem ? "Editar Depoimento" : "Novo Depoimento"}</h3>
-            <button type="button" onClick={closeForm} className="text-slate-400 hover:text-slate-700"><X className="h-4 w-4" /></button>
+        <div className="border-2 border-brand-primary/20 rounded-xl p-6 bg-white shadow-lg animate-in fade-in slide-in-from-top-4 duration-300">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+              {editingItem ? <Pencil className="h-5 w-5 text-blue-500" /> : <Plus className="h-5 w-5 text-brand-primary" />}
+              {editingItem ? "Editar Depoimento" : "Novo Depoimento"}
+            </h3>
+            <Button variant="ghost" size="sm" onClick={closeForm}>
+              <X className="h-5 w-5" />
+            </Button>
           </div>
 
-          {saveState?.message && (
-            <div className={`p-3 rounded-md text-sm font-medium border ${saveState.success ? "bg-green-50 border-green-200 text-green-800" : "bg-red-50 border-red-200 text-red-800"}`}>
-              {saveState.message}
-            </div>
-          )}
-
-          <form action={saveAction} className="space-y-4">
-            <input type="hidden" name="id" value={editingItem?._id || ""} />
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <input type="hidden" name="id" value={editingItem?._id} />
+            
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label htmlFor="dep-name" className="text-sm">Nome do Cliente</Label>
-                <Input id="dep-name" name="name" required defaultValue={editingItem?.name} placeholder="Ex: Maria Souza" />
+                <Input id="dep-name" name="name" defaultValue={editingItem?.name} required placeholder="Ex: Maria Silva" />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="dep-location" className="text-sm">Cidade / Bairro</Label>
-                <Input id="dep-location" name="location" required defaultValue={editingItem?.location} placeholder="Ex: São Paulo, SP" />
+                <Label htmlFor="dep-location" className="text-sm">Localização / Bairro</Label>
+                <Input id="dep-location" name="location" defaultValue={editingItem?.location} required placeholder="Ex: Itaim Bibi, SP" />
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="dep-rating" className="text-sm">Avaliação (1 a 5 estrelas)</Label>
+                <select 
+                  id="dep-rating" 
+                  name="rating" 
+                  defaultValue={editingItem?.rating || 5}
+                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm"
+                >
+                  {[5, 4, 3, 2, 1].map(n => (
+                    <option key={n} value={n}>{n} estrelas</option>
+                  ))}
+                </select>
+              </div>
+              
+              <div className="space-y-1.5">
+                <Label htmlFor="dep-avatar" className="text-sm">Foto do Cliente (opcional)</Label>
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full overflow-hidden border border-slate-200 bg-slate-50 flex-shrink-0 relative group">
+                    {avatarFile ? (
+                      <img src={URL.createObjectURL(avatarFile)} alt="Preview" className="h-full w-full object-cover" />
+                    ) : (
+                      editingItem?.avatar ? (
+                        <Image src={getImageUrl(editingItem.avatar as any, 100, 100) || "/placeholder.svg"} alt="Atual" fill className="object-cover" />
+                      ) : (
+                        <div className="h-full w-full flex items-center justify-center text-slate-300">
+                          <Upload className="h-5 w-5" />
+                        </div>
+                      )
+                    )}
+                  </div>
+                  <div className="flex-1 relative">
+                    <Input 
+                      id="dep-avatar" 
+                      name="avatar" 
+                      type="file" 
+                      accept="image/*" 
+                      className="bg-white cursor-pointer text-xs h-9" 
+                      onChange={(e) => setAvatarFile(e.target.files?.[0] || null)}
+                    />
+                    {avatarFile && <p className="absolute -bottom-4 left-0 text-[8px] text-blue-600 font-bold uppercase tracking-tighter">PRONTA PARA SALVAR</p>}
+                  </div>
+                </div>
               </div>
             </div>
 
             <div className="space-y-1.5">
               <Label htmlFor="dep-text" className="text-sm">Texto do Depoimento</Label>
-              <Textarea id="dep-text" name="text" required defaultValue={editingItem?.text} rows={3} placeholder="O que o cliente disse sobre você?" />
+              <Textarea id="dep-text" name="text" defaultValue={editingItem?.text} required placeholder="O que o cliente disse sobre seu serviço..." rows={3} />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="dep-rating" className="text-sm">Avaliação (1–5 estrelas)</Label>
-                <select
-                  id="dep-rating"
-                  name="rating"
-                  defaultValue={editingItem?.rating || 5}
-                  className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/30"
-                >
-                  {[5, 4, 3, 2, 1].map(n => (
-                    <option key={n} value={n}>{"⭐".repeat(n)} — {n} estrela{n > 1 ? "s" : ""}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="dep-avatar" className="text-sm">Foto do Cliente (opcional)</Label>
-                {editingItem?.avatar && (
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className="relative h-8 w-8 rounded-full overflow-hidden border border-slate-200">
-                      <Image
-                        src={getImageUrl(editingItem.avatar as any, 60, 60) || "/placeholder.svg"}
-                        alt={editingItem.name}
-                        fill
-                        sizes="32px"
-                        className="object-cover"
-                      />
-                    </div>
-                    <span className="text-xs text-slate-500">Foto atual. Selecione outra para substituir.</span>
-                  </div>
-                )}
-                <Input id="dep-avatar" name="avatar" type="file" accept="image/*" className="bg-white cursor-pointer text-xs" />
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 py-2">
               <input type="checkbox" id="dep-featured" name="featured" className="h-4 w-4 accent-orange-500 cursor-pointer" defaultChecked={editingItem?.featured ?? false} />
-              <Label htmlFor="dep-featured" className="text-sm cursor-pointer">Exibir este depoimento em destaque no site</Label>
+              <Label htmlFor="dep-featured" className="text-sm cursor-pointer">Destacar na página inicial</Label>
             </div>
 
-            <div className="flex justify-end gap-3 pt-2 border-t border-slate-200">
-              <Button type="button" variant="outline" onClick={closeForm} className="px-4">Cancelar</Button>
+            <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+              <Button type="button" variant="outline" onClick={closeForm}>Cancelar</Button>
               <Button type="submit" disabled={isSavePending} className="bg-brand-primary hover:bg-brand-secondary text-white px-6">
-                {isSavePending ? "Salvando..." : editingItem ? "Salvar Alterações" : "Criar Depoimento"}
+                {isSavePending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Salvando...</> : editingItem ? "Salvar Alterações" : "Criar Depoimento"}
               </Button>
             </div>
           </form>

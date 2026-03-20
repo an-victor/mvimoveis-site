@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { X, Loader2 } from "lucide-react"
+import { X, Loader2, Upload, Info } from "lucide-react"
 import Image from "next/image"
 import { getImageUrl } from "@/sanity/lib/image"
 
@@ -20,6 +20,11 @@ export default function SettingsForm({ initialData, documentId }: { initialData:
   const [removingBannerKey, setRemovingBannerKey] = useState<string | null>(null)
   const [localBanners, setLocalBanners] = useState<any[]>(initialData?.bannerImages || [])
 
+  // Estados para preview local (Configurações)
+  const [logoFile, setLogoFile] = useState<File | null>(null)
+  const [brokerPhotoFile, setBrokerPhotoFile] = useState<File | null>(null)
+  const [selectedBanners, setSelectedBanners] = useState<File[]>([])
+
   const handleRemoveBanner = (imageKey: string) => {
     setRemovingBannerKey(imageKey)
     startRemoveBannerTransition(async () => {
@@ -29,8 +34,39 @@ export default function SettingsForm({ initialData, documentId }: { initialData:
     })
   }
 
+  // Intercepta o submit do form para anexar todos os arquivos dos estados
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const formData = new FormData(e.currentTarget)
+    
+    // Anexa arquivos que estão nos estados (Logo e Foto Corretor são únicos)
+    if (logoFile) {
+      formData.delete("logo")
+      formData.append("logo", logoFile)
+    }
+    
+    if (brokerPhotoFile) {
+      formData.delete("brokerPhoto")
+      formData.append("brokerPhoto", brokerPhotoFile)
+    }
+
+    // Anexa múltiplos banners
+    if (selectedBanners.length > 0) {
+      formData.delete("banner")
+      selectedBanners.forEach(file => {
+        formData.append("banner", file)
+      })
+    }
+
+    startTransition(() => {
+      formAction(formData)
+    })
+  }
+
+  const [_, startTransition] = useTransition()
+
   return (
-    <form action={formAction} className="space-y-8">
+    <form onSubmit={handleSubmit} className="space-y-8">
       <input type="hidden" name="documentId" value={documentId} />
 
       {state?.message && (
@@ -51,10 +87,29 @@ export default function SettingsForm({ initialData, documentId }: { initialData:
               <p className="text-xs text-slate-500 mb-2">Este texto aparece na aba do navegador e no título das buscas do Google.</p>
               <Input id="title" name="title" defaultValue={initialData?.title} required />
             </div>
+            
             <div className="space-y-2 border-2 border-dashed border-slate-200 rounded-lg p-4 bg-slate-50 hover:bg-slate-100 transition-colors">
-              <Label htmlFor="logo">Upload da Logo</Label>
-              <p className="text-xs text-slate-500 mb-2">Formato recomendado: PNG transparente ou SVG.</p>
-              <Input id="logo" name="logo" type="file" accept="image/*" className="bg-white cursor-pointer" />
+              <Label htmlFor="logo" className="cursor-pointer">Upload da Logo</Label>
+              <p className="text-[10px] text-slate-500 mb-2">Formato recomendado: PNG transparente ou SVG.</p>
+              
+              <div className="flex items-center gap-4">
+                <Input 
+                  id="logo" 
+                  name="logo" 
+                  type="file" 
+                  accept="image/*" 
+                  className="bg-white cursor-pointer h-9 text-xs" 
+                  onChange={(e) => setLogoFile(e.target.files?.[0] || null)}
+                />
+                {logoFile && (
+                  <div className="relative h-10 w-10 border border-brand-primary rounded overflow-hidden shadow-sm flex-shrink-0 bg-white">
+                    <img src={URL.createObjectURL(logoFile)} alt="Logo Preview" className="h-full w-full object-contain p-1" />
+                    <button type="button" onClick={() => setLogoFile(null)} className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5">
+                      <X className="h-2 w-2" />
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
           
@@ -118,11 +173,11 @@ export default function SettingsForm({ initialData, documentId }: { initialData:
             </div>
           </div>
           
-          {/* Miniaturas do Banner */}
+          {/* Miniaturas do Banner Existentes */}
           {localBanners.length > 0 && (
             <div className="space-y-3">
               <Label className="text-sm font-semibold text-slate-700">
-                Imagens atuais do banner ({localBanners.length})
+                Imagens atuais no carrossel ({localBanners.length})
               </Label>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {localBanners.map((img: any) => (
@@ -147,22 +202,66 @@ export default function SettingsForm({ initialData, documentId }: { initialData:
                     </button>
                     {img._key === localBanners[0]?._key && (
                       <span className="absolute bottom-1.5 left-1.5 bg-brand-primary/90 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-                        Principal
+                        Capa
                       </span>
                     )}
                   </div>
                 ))}
               </div>
-              <p className="text-xs text-slate-400">Passe o mouse sobre uma imagem e clique no ❌ para removê-la. A primeira imagem é a principal.</p>
             </div>
           )}
 
-          <div className="space-y-2 border-2 border-dashed border-slate-200 rounded-lg p-4 bg-slate-50 hover:bg-slate-100 transition-colors">
-            <Label htmlFor="banner">
-              {localBanners.length > 0 ? "🖼️ Adicionar nova imagem ao banner" : "🖼️ Adicionar imagem de fundo ao banner"}
-            </Label>
-            <p className="text-xs text-slate-500 mb-2">Recomendado: Imagem de alta qualidade em formato paisagem (1920x1080). Você pode adicionar várias imagens para criar um carrossel.</p>
-            <Input id="banner" name="banner" type="file" accept="image/*" className="bg-white cursor-pointer" />
+          <div className="space-y-4 pt-4 border-t border-slate-100">
+            <div className="space-y-2 border-2 border-dashed border-slate-200 rounded-lg p-6 bg-slate-50 hover:bg-slate-100 transition-colors">
+              <Label htmlFor="banner" className="text-base cursor-pointer block">
+                🖼️ Selecionar novas imagens para o banner
+              </Label>
+              <p className="text-xs text-slate-500 mb-4 font-medium flex items-center gap-1.5">
+                <Info className="h-3.5 w-3.5 text-blue-500" />
+                Você pode selecionar múltiplas fotos em sequência.
+              </p>
+              <Input 
+                id="banner" 
+                name="banner" 
+                type="file" 
+                accept="image/*" 
+                multiple 
+                className="bg-white cursor-pointer" 
+                onChange={(e) => {
+                  if (e.target.files) {
+                    setSelectedBanners(prev => [...prev, ...Array.from(e.target.files!)])
+                    e.target.value = ""
+                  }
+                }}
+              />
+            </div>
+
+            {/* Previews de NOVOS Banners selecionados */}
+            {selectedBanners.length > 0 && (
+              <div className="bg-blue-50/30 border border-blue-100 rounded-lg p-4 space-y-3">
+                <h4 className="text-xs font-bold text-blue-800 flex items-center gap-2 uppercase tracking-wider">
+                  <Upload className="h-3.5 w-3.5" />
+                  Novas imagens prontas ({selectedBanners.length})
+                </h4>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {selectedBanners.map((file, idx) => (
+                    <div key={idx} className="relative aspect-video rounded overflow-hidden border border-blue-200 shadow-sm bg-white group">
+                      <img src={URL.createObjectURL(file)} alt="Preview banner" className="h-full w-full object-cover" />
+                      <button 
+                        type="button" 
+                        onClick={() => setSelectedBanners(prev => prev.filter((_, i) => i !== idx))}
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                      <div className="absolute bottom-0 left-0 right-0 bg-blue-600/90 text-[8px] text-white py-0.5 text-center font-bold">
+                        AGUARDANDO SALVAR
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -207,7 +306,7 @@ export default function SettingsForm({ initialData, documentId }: { initialData:
       <Card className="border-slate-200 shadow-sm">
         <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4">
           <CardTitle className="text-xl text-slate-800">Perfil do Corretor</CardTitle>
-          <CardDescription>Informações e foto que aparecem na página de cada imóvel na seção "Sobre o Corretor".</CardDescription>
+          <CardDescription>Informações e foto que aparecem na página de cada imóvel.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6 pt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -225,12 +324,11 @@ export default function SettingsForm({ initialData, documentId }: { initialData:
 
           <div className="space-y-2">
             <Label htmlFor="brokerBio">Frase de Apresentação</Label>
-            <p className="text-xs text-slate-500 mb-2">Uma frase curta e impactante que transmita seu compromisso com os clientes.</p>
             <Textarea 
               id="brokerBio" 
               name="brokerBio" 
               defaultValue={initialData?.brokerBio} 
-              placeholder="Ex: Meu compromisso é encontrar o lar ideal para você e sua família com total transparência e dedicação."
+              placeholder="Ex: Meu compromisso é encontrar o lar ideal para você..."
               rows={3}
             />
           </div>
@@ -239,27 +337,44 @@ export default function SettingsForm({ initialData, documentId }: { initialData:
             <Label htmlFor="brokerPhoto" className="text-base cursor-pointer">
               📸 Foto de Perfil do Corretor
             </Label>
-            <p className="text-xs text-slate-500">Recomendado: foto profissional quadrada (400x400px). Será exibida na página de cada imóvel.</p>
-            {initialData?.brokerPhoto && (
-              <div className="flex items-center gap-4 py-2">
-                <div className="h-16 w-16 overflow-hidden rounded-full border-2 border-brand-primary flex-shrink-0">
-                  <img 
-                    src={typeof initialData.brokerPhoto === 'string' ? initialData.brokerPhoto : '/placeholder-user.jpg'} 
-                    alt="Foto atual do corretor" 
+            <p className="text-[10px] text-slate-500 mb-4">Recomendado: foto profissional quadrada (400x400px).</p>
+            
+            <div className="flex items-center gap-6">
+              <div className="h-20 w-20 overflow-hidden rounded-full border-2 border-brand-primary flex-shrink-0 bg-white shadow-sm relative group">
+                {brokerPhotoFile ? (
+                  <img src={URL.createObjectURL(brokerPhotoFile)} alt="Preview corretor" className="h-full w-full object-cover" />
+                ) : (
+                   <img 
+                    src={initialData?.brokerPhoto ? (typeof initialData.brokerPhoto === 'string' ? initialData.brokerPhoto : getImageUrl(initialData.brokerPhoto, 200, 200)) : '/placeholder-user.jpg'} 
+                    alt="Foto atual" 
                     className="h-full w-full object-cover" 
                   />
-                </div>
-                <span className="text-sm text-slate-600">Foto atual. Selecione um novo arquivo para substituir.</span>
+                )}
+                {brokerPhotoFile && (
+                  <button type="button" onClick={() => setBrokerPhotoFile(null)} className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <X className="h-5 w-5 text-white" />
+                  </button>
+                )}
               </div>
-            )}
-            <Input id="brokerPhoto" name="brokerPhoto" type="file" accept="image/*" className="bg-white cursor-pointer" />
+              <div className="flex-1 space-y-2">
+                <Input 
+                  id="brokerPhoto" 
+                  name="brokerPhoto" 
+                  type="file" 
+                  accept="image/*" 
+                  className="bg-white cursor-pointer h-9 text-xs" 
+                  onChange={(e) => setBrokerPhotoFile(e.target.files?.[0] || null)}
+                />
+                {brokerPhotoFile && <p className="text-[10px] text-blue-600 font-bold uppercase">Pronta para enviar</p>}
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
 
       <div className="flex justify-end pt-4 border-t border-slate-200 mt-8">
-        <Button type="submit" size="lg" disabled={isPending} className="w-full md:w-auto px-8 bg-brand-primary hover:bg-brand-secondary text-white font-semibold shadow-md">
-          {isPending ? "Salvando Alterações..." : "Salvar Configurações"}
+        <Button type="submit" size="lg" disabled={isPending} className="w-full md:w-auto px-10 bg-brand-primary hover:bg-brand-secondary text-white font-bold shadow-lg transition-all transform hover:scale-[1.02]">
+          {isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Salvando...</> : "SALVAR TODAS AS CONFIGURAÇÕES"}
         </Button>
       </div>
     </form>

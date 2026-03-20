@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import Link from "next/link"
-import { Youtube, MapPin, Globe, Image as ImageIcon, DollarSign, X, Loader2 } from "lucide-react"
+import { Youtube, MapPin, Globe, Image as ImageIcon, DollarSign, X, Loader2, Upload, Info } from "lucide-react"
 import Image from "next/image"
 import { getImageUrl } from "@/sanity/lib/image"
 
@@ -19,6 +19,41 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
   const [isPendingRemove, startRemoveTransition] = useTransition()
   const [removingKey, setRemovingKey] = useState<string | null>(null)
   const [localImages, setLocalImages] = useState<any[]>(initialData?.images || [])
+  
+  // Estados para o sistema de preview local
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const filesArray = Array.from(e.target.files)
+      setSelectedFiles(prev => [...prev, ...filesArray])
+      // Limpa o input para permitir selecionar os mesmos arquivos novamente se desejar
+      e.target.value = ""
+    }
+  }
+
+  const removeSelectedFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index))
+  }
+
+  // Intercepta o submit do form para anexar os arquivos do estado
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const formData = new FormData(e.currentTarget)
+    
+    // Remove os valores originais do input de arquivo se houver
+    formData.delete("image")
+    
+    // Adiciona todos os arquivos do estado selectedFiles
+    selectedFiles.forEach(file => {
+      formData.append("image", file)
+    })
+
+    // Chama a formAction original com o formData modificado
+    startTransition(() => {
+      formAction(formData)
+    })
+  }
 
   const handleRemoveImage = (imageKey: string) => {
     setRemovingKey(imageKey)
@@ -30,7 +65,7 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
   }
 
   return (
-    <form ref={formRef} action={formAction} className="space-y-8">
+    <form ref={formRef} onSubmit={handleSubmit} className="space-y-8">
       <input type="hidden" name="id" value={initialData?._id} />
       <input type="hidden" name="slug" value={initialData?.slug?.current} />
 
@@ -149,25 +184,77 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
           </CardTitle>
           <CardDescription>
             {isEditing 
-              ? "Selecione novas fotos apenas se quiser adicionar ou substituir as atuais." 
-              : "Adicione as fotos do imóvel. A primeira foto será a foto de destaque."}
+              ? "Selecione novas fotos para adicionar à galeria." 
+              : "Selecione as fotos do imóvel. Elas serão enviadas quando você clicar em Cadastrar."}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6 pt-6">
-          <div className="space-y-2 border-2 border-dashed border-slate-200 rounded-lg p-6 bg-slate-50 hover:bg-slate-100 transition-colors">
-            <Label htmlFor="image" className="text-base cursor-pointer">
-              📷 {isEditing ? "Adicionar mais fotos" : "Clique para selecionar fotos (múltiplas permitidas)"}
-            </Label>
-            <p className="text-xs text-slate-500 mb-4">
-              Formatos aceitos: JPG, PNG, WEBP. Recomendado: fotos em alta resolução (1920x1080).
-            </p>
-            <Input id="image" name="image" type="file" accept="image/*" multiple required={!isEditing} className="bg-white cursor-pointer" />
+          <div className="space-y-4">
+            <div className="space-y-2 border-2 border-dashed border-slate-200 rounded-lg p-6 bg-slate-50 hover:bg-slate-100 transition-colors">
+              <Label htmlFor="image" className="text-base cursor-pointer block">
+                📷 Clique aqui para selecionar fotos
+              </Label>
+              <p className="text-xs text-slate-500 mb-4 font-medium flex items-center gap-1.5">
+                <Info className="h-3.5 w-3.5 text-blue-500" />
+                Você pode selecionar múltiplas fotos de uma vez ou em sequência.
+              </p>
+              <Input 
+                id="image" 
+                name="image" 
+                type="file" 
+                accept="image/*" 
+                multiple 
+                required={!isEditing && selectedFiles.length === 0} 
+                className="bg-white cursor-pointer" 
+                onChange={handleFileChange}
+              />
+            </div>
+
+            {/* Previews de arquivos selecionados localmente (Aguardando Salvar) */}
+            {selectedFiles.length > 0 && (
+              <div className="bg-blue-50/30 border border-blue-100 rounded-lg p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-semibold text-blue-800 flex items-center gap-2 uppercase tracking-wider">
+                    <Upload className="h-3.5 w-3.5" />
+                    Fotos para enviar ({selectedFiles.length})
+                  </h4>
+                  <p className="text-[10px] text-blue-600 font-bold bg-white px-2 py-1 rounded border border-blue-200">
+                    Aguardando Salvar Formulário
+                  </p>
+                </div>
+                
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                  {selectedFiles.map((file, idx) => (
+                    <div key={idx} className="relative aspect-square rounded-md overflow-hidden border border-blue-200 bg-white group shadow-sm">
+                      <img 
+                        src={URL.createObjectURL(file)} 
+                        alt="Preview" 
+                        className="h-full w-full object-cover" 
+                      />
+                      <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+                         <button 
+                          type="button" 
+                          onClick={() => removeSelectedFile(idx)}
+                          className="bg-red-500 text-white rounded-full p-1.5 shadow-lg transform scale-90 hover:scale-100 transition-transform"
+                          title="Remover foto"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                      <div className="absolute bottom-0 left-0 right-0 bg-blue-600/90 text-[8px] text-white py-0.5 text-center font-bold">
+                        PRONTO
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Miniaturas das fotos existentes */}
+          {/* Miniaturas das fotos existentes (Se editando) */}
           {isEditing && localImages.length > 0 && (
-            <div className="space-y-3">
-              <Label className="text-sm font-semibold text-slate-700">Fotos atuais ({localImages.length})</Label>
+            <div className="space-y-3 pt-4 border-t border-slate-100">
+              <Label className="text-sm font-semibold text-slate-700">Fotos atuais na galeria ({localImages.length})</Label>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                 {localImages.map((img: any) => (
                   <div key={img._key} className="relative group rounded-lg overflow-hidden aspect-square border border-slate-200 shadow-sm">
@@ -192,7 +279,7 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
                   </div>
                 ))}
               </div>
-              <p className="text-xs text-slate-400">Passe o mouse sobre uma foto e clique no ❌ para removê-la.</p>
+              <p className="text-[10px] text-slate-400">Passe o mouse sobre uma foto e clique no ❌ para removê-la definitivamente.</p>
             </div>
           )}
 

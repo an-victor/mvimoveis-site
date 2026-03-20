@@ -12,7 +12,11 @@ export async function updateSiteSettingsAction(prevState: any, formData: FormDat
 
   const documentId = formData.get("documentId") as string
   const logoFile = formData.get("logo") as File
-  const bannerFile = formData.get("banner") as File
+  const brokerPhotoFile = formData.get("brokerPhoto") as File
+  const bannerFiles = formData.getAll("banner") as File[]
+  const bannerAssetIds = formData.getAll("bannerAssetIds") as string[]
+  const logoAssetId = formData.get("logoAssetId") as string
+  const brokerPhotoAssetId = formData.get("brokerPhotoAssetId") as string
 
   try {
     const dataToUpdate: any = {
@@ -27,56 +31,64 @@ export async function updateSiteSettingsAction(prevState: any, formData: FormDat
       email: formData.get("email") as string,
       whatsapp: formData.get("whatsapp") as string,
       address: formData.get("address") as string,
+      brokerName: formData.get("brokerName") as string,
+      brokerTitle: formData.get("brokerTitle") as string,
+      brokerBio: formData.get("brokerBio") as string,
     }
 
-    // Upload do Logo se houver novo arquivo
-    if (logoFile && logoFile.size > 0) {
+    // Upload do Logo
+    if (logoAssetId) {
+      dataToUpdate.logo = { _type: 'image', asset: { _type: 'reference', _ref: logoAssetId } }
+    } else if (logoFile && logoFile.size > 0) {
       const buffer = Buffer.from(await logoFile.arrayBuffer())
-      const asset = await writeClient.assets.upload('image', buffer, {
-        filename: logoFile.name,
-        contentType: logoFile.type
-      })
-      dataToUpdate.logo = {
-        _type: 'image',
-        asset: { _type: 'reference', _ref: asset._id }
-      }
+      const asset = await writeClient.assets.upload('image', buffer, { filename: logoFile.name, contentType: logoFile.type })
+      dataToUpdate.logo = { _type: 'image', asset: { _type: 'reference', _ref: asset._id } }
     }
 
-    // Upload do Banner — ADICIONA ao array existente (não substitui)
-    if (bannerFile && bannerFile.size > 0) {
-      const buffer = Buffer.from(await bannerFile.arrayBuffer())
-      const asset = await writeClient.assets.upload('image', buffer, {
-        filename: bannerFile.name,
-        contentType: bannerFile.type
-      })
-      // Usa append para guardar todas as imagens do carrossel
-      dataToUpdate.bannerImages = {
-        _type: 'reference',  // sinalizador para o patch abaixo usar append
-        _asset: asset._id
+    // Upload da Foto do Corretor
+    if (brokerPhotoAssetId) {
+      dataToUpdate.brokerPhoto = { _type: 'image', asset: { _type: 'reference', _ref: brokerPhotoAssetId } }
+    } else if (brokerPhotoFile && brokerPhotoFile.size > 0) {
+      const buffer = Buffer.from(await brokerPhotoFile.arrayBuffer())
+      const asset = await writeClient.assets.upload('image', buffer, { filename: brokerPhotoFile.name, contentType: brokerPhotoFile.type })
+      dataToUpdate.brokerPhoto = { _type: 'image', asset: { _type: 'reference', _ref: asset._id } }
+    }
+
+    // Preparar novos banners
+    const newBanners: any[] = bannerAssetIds.map(id => ({
+      _type: 'image',
+      _key: id,
+      asset: { _type: 'reference', _ref: id }
+    }))
+
+    for (const file of bannerFiles) {
+      if (file && file.size > 0) {
+        const buffer = Buffer.from(await file.arrayBuffer())
+        const asset = await writeClient.assets.upload('image', buffer, { filename: file.name, contentType: file.type })
+        newBanners.push({
+          _type: 'image',
+          _key: asset._id,
+          asset: { _type: 'reference', _ref: asset._id }
+        })
       }
     }
 
     const existingDoc = await writeClient.getDocument(documentId)
 
-    // Separa o banner do resto do patch para usar insert em vez de set
-    const bannerAsset = dataToUpdate.bannerImages as any
-    delete dataToUpdate.bannerImages
-
     if (existingDoc) {
-      let patch = writeClient.patch(documentId).set(dataToUpdate)
-      if (bannerAsset?._asset) {
-        patch = patch.insert('after', 'bannerImages[-1]', [{
-          _type: 'image',
-          _key: bannerAsset._asset,
-          asset: { _type: 'reference', _ref: bannerAsset._asset }
-        }])
+      const patch = writeClient.patch(documentId).set(dataToUpdate)
+
+      if (newBanners.length > 0) {
+        patch.setIfMissing({ bannerImages: [] }).insert('after', 'bannerImages[-1]', newBanners)
       }
+
       await patch.commit()
     } else {
       await writeClient.create({
         _type: "siteSettings",
         _id: documentId,
-        ...dataToUpdate
+        ...dataToUpdate,
+        bannerImages: newBanners
       })
     }
 

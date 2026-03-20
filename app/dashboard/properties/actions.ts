@@ -32,17 +32,31 @@ export async function createPropertyAction(prevState: any, formData: FormData) {
   const title = formData.get("title") as string
   const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '')
   
-  const imageFile = formData.get("image") as File
-  let imageAsset;
+  // Coletar assets já enviados via upload direto
+  const assetIds = formData.getAll("assetIds") as string[]
+  const imageFiles = formData.getAll("image") as File[]
+  
+  const images: any[] = assetIds.map(id => ({
+    _type: 'image',
+    _key: id,
+    asset: { _type: 'reference', _ref: id }
+  }))
 
   try {
-    if (imageFile && imageFile.size > 0) {
-      const arrayBuffer = await imageFile.arrayBuffer()
-      const buffer = Buffer.from(arrayBuffer)
-      imageAsset = await writeClient.assets.upload('image', buffer, {
-        filename: imageFile.name,
-        contentType: imageFile.type
-      })
+    // Processar arquivos que possam ter sido enviados via form tradicional
+    for (const file of imageFiles) {
+      if (file && file.size > 0) {
+        const buffer = Buffer.from(await file.arrayBuffer())
+        const asset = await writeClient.assets.upload('image', buffer, {
+          filename: file.name,
+          contentType: file.type
+        })
+        images.push({
+          _type: 'image',
+          _key: asset._id,
+          asset: { _type: 'reference', _ref: asset._id }
+        })
+      }
     }
 
     const propertyData = {
@@ -64,14 +78,7 @@ export async function createPropertyAction(prevState: any, formData: FormData) {
         }
       ],
       features: (formData.get("features") as string).split(",").map(f => f.trim()).filter(Boolean),
-      images: imageAsset ? [{
-        _type: 'image',
-        _key: imageAsset._id,
-        asset: {
-          _type: 'reference',
-          _ref: imageAsset._id
-        }
-      }] : []
+      images: images
     }
 
     await writeClient.create(propertyData)
@@ -95,8 +102,16 @@ export async function updatePropertyAction(prevState: any, formData: FormData) {
 
   const id = formData.get("id") as string
   const title = formData.get("title") as string
-  const imageFile = formData.get("image") as File
-  let imageAsset;
+  
+  // Coletar assets já enviados via upload direto e arquivos tradicionais
+  const assetIds = formData.getAll("assetIds") as string[]
+  const imageFiles = formData.getAll("image") as File[]
+  
+  const newImages: any[] = assetIds.map(id => ({
+    _type: 'image',
+    _key: id,
+    asset: { _type: 'reference', _ref: id }
+  }))
 
   try {
     const updateData: any = {
@@ -111,29 +126,30 @@ export async function updatePropertyAction(prevState: any, formData: FormData) {
       features: (formData.get("features") as string).split(",").map(f => f.trim()).filter(Boolean),
     }
 
-    // Se uma nova imagem foi enviada, faz o upload e atualiza a referência
-    if (imageFile && imageFile.size > 0) {
-      const arrayBuffer = await imageFile.arrayBuffer()
-      const buffer = Buffer.from(arrayBuffer)
-      imageAsset = await writeClient.assets.upload('image', buffer, {
-        filename: imageFile.name,
-        contentType: imageFile.type
-      })
-
-      updateData.images = [{
-        _type: 'image',
-        _key: imageAsset._id,
-        asset: {
-          _type: 'reference',
-          _ref: imageAsset._id
-        }
-      }]
+    // Processar arquivos que possam ter sido enviados via form tradicional
+    for (const file of imageFiles) {
+      if (file && file.size > 0) {
+        const buffer = Buffer.from(await file.arrayBuffer())
+        const asset = await writeClient.assets.upload('image', buffer, {
+          filename: file.name,
+          contentType: file.type
+        })
+        newImages.push({
+          _type: 'image',
+          _key: asset._id,
+          asset: { _type: 'reference', _ref: asset._id }
+        })
+      }
     }
 
-    await writeClient
-      .patch(id)
-      .set(updateData)
-      .commit()
+    const patch = writeClient.patch(id).set(updateData)
+
+    // Se houver novas imagens, adiciona-as ao array existente
+    if (newImages.length > 0) {
+      patch.insert('after', 'images[-1]', newImages).setIfMissing({ images: [] })
+    }
+
+    await patch.commit()
     
     revalidatePath("/")
     revalidatePath("/imoveis")
@@ -175,6 +191,7 @@ export async function saveTestimonialAction(prevState: any, formData: FormData) 
 
   const id = formData.get("id") as string
   const avatarFile = formData.get("avatar") as File
+  const avatarAssetId = formData.get("avatarAssetId") as string
 
   try {
     const data: any = {
@@ -185,7 +202,9 @@ export async function saveTestimonialAction(prevState: any, formData: FormData) 
       featured: formData.get("featured") === "on",
     }
 
-    if (avatarFile && avatarFile.size > 0) {
+    if (avatarAssetId) {
+      data.avatar = { _type: 'image', asset: { _type: 'reference', _ref: avatarAssetId } }
+    } else if (avatarFile && avatarFile.size > 0) {
       const buffer = Buffer.from(await avatarFile.arrayBuffer())
       const asset = await writeClient.assets.upload('image', buffer, {
         filename: avatarFile.name,
@@ -223,5 +242,32 @@ export async function deleteTestimonialAction(formData: FormData) {
     revalidatePath("/dashboard/settings")
   } catch (error: any) {
     console.error("Erro ao deletar depoimento:", error)
+  }
+}
+
+// Upload de uma única imagem para o Sanity Assets
+export async function uploadImageAssetAction(formData: FormData) {
+  const session = await auth()
+  if (!session?.user) throw new Error("Acesso negado")
+
+  const file = formData.get("file") as File
+  if (!file || file.size === 0) throw new Error("Arquivo inválido")
+
+  try {
+    const arrayBuffer = await file.arrayBuffer()
+    const buffer = Buffer.from(arrayBuffer)
+    const asset = await writeClient.assets.upload('image', buffer, {
+      filename: file.name,
+      contentType: file.type
+    })
+
+    return { 
+      success: true, 
+      assetId: asset._id,
+      url: asset.url
+    }
+  } catch (error: any) {
+    console.error("Erro no upload do asset:", error)
+    return { success: false, message: error.message }
   }
 }
