@@ -12,8 +12,10 @@ import { Youtube, MapPin, Globe, Image as ImageIcon, DollarSign, X, Loader2, Upl
 import Image from "next/image"
 import { getImageUrl } from "@/sanity/lib/image"
 import { optimizeImage } from "@/lib/image-utils"
+import { useToast } from "@/hooks/use-toast"
 
 export default function PropertyForm({ initialData, isEditing }: { initialData?: any, isEditing?: boolean }) {
+  const { toast } = useToast()
   const action = isEditing ? updatePropertyAction : createPropertyAction
   const [state, formAction, isPending] = useActionState(action, { success: false, message: "" })
   const formRef = useRef<HTMLFormElement>(null)
@@ -29,15 +31,39 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
     if (e.target.files && e.target.files.length > 0) {
       const filesArray = Array.from(e.target.files)
       
+      // Verifica se há arquivos de vídeo selecionados
+      const videoFiles = filesArray.filter(file => file.type.startsWith('video/'))
+      
+      if (videoFiles.length > 0) {
+        toast({
+          variant: "destructive",
+          title: "⚠️ Apenas fotos são permitidas aqui!",
+          description: "Esta galeria aceita exclusivamente fotos (JPG, PNG, WEBP). Se você possui um vídeo do imóvel, por favor, faça o upload no YouTube e cole o código (ID) do vídeo no campo 'Links e Mídia Avançada' logo abaixo.",
+        })
+      }
+
+      // Filtra para processar apenas arquivos que sejam imagens
+      const imageFiles = filesArray.filter(file => file.type.startsWith('image/'))
+      
+      if (imageFiles.length === 0) {
+        e.target.value = ""
+        return
+      }
+
       setIsOptimizing(true)
       try {
         // Otimiza cada imagem antes de adicionar ao estado
         const optimizedFiles = await Promise.all(
-          filesArray.map(file => optimizeImage(file))
+          imageFiles.map(file => optimizeImage(file))
         )
         setSelectedFiles(prev => [...prev, ...optimizedFiles])
       } catch (error) {
         console.error("Erro na otimização:", error)
+        toast({
+          variant: "destructive",
+          title: "Erro ao processar imagens",
+          description: "Ocorreu um problema ao otimizar suas fotos. Tente selecionar menos arquivos de cada vez.",
+        })
       } finally {
         setIsOptimizing(false)
         // Limpa o input para permitir selecionar os mesmos arquivos novamente se desejar
@@ -226,7 +252,7 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
             {selectedFiles.length > 0 && (
               <div className="bg-blue-50/30 border border-blue-100 rounded-lg p-4 space-y-3">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-semibold text-blue-800 flex items-center gap-2 uppercase tracking-wider">
+                  <h4 className="text-sm font-bold text-blue-800 flex items-center gap-2 uppercase tracking-wider">
                     <Upload className="h-3.5 w-3.5" />
                     Fotos para enviar ({selectedFiles.length})
                   </h4>
@@ -259,6 +285,13 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {isOptimizing && (
+              <div className="flex items-center gap-3 p-4 bg-slate-100 border border-slate-200 rounded-lg animate-pulse">
+                <Loader2 className="h-5 w-5 animate-spin text-brand-primary" />
+                <span className="text-sm font-semibold text-slate-700">Otimizando imagens para o banco de dados...</span>
               </div>
             )}
           </div>
@@ -385,7 +418,7 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
         <Link href="/dashboard/properties">
           <Button type="button" variant="outline" className="px-6">Cancelar Operação</Button>
         </Link>
-        <Button type="submit" disabled={isPending} className="bg-brand-primary hover:bg-brand-secondary text-white px-8 font-semibold shadow-md">
+        <Button type="submit" disabled={isPending || isOptimizing} className="bg-brand-primary hover:bg-brand-secondary text-white px-8 font-semibold shadow-md">
           {isPending ? "Processando..." : isEditing ? "Salvar Alterações" : "Cadastrar Imóvel"}
         </Button>
       </div>
