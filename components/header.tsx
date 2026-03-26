@@ -9,6 +9,7 @@ import { getImageUrl } from "@/sanity/lib/image"
 import { NavigationLink } from "@/components/navigation-link"
 import type { SiteSettings } from "@/types/sanity"
 import type { Session } from "next-auth"
+import { WhatsAppLeadButton } from "@/components/whatsapp-lead-button"
 
 interface HeaderProps {
   siteSettings: SiteSettings | null
@@ -77,15 +78,13 @@ export function Header({ siteSettings, session }: HeaderProps) {
 
         <div className="flex items-center gap-4">
           {siteSettings?.whatsapp && (
-            <Link
-              href={`https://wa.me/${siteSettings.whatsapp.replace(/\D/g, "")}`}
-              target="_blank"
-              rel="noopener noreferrer"
+            <WhatsAppLeadButton
+              whatsappNumber={siteSettings.whatsapp}
               className="hidden md:inline-flex items-center rounded-md bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-brand-secondary shadow-sm"
             >
               <MessageSquare className="mr-2 h-4 w-4" />
               WhatsApp
-            </Link>
+            </WhatsAppLeadButton>
           )}
 
           {session ? (
@@ -177,15 +176,13 @@ export function Header({ siteSettings, session }: HeaderProps) {
             )}
 
             {siteSettings?.whatsapp && (
-              <Link
-                href={`https://wa.me/${siteSettings.whatsapp.replace(/\D/g, "")}`}
-                target="_blank"
-                rel="noopener noreferrer"
+              <WhatsAppLeadButton
+                whatsappNumber={siteSettings.whatsapp}
                 className="flex items-center justify-center rounded-md bg-brand-primary px-4 py-3 text-base font-medium text-white hover:bg-brand-secondary"
               >
                 <MessageSquare className="mr-2 h-5 w-5" />
                 Falar no WhatsApp
-              </Link>
+              </WhatsAppLeadButton>
             )}
           </nav>
         </div>

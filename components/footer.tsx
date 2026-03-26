@@ -1,8 +1,11 @@
+"use client"
+
 import Link from "next/link"
 import { Phone, Mail, MapPin, MessageSquare } from "lucide-react"
 import { getImageUrl } from "@/sanity/lib/image"
 import { NavigationLink } from "@/components/navigation-link"
 import type { SiteSettings } from "@/types/sanity"
+import { WhatsAppLeadButton } from "@/components/whatsapp-lead-button"
 
 interface FooterProps {
   siteSettings: SiteSettings | null
@@ -81,15 +84,13 @@ export function Footer({ siteSettings }: FooterProps) {
             
             {siteSettings?.whatsapp && (
               <div className="mt-6">
-                <Link
-                  href={`https://wa.me/${siteSettings.whatsapp.replace(/\D/g, "")}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <WhatsAppLeadButton
+                  whatsappNumber={siteSettings.whatsapp}
                   className="inline-flex items-center rounded-full bg-green-500 px-4 py-2 text-xs font-medium text-white hover:bg-green-600 transition-colors shadow-sm"
                 >
                   <MessageSquare className="mr-2 h-4 w-4" />
                   WhatsApp
-                </Link>
+                </WhatsAppLeadButton>
               </div>
             )}
           </div>

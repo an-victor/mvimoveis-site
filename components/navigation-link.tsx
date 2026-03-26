@@ -9,9 +9,10 @@ interface NavigationLinkProps {
   href: string
   children: React.ReactNode
   className?: string
+  onClick?: (e?: React.MouseEvent<HTMLAnchorElement>) => void
 }
 
-export function NavigationLink({ href, children, className }: NavigationLinkProps) {
+export function NavigationLink({ href, children, className, onClick: externalOnClick }: NavigationLinkProps) {
   const router = useRouter()
   const pathname = usePathname()
 
@@ -41,7 +42,7 @@ export function NavigationLink({ href, children, className }: NavigationLinkProp
   }
 
   return (
-    <Link href={href} className={className} onClick={handleClick}>
+    <Link href={href} className={className} onClick={(e) => { handleClick(e); externalOnClick?.(e) }}>
       {children}
     </Link>
   )
