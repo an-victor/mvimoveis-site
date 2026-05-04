@@ -14,6 +14,7 @@ import Image from "next/image"
 import { getImageUrl } from "@/sanity/lib/image"
 import { optimizeImage } from "@/lib/image-utils"
 import { useToast } from "@/hooks/use-toast"
+import PropertySaveOverlay from "@/components/property-save-overlay"
 
 export default function PropertyForm({ initialData, isEditing }: { initialData?: any, isEditing?: boolean }) {
   const router = useRouter()
@@ -29,20 +30,23 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [isOptimizing, setIsOptimizing] = useState(false)
   const [uploadStatus, setUploadStatus] = useState<string>("")
+  const [overlayStage, setOverlayStage] = useState<"uploading" | "saving" | "publishing" | "done" | null>(null)
 
   // Efeito para lidar com o sucesso do salvamento
   useEffect(() => {
     if (state?.success) {
       setUploadStatus("finalizado")
+      setOverlayStage("done")
       
-      // Pequeno delay para o usuário ver a mensagem de sucesso próximo ao botão antes de redirecionar
+      // Delay maior para o usuário ler o aviso sobre tempo de publicação
       const timer = setTimeout(() => {
         router.push("/dashboard/properties")
-      }, 2500)
+      }, 5000)
       
       return () => clearTimeout(timer)
     } else if (state?.message && !state.success) {
       setUploadStatus("")
+      setOverlayStage(null)
       toast({
         title: "Erro no salvamento",
         description: state.message,
@@ -51,13 +55,22 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
     }
   }, [state, isEditing, router, toast])
 
-  // Atualiza o status textual durante o processo
+  // Atualiza o status textual e overlay durante o processo
   useEffect(() => {
     if (isPending) {
       if (selectedFiles.length > 0) {
         setUploadStatus("uploading")
+        setOverlayStage("uploading")
+        // Simula transição para saving após um tempo proporcional
+        const uploadTime = Math.max(3000, selectedFiles.length * 1500)
+        const timer = setTimeout(() => {
+          setUploadStatus("saving")
+          setOverlayStage("saving")
+        }, uploadTime)
+        return () => clearTimeout(timer)
       } else {
         setUploadStatus("saving")
+        setOverlayStage("saving")
       }
     }
   }, [isPending, selectedFiles])
@@ -138,6 +151,12 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
   }
 
   return (
+    <>
+    <PropertySaveOverlay 
+      stage={overlayStage} 
+      photoCount={selectedFiles.length} 
+      isEditing={!!isEditing} 
+    />
     <form ref={formRef} onSubmit={handleSubmit} className="space-y-8">
       <input type="hidden" name="id" value={initialData?._id} />
       <input type="hidden" name="slug" value={initialData?.slug?.current} />
@@ -488,5 +507,6 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
         </div>
       </div>
     </form>
+    </>
   )
 }
