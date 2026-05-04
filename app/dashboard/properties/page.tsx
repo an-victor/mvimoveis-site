@@ -27,12 +27,12 @@ export default async function PropertiesPage() {
           <h1 className="text-3xl font-bold tracking-tight">Meus Imóveis</h1>
           <p className="text-muted-foreground">Gerencie o catálogo de imóveis do seu site.</p>
         </div>
-        <Link href="/dashboard/properties/new">
-          <Button className="gap-2">
+        <Button asChild className="gap-2">
+          <Link href="/dashboard/properties/new">
             <Plus className="h-4 w-4" />
             Cadastrar Imóvel
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
 
       <Card>
@@ -81,11 +81,11 @@ export default async function PropertiesPage() {
                     </TableCell>
                     <TableCell className="text-right space-x-2">
                       <div className="flex justify-end gap-2">
-                        <Link href={`/dashboard/properties/${property._id}`}>
-                          <Button variant="ghost" size="icon" title="Editar">
+                        <Button asChild variant="ghost" size="icon" title="Editar">
+                          <Link href={`/dashboard/properties/${property._id}`}>
                             <Pencil className="h-4 w-4" />
-                          </Button>
-                        </Link>
+                          </Link>
+                        </Button>
                         <form action={deletePropertyAction}>
                           <input type="hidden" name="id" value={property._id} />
                           <Button variant="ghost" size="icon" type="submit" title="Excluir" className="text-red-500 hover:text-red-600 hover:bg-red-50">

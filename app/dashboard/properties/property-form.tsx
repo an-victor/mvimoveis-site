@@ -487,11 +487,11 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
         )}
         
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <Link href="/dashboard/properties" className="flex-1 sm:flex-none">
-            <Button type="button" variant="outline" className="w-full px-6" disabled={isPending}>
+          <Button asChild type="button" variant="outline" className="flex-1 sm:flex-none w-full px-6" disabled={isPending}>
+            <Link href="/dashboard/properties">
               Cancelar
-            </Button>
-          </Link>
+            </Link>
+          </Button>
           <Button 
             type="submit" 
             disabled={isPending || isOptimizing} 

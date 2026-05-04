@@ -121,16 +121,17 @@ export default async function Home() {
             {siteSettings?.whatsapp && (
               <HeroWhatsAppButton whatsappNumber={siteSettings.whatsapp} />
             )}
-            <Link href="/imoveis">
-              <Button
-                variant="outline"
-                className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 hover:text-white shadow-xl transition-all duration-300 transform hover:-translate-y-1 rounded-full px-8"
-                size="lg"
-              >
+            <Button
+              asChild
+              variant="outline"
+              className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 hover:text-white shadow-xl transition-all duration-300 transform hover:-translate-y-1 rounded-full px-8"
+              size="lg"
+            >
+              <Link href="/imoveis">
                 Ver Imóveis
                 <ChevronRight className="ml-2 h-4 w-4 opacity-70 group-hover:opacity-100 transition-opacity" />
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
           </div>
         </div>
@@ -149,12 +150,12 @@ export default async function Home() {
             ))}
           </div>
           <div className="mt-12 text-center">
-            <Link href="/imoveis">
-              <Button variant="outline" className="border-brand-primary text-brand-primary hover:bg-orange-50">
+            <Button asChild variant="outline" className="border-brand-primary text-brand-primary hover:bg-orange-50">
+              <Link href="/imoveis">
                 Ver todos os imóveis
                 <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
