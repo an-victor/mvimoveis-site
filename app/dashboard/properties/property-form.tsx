@@ -47,6 +47,7 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
   const [isOptimizing, setIsOptimizing] = useState(false)
   const [uploadStatus, setUploadStatus] = useState<string>("")
   const [overlayStage, setOverlayStage] = useState<"uploading" | "saving" | "publishing" | "done" | null>(null)
+  const [uploadProgress, setUploadProgress] = useState(0)
 
   // Efeito para lidar com o sucesso do salvamento
   useEffect(() => {
@@ -71,24 +72,42 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
     }
   }, [state, isEditing, router, toast])
 
-  // Atualiza o status textual e overlay durante o processo
+  // Atualiza o status textual e overlay durante o processo com simulação de barra de progresso
   useEffect(() => {
     if (isPending) {
       const newFilesCount = mediaItems.filter(m => m.type === "new").length
       if (newFilesCount > 0) {
         setUploadStatus("uploading")
         setOverlayStage("uploading")
-        // Simula transição para saving após um tempo proporcional
-        const uploadTime = Math.max(3000, newFilesCount * 1500)
-        const timer = setTimeout(() => {
-          setUploadStatus("saving")
-          setOverlayStage("saving")
-        }, uploadTime)
-        return () => clearTimeout(timer)
+        setUploadProgress(0)
+        
+        // Simula transição com progresso (cada foto aumenta em média 1.5s a 2s)
+        const totalTime = Math.max(3000, newFilesCount * 1800)
+        const intervalTime = 100 // atualiza a cada 100ms
+        const steps = totalTime / intervalTime
+        let currentStep = 0
+        
+        const interval = setInterval(() => {
+          currentStep++
+          const progress = Math.min(99, Math.floor((currentStep / steps) * 100))
+          setUploadProgress(progress)
+          
+          if (currentStep >= steps) {
+            clearInterval(interval)
+            setUploadStatus("saving")
+            setOverlayStage("saving")
+            setUploadProgress(100)
+          }
+        }, intervalTime)
+        
+        return () => clearInterval(interval)
       } else {
         setUploadStatus("saving")
         setOverlayStage("saving")
+        setUploadProgress(100)
       }
+    } else {
+      setUploadProgress(0)
     }
   }, [isPending, mediaItems])
 
@@ -211,6 +230,7 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
     <PropertySaveOverlay 
       stage={overlayStage} 
       photoCount={mediaItems.filter(m => m.type === "new").length} 
+      progress={uploadProgress}
       isEditing={!!isEditing} 
     />
     <form ref={formRef} onSubmit={handleSubmit} className="space-y-8">

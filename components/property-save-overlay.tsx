@@ -9,6 +9,7 @@ interface PropertySaveOverlayProps {
   stage: SaveStage
   photoCount: number
   isEditing: boolean
+  progress?: number
 }
 
 const stageConfig = {
@@ -46,7 +47,7 @@ const stageConfig = {
   },
 }
 
-export default function PropertySaveOverlay({ stage, photoCount, isEditing }: PropertySaveOverlayProps) {
+export default function PropertySaveOverlay({ stage, photoCount, isEditing, progress = 0 }: PropertySaveOverlayProps) {
   const [dots, setDots] = useState("")
   const [elapsed, setElapsed] = useState(0)
 
@@ -80,8 +81,8 @@ export default function PropertySaveOverlay({ stage, photoCount, isEditing }: Pr
         {/* Barra de progresso no topo */}
         <div className="h-1.5 bg-slate-100 w-full">
           <div
-            className="h-full bg-gradient-to-r from-blue-500 via-amber-500 to-green-500 transition-all duration-1000 ease-out rounded-r-full"
-            style={{ width: `${config.progress}%` }}
+            className="h-full bg-gradient-to-r from-blue-500 via-amber-500 to-green-500 transition-all duration-300 ease-out rounded-r-full"
+            style={{ width: `${stage === 'uploading' ? progress : config.progress}%` }}
           />
         </div>
 
@@ -105,11 +106,24 @@ export default function PropertySaveOverlay({ stage, photoCount, isEditing }: Pr
             )}
           </div>
 
-          {/* Info de fotos */}
-          {stage === "uploading" && photoCount > 0 && (
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-100 rounded-full text-sm text-blue-700 font-medium">
-              <Upload className="h-3.5 w-3.5" />
-              {photoCount} {photoCount === 1 ? "foto" : "fotos"} sendo enviada{photoCount > 1 ? "s" : ""}
+          {/* Barra central com porcentagem para Upload */}
+          {stage === "uploading" && (
+            <div className="space-y-2 mt-4 px-2">
+              <div className="flex justify-between text-sm font-semibold text-slate-700">
+                <span>Enviando fotos...</span>
+                <span>{progress}%</span>
+              </div>
+              <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden border border-slate-200">
+                <div 
+                  className="bg-blue-500 h-full transition-all duration-300 ease-out rounded-full" 
+                  style={{ width: `${progress}%` }} 
+                />
+              </div>
+              {photoCount > 0 && (
+                <p className="text-xs text-slate-500 font-medium text-left">
+                  Processando {photoCount} {photoCount === 1 ? "imagem nova" : "imagens novas"}...
+                </p>
+              )}
             </div>
           )}
 
