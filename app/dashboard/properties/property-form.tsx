@@ -24,10 +24,26 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
   const formRef = useRef<HTMLFormElement>(null)
   const [isPendingRemove, startRemoveTransition] = useTransition()
   const [removingKey, setRemovingKey] = useState<string | null>(null)
-  const [localImages, setLocalImages] = useState<any[]>(initialData?.images || [])
+  type MediaItem = {
+    type: "local" | "new"
+    id: string
+    file?: File
+    data?: any
+    previewUrl?: string
+  }
+
+  const [mediaItems, setMediaItems] = useState<MediaItem[]>(() => {
+    return (initialData?.images || []).map((img: any) => ({
+      type: "local",
+      id: img._key,
+      data: img,
+      previewUrl: getImageUrl(img, 300, 300) || "/placeholder.svg"
+    }))
+  })
   
+  const [draggedIdx, setDraggedIdx] = useState<number | null>(null)
+
   // Estados para o sistema de preview local
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [isOptimizing, setIsOptimizing] = useState(false)
   const [uploadStatus, setUploadStatus] = useState<string>("")
   const [overlayStage, setOverlayStage] = useState<"uploading" | "saving" | "publishing" | "done" | null>(null)
@@ -58,11 +74,12 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
   // Atualiza o status textual e overlay durante o processo
   useEffect(() => {
     if (isPending) {
-      if (selectedFiles.length > 0) {
+      const newFilesCount = mediaItems.filter(m => m.type === "new").length
+      if (newFilesCount > 0) {
         setUploadStatus("uploading")
         setOverlayStage("uploading")
         // Simula transição para saving após um tempo proporcional
-        const uploadTime = Math.max(3000, selectedFiles.length * 1500)
+        const uploadTime = Math.max(3000, newFilesCount * 1500)
         const timer = setTimeout(() => {
           setUploadStatus("saving")
           setOverlayStage("saving")
@@ -73,7 +90,7 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
         setOverlayStage("saving")
       }
     }
-  }, [isPending, selectedFiles])
+  }, [isPending, mediaItems])
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -104,7 +121,13 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
         const optimizedFiles = await Promise.all(
           imageFiles.map(file => optimizeImage(file))
         )
-        setSelectedFiles(prev => [...prev, ...optimizedFiles])
+        const newItems: MediaItem[] = optimizedFiles.map(file => ({
+          type: "new",
+          id: Math.random().toString(36).substring(7),
+          file,
+          previewUrl: URL.createObjectURL(file)
+        }))
+        setMediaItems(prev => [...prev, ...newItems])
       } catch (error) {
         console.error("Erro na otimização:", error)
         toast({
@@ -120,11 +143,44 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
     }
   }
 
-  const removeSelectedFile = (index: number) => {
-    setSelectedFiles(prev => prev.filter((_, i) => i !== index))
+  const handleRemoveMedia = (item: MediaItem) => {
+    if (item.type === "local") {
+      setRemovingKey(item.id)
+      startRemoveTransition(async () => {
+        const result = await removePropertyImageAction(initialData?._id, item.id)
+        if (result?.success) {
+          setMediaItems(prev => prev.filter(m => m.id !== item.id))
+        }
+        setRemovingKey(null)
+      })
+    } else {
+      setMediaItems(prev => prev.filter(m => m.id !== item.id))
+      if (item.previewUrl && item.previewUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(item.previewUrl)
+      }
+    }
   }
 
-  // Intercepta o submit do form para anexar os arquivos do estado
+  const handleDragStart = (idx: number) => setDraggedIdx(idx)
+  
+  const handleDragEnter = (idx: number) => {
+    if (draggedIdx === null || draggedIdx === idx) return
+    setMediaItems(prev => {
+      const newItems = [...prev]
+      const [draggedItem] = newItems.splice(draggedIdx, 1)
+      newItems.splice(idx, 0, draggedItem)
+      return newItems
+    })
+    setDraggedIdx(idx)
+  }
+
+  const handleDragEnd = () => setDraggedIdx(null)
+  
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault() // Permite drop
+  }
+
+  // Intercepta o submit do form para anexar os arquivos e ordem
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
@@ -132,22 +188,22 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
     // Remove os valores originais do input de arquivo se houver
     formData.delete("image")
     
-    // Adiciona todos os arquivos do estado selectedFiles
-    selectedFiles.forEach(file => {
-      formData.append("image", file)
+    // Adiciona a ordem de todas as imagens misturadas
+    const orderData = mediaItems.map(item => {
+      if (item.type === "local") return { type: "local", data: item.data }
+      return { type: "new" }
+    })
+    formData.append("imagesOrder", JSON.stringify(orderData))
+
+    // Adiciona as imagens novas ao FormData
+    mediaItems.forEach(item => {
+      if (item.type === "new" && item.file) {
+        formData.append("image", item.file)
+      }
     })
 
     // Chama a formAction diretamente (useActionState já lida com a transição)
     formAction(formData)
-  }
-
-  const handleRemoveImage = (imageKey: string) => {
-    setRemovingKey(imageKey)
-    startRemoveTransition(async () => {
-      await removePropertyImageAction(initialData?._id, imageKey)
-      setLocalImages(prev => prev.filter((img: any) => img._key !== imageKey))
-      setRemovingKey(null)
-    })
   }
 
   return (
@@ -278,11 +334,11 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
           <div className="space-y-4">
             <div className="space-y-2 border-2 border-dashed border-slate-200 rounded-lg p-6 bg-slate-50 hover:bg-slate-100 transition-colors">
               <Label htmlFor="image" className="text-base cursor-pointer block">
-                📷 Clique aqui para selecionar fotos
+                📷 Clique aqui para adicionar fotos
               </Label>
               <p className="text-xs text-slate-500 mb-4 font-medium flex items-center gap-1.5">
                 <Info className="h-3.5 w-3.5 text-blue-500" />
-                Você pode selecionar múltiplas fotos de uma vez ou em sequência.
+                Você pode selecionar múltiplas fotos. Arraste e solte as fotos na grade abaixo para reordená-las. A primeira foto será a capa.
               </p>
               <Input 
                 id="image" 
@@ -290,91 +346,97 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
                 type="file" 
                 accept="image/*" 
                 multiple 
-                required={!isEditing && selectedFiles.length === 0} 
+                required={!isEditing && mediaItems.length === 0} 
                 className="bg-white cursor-pointer" 
                 onChange={handleFileChange}
+                disabled={isOptimizing || isPendingRemove}
               />
             </div>
-
-            {/* Previews de arquivos selecionados localmente (Aguardando Salvar) */}
-            {selectedFiles.length > 0 && (
-              <div className="bg-blue-50/30 border border-blue-100 rounded-lg p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-bold text-blue-800 flex items-center gap-2 uppercase tracking-wider">
-                    <Upload className="h-3.5 w-3.5" />
-                    Fotos para enviar ({selectedFiles.length})
-                  </h4>
-                  <p className="text-[10px] text-blue-600 font-bold bg-white px-2 py-1 rounded border border-blue-200">
-                    Aguardando Salvar Formulário
-                  </p>
-                </div>
-                
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
-                  {selectedFiles.map((file, idx) => (
-                    <div key={idx} className="relative aspect-square rounded-md overflow-hidden border border-blue-200 bg-white group shadow-sm">
-                      <img 
-                        src={URL.createObjectURL(file)} 
-                        alt="Preview" 
-                        className="h-full w-full object-cover" 
-                      />
-                      <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center">
-                         <button 
-                          type="button" 
-                          onClick={() => removeSelectedFile(idx)}
-                          className="bg-red-500 text-white rounded-full p-1.5 shadow-lg transform scale-90 hover:scale-100 transition-transform"
-                          title="Remover foto"
-                        >
-                          <X className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                      <div className="absolute bottom-0 left-0 right-0 bg-blue-600/90 text-[8px] text-white py-0.5 text-center font-bold">
-                        PRONTO
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
+            
             {isOptimizing && (
               <div className="flex items-center gap-3 p-4 bg-slate-100 border border-slate-200 rounded-lg animate-pulse">
                 <Loader2 className="h-5 w-5 animate-spin text-brand-primary" />
                 <span className="text-sm font-semibold text-slate-700">Otimizando imagens para o banco de dados...</span>
               </div>
             )}
-          </div>
 
-          {/* Miniaturas das fotos existentes (Se editando) */}
-          {isEditing && localImages.length > 0 && (
-            <div className="space-y-3 pt-4 border-t border-slate-100">
-              <Label className="text-sm font-semibold text-slate-700">Fotos atuais na galeria ({localImages.length})</Label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                {localImages.map((img: any) => (
-                  <div key={img._key} className="relative group rounded-lg overflow-hidden aspect-square border border-slate-200 shadow-sm">
-                    <Image
-                      src={getImageUrl(img as any, 300, 300) || "/placeholder.svg"}
-                      alt="Foto do imóvel"
-                      fill
-                      sizes="(max-width: 640px) 50vw, 25vw"
-                      className="object-cover"
-                    />
-                    <button
-                      type="button"
-                      disabled={isPendingRemove}
-                      onClick={() => handleRemoveImage(img._key)}
-                      className="absolute top-1.5 right-1.5 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 shadow-md opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50"
-                      title="Remover foto"
+            {mediaItems.length > 0 && (
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-3 mt-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                    <ImageIcon className="h-4 w-4" />
+                    Fotos Selecionadas ({mediaItems.length})
+                  </h4>
+                  <p className="text-xs text-slate-500 bg-white px-2 py-1 rounded border border-slate-200 shadow-sm">
+                    Arraste para reordenar
+                  </p>
+                </div>
+                
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {mediaItems.map((item, idx) => (
+                    <div 
+                      key={item.id} 
+                      draggable
+                      onDragStart={() => handleDragStart(idx)}
+                      onDragEnter={() => handleDragEnter(idx)}
+                      onDragEnd={handleDragEnd}
+                      onDragOver={handleDragOver}
+                      className={`relative aspect-square rounded-md overflow-hidden bg-white shadow-sm cursor-grab active:cursor-grabbing border-2 transition-all ${
+                        idx === 0 ? 'border-brand-primary ring-2 ring-brand-primary/20 ring-offset-1' : 'border-slate-200 hover:border-brand-primary/50'
+                      } ${draggedIdx === idx ? 'opacity-50 scale-95' : 'opacity-100'}`}
                     >
-                      {removingKey === img._key
-                        ? <Loader2 className="h-3 w-3 animate-spin" />
-                        : <X className="h-3 w-3" />}
-                    </button>
-                  </div>
-                ))}
+                      {item.type === 'local' ? (
+                        <Image
+                          src={item.previewUrl || "/placeholder.svg"}
+                          alt="Foto do imóvel"
+                          fill
+                          sizes="(max-width: 640px) 50vw, 25vw"
+                          className="object-cover pointer-events-none"
+                        />
+                      ) : (
+                        <img 
+                          src={item.previewUrl} 
+                          alt="Preview" 
+                          className="h-full w-full object-cover pointer-events-none" 
+                        />
+                      )}
+
+                      {/* Flag de Capa */}
+                      {idx === 0 && (
+                        <div className="absolute top-1 left-1 bg-brand-primary text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm z-10">
+                          CAPA
+                        </div>
+                      )}
+                      
+                      {/* Flag de Nova Mídia */}
+                      {item.type === 'new' && (
+                        <div className="absolute bottom-1 left-1 bg-blue-500/90 text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm z-10">
+                          NOVA
+                        </div>
+                      )}
+
+                      {/* Botão de Remover */}
+                      <button 
+                        type="button" 
+                        disabled={isPendingRemove}
+                        onClick={() => handleRemoveMedia(item)}
+                        className={`absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 transition-colors z-20 ${
+                          removingKey === item.id ? 'opacity-100' : 'opacity-0 hover:opacity-100'
+                        }`}
+                        title="Remover foto"
+                      >
+                        {removingKey === item.id ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <X className="h-3.5 w-3.5" />
+                        )}
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <p className="text-[10px] text-slate-400">Passe o mouse sobre uma foto e clique no ❌ para removê-la definitivamente.</p>
-            </div>
-          )}
+            )}
+          </div>
 
           <div className="space-y-2">
             <Label htmlFor="description">Descrição Completa</Label>

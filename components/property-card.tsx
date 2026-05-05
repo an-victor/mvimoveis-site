@@ -6,7 +6,6 @@ import { MapPin, Bed, Bath, Car, Maximize, ArrowRight } from "lucide-react"
 import { getImageUrl } from "@/sanity/lib/image"
 import { formatCurrency } from "@/lib/format-currency"
 import type { Property } from "@/types/sanity"
-import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
 
 interface PropertyCardProps {
@@ -76,10 +75,10 @@ export function PropertyCard({ property, index = 0 }: PropertyCardProps) {
               </div>
             </div>
 
-            <Button variant="outline" className="w-full border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white font-semibold transition-all duration-300 rounded-xl group-hover:bg-brand-primary group-hover:text-white">
+            <span className="flex items-center justify-center w-full py-2.5 border border-brand-primary text-brand-primary font-semibold text-sm transition-all duration-300 rounded-xl group-hover:bg-brand-primary group-hover:text-white">
               Ver Detalhes
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </Button>
+            </span>
           </div>
         </div>
       </Link>

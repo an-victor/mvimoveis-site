@@ -32,11 +32,12 @@ export async function createPropertyAction(prevState: any, formData: FormData) {
   const title = formData.get("title") as string
   const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '')
   
-  // Coletar assets já enviados via upload direto
+  // Coletar assets já enviados via upload direto e ordem das imagens
   const assetIds = formData.getAll("assetIds") as string[]
   const imageFiles = formData.getAll("image") as File[]
+  const imagesOrderStr = formData.get("imagesOrder") as string
   
-  const images: any[] = assetIds.map(id => ({
+  let images: any[] = assetIds.map(id => ({
     _type: 'image',
     _key: id,
     asset: { _type: 'reference', _ref: id }
@@ -44,6 +45,7 @@ export async function createPropertyAction(prevState: any, formData: FormData) {
 
   try {
     // Processar arquivos em paralelo para maior velocidade
+    let uploadedImages: any[] = []
     if (imageFiles.length > 0) {
       const uploadPromises = imageFiles.map(async (file) => {
         if (file && file.size > 0) {
@@ -61,7 +63,26 @@ export async function createPropertyAction(prevState: any, formData: FormData) {
         return null
       })
 
-      const uploadedImages = (await Promise.all(uploadPromises)).filter(Boolean) as any[]
+      uploadedImages = (await Promise.all(uploadPromises)).filter(Boolean) as any[]
+    }
+
+    if (imagesOrderStr) {
+      const order = JSON.parse(imagesOrderStr)
+      let newFileIdx = 0
+      
+      const orderedImages = order.map((item: any) => {
+        if (item.type === 'local') return item.data
+        if (item.type === 'new') {
+          const up = uploadedImages[newFileIdx]
+          newFileIdx++
+          return up
+        }
+        return null
+      }).filter(Boolean)
+      
+      orderedImages.push(...images) // assetIds diretos no final se houver
+      images = orderedImages
+    } else {
       images.push(...uploadedImages)
     }
 
@@ -109,11 +130,12 @@ export async function updatePropertyAction(prevState: any, formData: FormData) {
   const id = formData.get("id") as string
   const title = formData.get("title") as string
   
-  // Coletar assets já enviados via upload direto e arquivos tradicionais
+  // Coletar assets já enviados via upload direto e ordem das imagens
   const assetIds = formData.getAll("assetIds") as string[]
   const imageFiles = formData.getAll("image") as File[]
+  const imagesOrderStr = formData.get("imagesOrder") as string
   
-  const newImages: any[] = assetIds.map(id => ({
+  const directAssetImages: any[] = assetIds.map(id => ({
     _type: 'image',
     _key: id,
     asset: { _type: 'reference', _ref: id }
@@ -133,6 +155,7 @@ export async function updatePropertyAction(prevState: any, formData: FormData) {
     }
 
     // Processar arquivos em paralelo para maior velocidade
+    let uploadedImages: any[] = []
     if (imageFiles.length > 0) {
       const uploadPromises = imageFiles.map(async (file) => {
         if (file && file.size > 0) {
@@ -150,15 +173,33 @@ export async function updatePropertyAction(prevState: any, formData: FormData) {
         return null
       })
 
-      const uploadedImages = (await Promise.all(uploadPromises)).filter(Boolean) as any[]
-      newImages.push(...uploadedImages)
+      uploadedImages = (await Promise.all(uploadPromises)).filter(Boolean) as any[]
     }
 
     const patch = writeClient.patch(id).set(updateData)
 
-    // Se houver novas imagens, anexa-as ao array existente de forma robusta
-    if (newImages.length > 0) {
-      patch.setIfMissing({ images: [] }).append('images', newImages)
+    if (imagesOrderStr) {
+      // Reconstrói o array seguindo a ordem
+      const order = JSON.parse(imagesOrderStr)
+      let newFileIdx = 0
+      
+      const finalImages = order.map((item: any) => {
+        if (item.type === 'local') return item.data
+        if (item.type === 'new') {
+          const up = uploadedImages[newFileIdx]
+          newFileIdx++
+          return up
+        }
+        return null
+      }).filter(Boolean)
+      
+      finalImages.push(...directAssetImages)
+      patch.set({ images: finalImages })
+    } else {
+      const newImages = [...directAssetImages, ...uploadedImages]
+      if (newImages.length > 0) {
+        patch.setIfMissing({ images: [] }).append('images', newImages)
+      }
     }
 
     await patch.commit()
