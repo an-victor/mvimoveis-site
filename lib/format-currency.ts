@@ -1,6 +1,10 @@
-export function formatCurrency(price: string): string {
+export function formatCurrency(price: string | null | undefined): string {
+  if (!price) {
+    return "Sob consulta"
+  }
+
   // Remove qualquer formatação existente e extrai apenas os números
-  const cleanPrice = price
+  const cleanPrice = String(price)
     .replace(/[^\d,.-]/g, "")
     .replace(/\./g, "")
     .replace(",", ".")
@@ -10,7 +14,7 @@ export function formatCurrency(price: string): string {
 
   // Se não conseguir converter, retorna o preço original
   if (isNaN(numericPrice)) {
-    return price
+    return String(price)
   }
 
   // Formata como moeda brasileira com 2 casas decimais
@@ -22,7 +26,10 @@ export function formatCurrency(price: string): string {
   }).format(numericPrice)
 }
 
-export function formatCurrencyFromNumber(price: number): string {
+export function formatCurrencyFromNumber(price: number | null | undefined): string {
+  if (price === null || price === undefined || isNaN(price)) {
+    return "Sob consulta"
+  }
   return new Intl.NumberFormat("pt-BR", {
     style: "currency",
     currency: "BRL",

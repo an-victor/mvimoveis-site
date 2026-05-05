@@ -344,7 +344,7 @@ export default async function PropertyDetails({ params }: { params: Promise<{ sl
               
               {/* Formulário de Contato Direto */}
               <div className="mb-12">
-                <LeadContactForm propertyTitle={property.title} propertySlug={property.slug.current} />
+                <LeadContactForm propertyTitle={property.title} propertySlug={property?.slug?.current || ""} />
               </div>
 
               {/* Imóveis Similares */}
@@ -394,7 +394,7 @@ export default async function PropertyDetails({ params }: { params: Promise<{ sl
                       propertyTitle={property.title}
                       propertyLocation={property.location}
                       propertyPrice={formatCurrency(property.price)}
-                      propertySlug={property.slug.current}
+                      propertySlug={property?.slug?.current || ""}
                       whatsappNumber={siteSettings?.whatsapp || "5511999999999"}
                     />
                   </div>
