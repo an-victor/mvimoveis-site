@@ -210,7 +210,7 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
     <>
     <PropertySaveOverlay 
       stage={overlayStage} 
-      photoCount={selectedFiles.length} 
+      photoCount={mediaItems.filter(m => m.type === "new").length} 
       isEditing={!!isEditing} 
     />
     <form ref={formRef} onSubmit={handleSubmit} className="space-y-8">
