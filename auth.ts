@@ -17,11 +17,11 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
           return null
         }
 
-        const email = credentials.email as string
+        const email = (credentials.email as string).trim()
         const password = credentials.password as string
 
-        const adminEmail = process.env.ADMIN_EMAIL
-        const adminPasswordHash = process.env.ADMIN_PASSWORD
+        const adminEmail = process.env.ADMIN_EMAIL?.trim()
+        const adminPasswordHash = process.env.ADMIN_PASSWORD?.trim()
 
         if (!adminEmail || !adminPasswordHash) {
           console.error("Variáveis de ambiente ADMIN_EMAIL ou ADMIN_PASSWORD não configuradas.")
