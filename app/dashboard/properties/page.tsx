@@ -7,6 +7,7 @@ import { Plus, Pencil, Trash2, Home as HomeIcon } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { deletePropertyAction } from "./actions"
+import { DeleteButton } from "./delete-button"
 
 export const metadata = {
   title: "Gerenciar Imóveis | Área do Usuário",
@@ -90,9 +91,7 @@ export default async function PropertiesPage() {
                         </Button>
                         <form action={deletePropertyAction}>
                           <input type="hidden" name="id" value={property._id} />
-                          <Button variant="ghost" size="icon" type="submit" title="Excluir" className="text-red-500 hover:text-red-600 hover:bg-red-50">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <DeleteButton />
                         </form>
                       </div>
                     </TableCell>
