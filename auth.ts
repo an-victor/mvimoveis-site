@@ -29,8 +29,15 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
         }
 
         if (email === adminEmail) {
-          // Verifica se a senha confere com o hash no .env
-          const passwordsMatch = await bcrypt.compare(password, adminPasswordHash)
+          // Verifica se a senha confere com o hash no .env (ou texto plano como fallback de emergência)
+          let passwordsMatch = false
+          
+          if (adminPasswordHash.startsWith("$2")) {
+            passwordsMatch = await bcrypt.compare(password, adminPasswordHash)
+          } else {
+            passwordsMatch = (password === adminPasswordHash)
+          }
+
           if (passwordsMatch) {
             return { id: "1", name: "Corretor", email: adminEmail }
           }
