@@ -12,6 +12,8 @@ export const metadata = {
   title: "Gerenciar Imóveis | Área do Usuário",
 }
 
+export const dynamic = "force-dynamic"
+
 // Uma query um pouco mais abrangente que a PROPERTIES_QUERY (que filtrava só disponíveis)
 const DASHBOARD_PROPERTIES_QUERY = groq`*[_type == "property"] | order(_createdAt desc) {
   _id, title, price, location, status, images
