@@ -1,8 +1,8 @@
 "use client"
 
-import { useActionState, useRef, useTransition, useState, useEffect } from "react"
+import { useActionState, useRef, useTransition, useState, useEffect, startTransition } from "react"
 import { useRouter } from "next/navigation"
-import { createPropertyAction, updatePropertyAction, removePropertyImageAction } from "./actions"
+import { createPropertyAction, updatePropertyAction, removePropertyImageAction, uploadImageAssetAction } from "./actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -72,36 +72,7 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
     }
   }, [state, isEditing, router, toast])
 
-  // Sistema de progresso que agora reage ao estágio do overlay disparado no clique
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    
-    if (overlayStage === "uploading") {
-      const newFilesCount = mediaItems.filter(m => m.type === "new").length
-      const totalTime = Math.max(3000, newFilesCount * 1800)
-      const intervalTime = 100
-      const steps = totalTime / intervalTime
-      let currentStep = 0
-      
-      interval = setInterval(() => {
-        currentStep++
-        const progress = Math.min(99, Math.floor((currentStep / steps) * 100))
-        setUploadProgress(progress)
-        
-        if (currentStep >= steps) {
-          clearInterval(interval)
-          setUploadStatus("saving")
-          setOverlayStage("saving")
-          setUploadProgress(100)
-        }
-      }, intervalTime)
-    }
-    
-    return () => {
-      if (interval) clearInterval(interval)
-    }
-  }, [overlayStage, mediaItems])
-
+  // Sistema de progresso agora é real e calculado no handleSubmit
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const filesArray = Array.from(e.target.files)
@@ -126,18 +97,25 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
       }
 
       setIsOptimizing(true)
+      // Pequeno delay para permitir que a UI (React) renderize o aviso "Otimizando imagens..." antes de travar a thread
+      await new Promise(resolve => setTimeout(resolve, 50))
+      
       try {
-        // Otimiza cada imagem antes de adicionar ao estado
-        const optimizedFiles = await Promise.all(
-          imageFiles.map(file => optimizeImage(file))
-        )
-        const newItems: MediaItem[] = optimizedFiles.map(file => ({
-          type: "new",
-          id: Math.random().toString(36).substring(7),
-          file,
-          previewUrl: URL.createObjectURL(file)
-        }))
-        setMediaItems(prev => [...prev, ...newItems])
+        // Processa as imagens sequencialmente para não sobrecarregar a memória do navegador (evitar crash)
+        for (let i = 0; i < imageFiles.length; i++) {
+          const file = imageFiles[i]
+          const optimizedFile = await optimizeImage(file)
+          const newItem: MediaItem = {
+            type: "new",
+            id: Math.random().toString(36).substring(7),
+            file: optimizedFile,
+            previewUrl: URL.createObjectURL(optimizedFile)
+          }
+          // Atualiza a galeria uma a uma para dar feedback visual imediato ao usuário
+          setMediaItems(prev => [...prev, newItem])
+          // Pequeno respiro para a UI renderizar a nova imagem
+          await new Promise(resolve => setTimeout(resolve, 10))
+        }
       } catch (error) {
         console.error("Erro na otimização:", error)
         toast({
@@ -191,12 +169,13 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
   }
 
   // Intercepta o submit do form para anexar os arquivos e ordem
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     
-    // Gatilho IMEDIATO para a interface reagir (zero delay)
-    const newFilesCount = mediaItems.filter(m => m.type === "new").length
-    if (newFilesCount > 0) {
+    const newFiles = mediaItems.filter(m => m.type === "new" && m.file);
+    
+    // Gatilho IMEDIATO para a interface reagir
+    if (newFiles.length > 0) {
       setUploadStatus("uploading")
       setOverlayStage("uploading")
       setUploadProgress(0)
@@ -207,26 +186,77 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
     }
 
     const formData = new FormData(e.currentTarget)
-    
-    // Remove os valores originais do input de arquivo se houver
+    // Remove os valores originais do input de arquivo para não estourar o limite de 4.5MB da Vercel
     formData.delete("image")
     
-    // Adiciona a ordem de todas as imagens misturadas
-    const orderData = mediaItems.map(item => {
-      if (item.type === "local") return { type: "local", data: item.data }
-      return { type: "new" }
-    })
-    formData.append("imagesOrder", JSON.stringify(orderData))
+    const updatedMediaItems = [...mediaItems];
+    
+    try {
+      // Faz o upload real imagem por imagem (evita Payload Too Large e dá barra de progresso verdadeira)
+      if (newFiles.length > 0) {
+        for (let i = 0; i < newFiles.length; i++) {
+          const item = newFiles[i];
+          
+          // Previne que imagens que falharam na otimização derrubem a Server Action da Vercel
+          if (item.file!.size > 4.4 * 1024 * 1024) {
+             throw new Error(`A foto enviada é muito grande (${(item.file!.size / 1024 / 1024).toFixed(1)}MB). O limite do servidor é 4.4MB.`);
+          }
 
-    // Adiciona as imagens novas ao FormData
-    mediaItems.forEach(item => {
-      if (item.type === "new" && item.file) {
-        formData.append("image", item.file)
+          const imgFormData = new FormData();
+          imgFormData.append("file", item.file!);
+          
+          const result = await uploadImageAssetAction(imgFormData);
+          
+          if (result?.success && result.assetId) {
+             // Atualiza o array local transformando 'new' em 'local' já com a referência do Sanity
+             const index = updatedMediaItems.findIndex(m => m.id === item.id);
+             if (index !== -1) {
+               updatedMediaItems[index] = {
+                 type: "local",
+                 id: item.id,
+                 data: {
+                   _type: 'image',
+                   _key: result.assetId,
+                   asset: { _type: 'reference', _ref: result.assetId }
+                 },
+                 previewUrl: item.previewUrl
+               };
+             }
+             // Atualiza o progresso perfeitamente sincronizado com a realidade
+             const progress = Math.floor(((i + 1) / newFiles.length) * 100);
+             setUploadProgress(progress);
+          } else {
+             throw new Error(result?.message || "Erro no upload da imagem");
+          }
+        }
       }
-    })
 
-    // Chama a formAction diretamente (useActionState já lida com a transição em background)
-    formAction(formData)
+      setUploadStatus("saving")
+      setOverlayStage("saving")
+      
+      // Adiciona a ordem de todas as imagens agora que todas são 'local'
+      const orderData = updatedMediaItems.map(item => {
+        if (item.type === "local") return { type: "local", data: item.data }
+        return { type: "new" }
+      })
+      
+      formData.append("imagesOrder", JSON.stringify(orderData))
+      
+      // Chama a formAction final apenas com referências em texto, não excede limite da Vercel
+      // O React 19 EXIGE startTransition para chamar action externa de form
+      startTransition(() => {
+        formAction(formData)
+      })
+    } catch (error: any) {
+      console.error(error);
+      setUploadStatus("");
+      setOverlayStage(null);
+      toast({
+        title: "Erro no envio",
+        description: error.message || "Falha de rede ao enviar imagens. Verifique sua conexão e tente novamente.",
+        variant: "destructive",
+      });
+    }
   }
 
   return (
