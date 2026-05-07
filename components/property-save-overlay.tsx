@@ -141,10 +141,10 @@ export default function PropertySaveOverlay({ stage, photoCount, isEditing, prog
                 <Clock className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="text-sm font-semibold text-amber-800">
-                    Seu imóvel pode levar de 1 a 5 minutos para aparecer no site.
+                    O imóvel estará visível para o público em até 1 minuto.
                   </p>
                   <p className="text-xs text-amber-600 mt-1">
-                    As imagens e páginas estão sendo processadas em segundo plano. Isso é normal e automático.
+                    A plataforma já está atualizando o site automaticamente nos bastidores sem a necessidade de recarregar a página.
                   </p>
                 </div>
               </div>
