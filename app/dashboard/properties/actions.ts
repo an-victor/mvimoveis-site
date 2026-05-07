@@ -10,6 +10,10 @@ export async function deletePropertyAction(formData: FormData) {
     throw new Error("Acesso negado")
   }
 
+  if (!process.env.SANITY_API_WRITE_TOKEN) {
+    throw new Error("ERRO DE CONFIGURAÇÃO: O token SANITY_API_WRITE_TOKEN não está configurado. O imóvel não foi deletado no banco de dados.")
+  }
+
   const id = formData.get("id") as string
   if (!id) return
 
@@ -27,6 +31,10 @@ export async function createPropertyAction(prevState: any, formData: FormData) {
   const session = await auth()
   if (!session?.user) {
     return { success: false, message: "Acesso negado. Faça login." }
+  }
+
+  if (!process.env.SANITY_API_WRITE_TOKEN) {
+    return { success: false, message: "ERRO: SANITY_API_WRITE_TOKEN não está configurado na Vercel ou localmente. Não é possível salvar dados no banco." }
   }
 
   const title = formData.get("title") as string
@@ -128,6 +136,10 @@ export async function updatePropertyAction(prevState: any, formData: FormData) {
     return { success: false, message: "Acesso negado. Faça login." }
   }
 
+  if (!process.env.SANITY_API_WRITE_TOKEN) {
+    return { success: false, message: "ERRO: SANITY_API_WRITE_TOKEN não está configurado na Vercel ou localmente. Não é possível salvar dados no banco." }
+  }
+
   const id = formData.get("id") as string
   const title = formData.get("title") as string
   
@@ -223,6 +235,10 @@ export async function removePropertyImageAction(propertyId: string, imageKey: st
   const session = await auth()
   if (!session?.user) throw new Error("Acesso negado")
 
+  if (!process.env.SANITY_API_WRITE_TOKEN) {
+    return { success: false, message: "ERRO: SANITY_API_WRITE_TOKEN não está configurado." }
+  }
+
   try {
     await writeClient
       .patch(propertyId)
@@ -243,6 +259,10 @@ export async function removePropertyImageAction(propertyId: string, imageKey: st
 export async function saveTestimonialAction(prevState: any, formData: FormData) {
   const session = await auth()
   if (!session?.user) return { success: false, message: "Acesso negado." }
+
+  if (!process.env.SANITY_API_WRITE_TOKEN) {
+    return { success: false, message: "ERRO: SANITY_API_WRITE_TOKEN não está configurado." }
+  }
 
   const id = formData.get("id") as string
   const avatarFile = formData.get("avatar") as File
@@ -288,6 +308,11 @@ export async function deleteTestimonialAction(formData: FormData) {
   const session = await auth()
   if (!session?.user) throw new Error("Acesso negado")
 
+  if (!process.env.SANITY_API_WRITE_TOKEN) {
+    console.error("ERRO: SANITY_API_WRITE_TOKEN não configurado.")
+    return
+  }
+
   const id = formData.get("id") as string
   if (!id) return
 
@@ -304,6 +329,10 @@ export async function deleteTestimonialAction(formData: FormData) {
 export async function uploadImageAssetAction(formData: FormData) {
   const session = await auth()
   if (!session?.user) throw new Error("Acesso negado")
+
+  if (!process.env.SANITY_API_WRITE_TOKEN) {
+    return { success: false, message: "ERRO: SANITY_API_WRITE_TOKEN não configurado." }
+  }
 
   const file = formData.get("file") as File
   if (!file || file.size === 0) throw new Error("Arquivo inválido")
