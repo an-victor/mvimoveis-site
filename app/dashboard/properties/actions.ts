@@ -1,6 +1,7 @@
 "use server"
 
 import { writeClient } from "@/sanity/lib/write-client"
+import { client } from "@/sanity/lib/client"
 import { revalidatePath } from "next/cache"
 import { auth } from "@/auth"
 
@@ -18,7 +19,26 @@ export async function deletePropertyAction(formData: FormData) {
   if (!id) return
 
   try {
+    // 1. Buscar as imagens do imóvel antes de deletar
+    const property = await client.fetch(`*[_type == "property" && _id == $id][0]{images}`, { id })
+
+    // 2. Deletar o documento do imóvel
     await writeClient.delete(id)
+    
+    // 3. Deletar os assets (arquivos físicos de imagem) para economizar espaço
+    if (property?.images && Array.isArray(property.images)) {
+      const assetIdsToDelete = property.images
+        .map((img: any) => img.asset?._ref)
+        .filter(Boolean)
+      
+      if (assetIdsToDelete.length > 0) {
+        // Promise.allSettled garante que mesmo se um falhar, os outros tentam deletar
+        await Promise.allSettled(
+          assetIdsToDelete.map((assetId: string) => writeClient.delete(assetId))
+        )
+      }
+    }
+
     revalidatePath("/")
     revalidatePath("/imoveis")
     revalidatePath("/dashboard/properties")
@@ -240,10 +260,24 @@ export async function removePropertyImageAction(propertyId: string, imageKey: st
   }
 
   try {
+    // 1. Descobrir qual é o ID do arquivo (asset._ref) antes de remover do array
+    const property = await client.fetch(`*[_type == "property" && _id == $id][0]{
+      "assetRef": images[_key == $key][0].asset._ref
+    }`, { id: propertyId, key: imageKey })
+    
+    const assetId = property?.assetRef
+
+    // 2. Remover a referência da imagem de dentro do imóvel
     await writeClient
       .patch(propertyId)
       .unset([`images[_key=="${imageKey}"]`])
       .commit()
+
+    // 3. Deletar o arquivo físico lá do servidor do Sanity (Assets)
+    if (assetId) {
+      // Usamos .catch para não travar caso o asset já tenha sido deletado
+      await writeClient.delete(assetId).catch(console.error)
+    }
 
     revalidatePath("/")
     revalidatePath("/imoveis")
