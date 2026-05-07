@@ -14,7 +14,7 @@ import { ContactSection } from "@/components/contact-section"
 import { HeroWhatsAppButton } from "@/components/hero-whatsapp-button"
 
 // Revalidar a página a cada 1 hora (3600 segundos) para rotacionar os imóveis em destaque
-export const revalidate = 3600
+export const revalidate = 60
 
 // Função simples de shuffle com semente para garantir ordem consistente na mesma hora
 function seededShuffle<T>(array: T[], seed: number): T[] {
@@ -53,13 +53,13 @@ async function getHomeData() {
     // Lógica de rotação a cada 60 minutos
     let featuredProperties = allFeaturedProperties || []
     
-    if (featuredProperties.length > 6) {
+    if (featuredProperties.length > 9) {
       // Semente baseada na hora atual desde o epoch (muda a cada 60 min)
       const currentHourSeed = Math.floor(Date.now() / (1000 * 60 * 60))
-      featuredProperties = seededShuffle(featuredProperties, currentHourSeed).slice(0, 6)
+      featuredProperties = seededShuffle(featuredProperties, currentHourSeed).slice(0, 9)
     } else {
-      // Se houver 6 ou menos, apenas limita o máximo
-      featuredProperties = featuredProperties.slice(0, 6)
+      // Se houver 9 ou menos, apenas limita o máximo
+      featuredProperties = featuredProperties.slice(0, 9)
     }
 
     return {

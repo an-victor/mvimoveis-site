@@ -3,7 +3,7 @@ import { groq } from "next-sanity"
 import Link from "next/link"
 import { getImageUrl } from "@/sanity/lib/image"
 import { Button } from "@/components/ui/button"
-import { Plus, Pencil, Trash2, Home as HomeIcon } from "lucide-react"
+import { Plus, Pencil, Trash2, Home as HomeIcon, Star } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { deletePropertyAction } from "./actions"
@@ -17,7 +17,7 @@ export const dynamic = "force-dynamic"
 
 // Uma query um pouco mais abrangente que a PROPERTIES_QUERY (que filtrava só disponíveis)
 const DASHBOARD_PROPERTIES_QUERY = groq`*[_type == "property"] | order(_createdAt desc) {
-  _id, title, price, location, status, images
+  _id, title, price, location, status, images, featured
 }`
 
 export default async function PropertiesPage() {
@@ -71,7 +71,14 @@ export default async function PropertiesPage() {
                         />
                       </div>
                     </TableCell>
-                    <TableCell className="font-medium">{property.title}</TableCell>
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-2">
+                        {property.title}
+                        {property.featured && (
+                          <Star className="h-4 w-4 text-amber-500 fill-amber-500" title="Imóvel em Destaque" />
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell>{property.location}</TableCell>
                     <TableCell>{property.price}</TableCell>
                     <TableCell>

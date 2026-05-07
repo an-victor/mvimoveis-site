@@ -72,44 +72,35 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
     }
   }, [state, isEditing, router, toast])
 
-  // Atualiza o status textual e overlay durante o processo com simulação de barra de progresso
+  // Sistema de progresso que agora reage ao estágio do overlay disparado no clique
   useEffect(() => {
-    if (isPending) {
+    let interval: NodeJS.Timeout;
+    
+    if (overlayStage === "uploading") {
       const newFilesCount = mediaItems.filter(m => m.type === "new").length
-      if (newFilesCount > 0) {
-        setUploadStatus("uploading")
-        setOverlayStage("uploading")
-        setUploadProgress(0)
+      const totalTime = Math.max(3000, newFilesCount * 1800)
+      const intervalTime = 100
+      const steps = totalTime / intervalTime
+      let currentStep = 0
+      
+      interval = setInterval(() => {
+        currentStep++
+        const progress = Math.min(99, Math.floor((currentStep / steps) * 100))
+        setUploadProgress(progress)
         
-        // Simula transição com progresso (cada foto aumenta em média 1.5s a 2s)
-        const totalTime = Math.max(3000, newFilesCount * 1800)
-        const intervalTime = 100 // atualiza a cada 100ms
-        const steps = totalTime / intervalTime
-        let currentStep = 0
-        
-        const interval = setInterval(() => {
-          currentStep++
-          const progress = Math.min(99, Math.floor((currentStep / steps) * 100))
-          setUploadProgress(progress)
-          
-          if (currentStep >= steps) {
-            clearInterval(interval)
-            setUploadStatus("saving")
-            setOverlayStage("saving")
-            setUploadProgress(100)
-          }
-        }, intervalTime)
-        
-        return () => clearInterval(interval)
-      } else {
-        setUploadStatus("saving")
-        setOverlayStage("saving")
-        setUploadProgress(100)
-      }
-    } else {
-      setUploadProgress(0)
+        if (currentStep >= steps) {
+          clearInterval(interval)
+          setUploadStatus("saving")
+          setOverlayStage("saving")
+          setUploadProgress(100)
+        }
+      }, intervalTime)
     }
-  }, [isPending, mediaItems])
+    
+    return () => {
+      if (interval) clearInterval(interval)
+    }
+  }, [overlayStage, mediaItems])
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -202,6 +193,19 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
   // Intercepta o submit do form para anexar os arquivos e ordem
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    
+    // Gatilho IMEDIATO para a interface reagir (zero delay)
+    const newFilesCount = mediaItems.filter(m => m.type === "new").length
+    if (newFilesCount > 0) {
+      setUploadStatus("uploading")
+      setOverlayStage("uploading")
+      setUploadProgress(0)
+    } else {
+      setUploadStatus("saving")
+      setOverlayStage("saving")
+      setUploadProgress(100)
+    }
+
     const formData = new FormData(e.currentTarget)
     
     // Remove os valores originais do input de arquivo se houver
@@ -221,7 +225,7 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
       }
     })
 
-    // Chama a formAction diretamente (useActionState já lida com a transição)
+    // Chama a formAction diretamente (useActionState já lida com a transição em background)
     formAction(formData)
   }
 
@@ -576,10 +580,10 @@ export default function PropertyForm({ initialData, isEditing }: { initialData?:
           </Button>
           <Button 
             type="submit" 
-            disabled={isPending || isOptimizing} 
+            disabled={isPending || overlayStage !== null || isOptimizing} 
             className="flex-1 sm:flex-none bg-brand-primary hover:bg-brand-secondary text-white px-8 font-semibold shadow-md min-w-[160px]"
           >
-            {isPending ? (
+            {(isPending || overlayStage !== null) ? (
               <div className="flex items-center gap-2">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 <span>Processando</span>

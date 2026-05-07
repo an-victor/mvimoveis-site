@@ -97,6 +97,7 @@ export async function createPropertyAction(prevState: any, formData: FormData) {
       bathrooms: Number(formData.get("bathrooms")),
       parkingSpots: Number(formData.get("parkingSpots")),
       status: formData.get("status") as string,
+      featured: formData.get("featured") === "on",
       description: [
         {
           _type: "block",
@@ -151,6 +152,7 @@ export async function updatePropertyAction(prevState: any, formData: FormData) {
       bathrooms: Number(formData.get("bathrooms")),
       parkingSpots: Number(formData.get("parkingSpots")),
       status: formData.get("status") as string,
+      featured: formData.get("featured") === "on",
       features: (formData.get("features") as string).split(",").map(f => f.trim()).filter(Boolean),
     }
 
