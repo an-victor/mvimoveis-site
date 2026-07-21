@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import { Send, Check, Loader2, Mail } from "lucide-react"
 import { saveLead } from "@/app/lib/lead-actions"
 import { Button } from "@/components/ui/button"
@@ -146,7 +147,11 @@ export function LeadContactForm({ propertyTitle, propertySlug }: LeadContactForm
           {loading ? "Enviando..." : "Enviar Mensagem por E-mail"}
         </Button>
         <p className="text-[10px] text-center text-slate-400">
-          Ao enviar, você concorda com nossa política de privacidade e tratamento de dados.
+          Ao enviar, você declara que leu nossa{" "}
+          <Link href="/politica" className="font-semibold underline underline-offset-2 hover:text-brand-primary">
+            Política de Privacidade
+          </Link>
+          .
         </p>
       </form>
     </div>

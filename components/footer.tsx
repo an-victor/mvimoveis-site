@@ -55,6 +55,9 @@ export function Footer({ siteSettings }: FooterProps) {
               <NavigationLink href="/#contato" className="text-slate-600 hover:text-brand-primary transition-colors">
                 Contato
               </NavigationLink>
+              <Link href="/politica" className="text-slate-600 hover:text-brand-primary transition-colors">
+                Política de Privacidade
+              </Link>
             </nav>
           </div>
 
@@ -100,6 +103,11 @@ export function Footer({ siteSettings }: FooterProps) {
         <div className="mt-12 border-t pt-8 text-center text-sm text-slate-500">
           <p>
             © {currentYear} {siteSettings?.title || "Marcelo Victor Imóveis"}. Todos os direitos reservados.
+          </p>
+          <p className="mt-2">
+            <Link href="/politica" className="hover:text-brand-primary hover:underline">
+              Política de Privacidade
+            </Link>
           </p>
           <p className="mt-2 text-xs text-slate-400">
             Feito com excelência pela ALX Mídias.

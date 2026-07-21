@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
+import Link from "next/link"
 import { X, Loader2, MessageCircle, CheckCircle2, ShieldCheck } from "lucide-react"
 import { saveLead } from "@/app/lib/lead-actions"
 
@@ -262,9 +263,17 @@ export function WhatsAppLeadModal({
               </div>
 
               {/* Nota de privacidade */}
-              <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-400">
+              <div className="flex flex-wrap items-center justify-center gap-1.5 text-center text-[11px] text-slate-400">
                 <ShieldCheck className="h-3.5 w-3.5 flex-shrink-0" />
-                <span>Seus dados são usados apenas para atendimento. Não enviamos spam.</span>
+                <span>Seus dados são usados para atendimento.</span>
+                <Link
+                  href="/politica"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold underline underline-offset-2 hover:text-green-600"
+                >
+                  Política de Privacidade
+                </Link>
               </div>
             </form>
           </>

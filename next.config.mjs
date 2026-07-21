@@ -24,6 +24,20 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/politicas',
+        destination: '/politica',
+        permanent: true,
+      },
+      {
+        source: '/politica-de-privacidade',
+        destination: '/politica',
+        permanent: true,
+      },
+    ]
+  },
   async headers() {
     return [
       {
